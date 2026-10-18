@@ -1,0 +1,2952 @@
+{
+  "schema_version": "1.0",
+  "scan_id": "20261009-194811-43c5cf",
+  "machine_name": "PC-126FA7",
+  "os": "Microsoft Windows 10 Professionnel 22H2",
+  "os_family": "windows",
+  "os_version": "10.0.19045.7725",
+  "scan_date": "2026-10-09T19:48:11-04:00",
+  "kmb_version": "2.0.0",
+  "duration_s": 49.0,
+  "is_admin": false,
+  "anonymized": true,
+  "scores": {
+    "securite": 54,
+    "performance": 100,
+    "stockage": 94,
+    "logiciels": 78,
+    "global": 76
+  },
+  "summary": {
+    "critique": 1,
+    "eleve": 3,
+    "moyen": 5,
+    "faible": 4,
+    "info": 3,
+    "total": 16,
+    "conformes": 24,
+    "non_verifiables": 2
+  },
+  "findings": [
+    {
+      "key": "SYS-001",
+      "id": "SYS-001",
+      "domain": "securite",
+      "category": "Système",
+      "title": "Système d'exploitation en fin de support",
+      "severity": "critique",
+      "status": "detecte",
+      "description": "La version de Windows installée ne reçoit plus de correctifs de sécurité de Microsoft.",
+      "danger": "Chaque nouvelle faille découverte dans Windows restera ouverte pour toujours sur ce poste. Les attaquants ciblent précisément les systèmes qui ne sont plus corrigés.",
+      "impact": "Exposition permanente aux nouvelles vulnérabilités (rançongiciels, prise de contrôle à distance). Non-conformité pour un usage professionnel.",
+      "evidence": "Microsoft Windows 10 Professionnel 22H2 (build 19045.7725) : fin de support le 2025-10-14 (cycle 10 22H2, source endoflife.date)",
+      "location": "Paramètres > Système > À propos (Spécifications de Windows)",
+      "risk_score": 9.5,
+      "penalty": 15,
+      "remediation": {
+        "steps": [
+          "Vérifier la compatibilité du poste avec Windows 11 via l'application « Contrôle d'intégrité du PC ».",
+          "Sauvegarder les données importantes sur un support externe ou dans le nuage.",
+          "Si le poste est compatible : Paramètres > Windows Update > Mettre à niveau vers Windows 11.",
+          "Sinon : souscrire aux mises à jour de sécurité étendues (ESU) de Microsoft, ou remplacer le poste, ou installer un système supporté (ex. Linux).",
+          "Relancer un scan KMB pour confirmer la correction."
+        ],
+        "commands": {
+          "windows": [
+            "winver",
+            "start ms-settings:windowsupdate"
+          ]
+        },
+        "duration": "1 à 3 heures",
+        "requires_admin": true
+      },
+      "references": [
+        "https://learn.microsoft.com/lifecycle/products/windows-10-home-and-pro",
+        "https://endoflife.date/windows"
+      ],
+      "details": {
+        "product": "windows",
+        "build": "19045",
+        "display_version": "22H2",
+        "cycle": "10-22h2",
+        "eol": "2025-10-14",
+        "latest": null,
+        "lts": false,
+        "status": "fin_de_support",
+        "label": "10 22H2"
+      }
+    },
+    {
+      "key": "SYS-003",
+      "id": "SYS-003",
+      "domain": "securite",
+      "category": "Système",
+      "title": "Correctifs Windows en attente d'installation",
+      "severity": "moyen",
+      "status": "detecte",
+      "description": "Windows Update signale des mises à jour disponibles qui ne sont pas encore installées.",
+      "danger": "Les correctifs publiés révèlent publiquement les failles qu'ils corrigent : un poste non mis à jour devient une cible facile dans les jours qui suivent.",
+      "impact": "Vulnérabilités connues et exploitables sur le poste.",
+      "evidence": "1 mise(s) à jour en attente selon Windows Update : Mise à jour de la sélection disjointe pour Microsoft Defender Antivirus – 2267602 Ko (version 1.459.x.x) – Canal actuel (large)",
+      "location": "Paramètres > Windows Update",
+      "risk_score": 5.0,
+      "penalty": 5,
+      "remediation": {
+        "steps": [
+          "Ouvrir Paramètres > Windows Update.",
+          "Cliquer sur « Rechercher des mises à jour » puis « Installer ».",
+          "Redémarrer l'ordinateur lorsque Windows le demande."
+        ],
+        "commands": {
+          "windows": [
+            "start ms-settings:windowsupdate",
+            "UsoClient StartInteractiveScan"
+          ]
+        },
+        "duration": "15 à 60 minutes",
+        "requires_admin": false
+      },
+      "references": [
+        "https://support.microsoft.com/windows/windows-update-faq"
+      ],
+      "details": {
+        "updates": [
+          {
+            "title": "Mise à jour de la sélection disjointe pour Microsoft Defender Antivirus – 2267602 Ko (version 1.459.x.x) – Canal actuel (large)",
+            "severity": null,
+            "kb": "2267602",
+            "categories": "Definition Updates, Microsoft Defender Antivirus"
+          }
+        ]
+      }
+    },
+    {
+      "key": "SYS-004",
+      "id": "SYS-004",
+      "domain": "securite",
+      "category": "Système",
+      "title": "Aucun correctif installé récemment",
+      "severity": "moyen",
+      "status": "conforme",
+      "description": "Le dernier correctif Windows installé date de plus de 45 jours.",
+      "danger": "Microsoft publie des correctifs de sécurité chaque mois (« Patch Tuesday »). Un écart de plus d'un mois signale que les mises à jour ne s'installent plus.",
+      "impact": "Accumulation de vulnérabilités connues.",
+      "evidence": "Dernier correctif installé le 2026-09-11 (il y a 28 jours), 23 correctifs au total",
+      "location": "Paramètres > Windows Update > Historique des mises à jour",
+      "risk_score": 0.0,
+      "penalty": 0,
+      "remediation": {
+        "steps": [
+          "Ouvrir l'historique de Windows Update et vérifier les échecs éventuels.",
+          "Lancer une recherche de mises à jour et les installer.",
+          "Si les installations échouent, exécuter l'utilitaire de résolution des problèmes de Windows Update."
+        ],
+        "commands": {
+          "windows": [
+            "Get-HotFix | Sort-Object InstalledOn -Descending | Select-Object -First 5",
+            "start ms-settings:windowsupdate-history"
+          ]
+        },
+        "duration": "30 minutes",
+        "requires_admin": false
+      },
+      "references": [],
+      "details": null
+    },
+    {
+      "key": "SYS-005",
+      "id": "SYS-005",
+      "domain": "securite",
+      "category": "Système",
+      "title": "Contrôle de compte d'utilisateur (UAC) désactivé",
+      "severity": "eleve",
+      "status": "conforme",
+      "description": "L'UAC demande une confirmation avant qu'un programme obtienne les droits administrateur. Il est désactivé sur ce poste.",
+      "danger": "Tout programme lancé, y compris un logiciel malveillant, obtient silencieusement les pleins pouvoirs sur la machine.",
+      "impact": "Installation invisible de logiciels malveillants, modification du système sans avertissement.",
+      "evidence": "EnableLUA = 1",
+      "location": "Registre : HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System (EnableLUA)",
+      "risk_score": 0.0,
+      "penalty": 0,
+      "remediation": {
+        "steps": [
+          "Ouvrir le Panneau de configuration > Comptes d'utilisateurs > Modifier les paramètres de contrôle de compte d'utilisateur.",
+          "Placer le curseur sur « M'avertir uniquement quand des applications tentent d'apporter des modifications » (niveau par défaut).",
+          "Valider puis redémarrer."
+        ],
+        "commands": {
+          "windows": [
+            "Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System' -Name EnableLUA -Value 1"
+          ]
+        },
+        "duration": "5 minutes",
+        "requires_admin": true
+      },
+      "references": [
+        "https://learn.microsoft.com/windows/security/application-security/application-control/user-account-control/"
+      ],
+      "details": null
+    },
+    {
+      "key": "SYS-007",
+      "id": "SYS-007",
+      "domain": "securite",
+      "category": "Système",
+      "title": "Démarrage sécurisé (Secure Boot) désactivé",
+      "severity": "moyen",
+      "status": "detecte",
+      "description": "Secure Boot vérifie que seuls des chargeurs de démarrage signés s'exécutent au démarrage du PC. Il est désactivé ou non disponible.",
+      "danger": "Un « bootkit » peut se charger avant Windows et se cacher de l'antivirus.",
+      "impact": "Compromission persistante très difficile à détecter.",
+      "evidence": "Micrologiciel UEFI, Secure Boot désactivé",
+      "location": "Micrologiciel UEFI (BIOS) du poste ; vérifiable dans msinfo32 > « État du démarrage sécurisé »",
+      "risk_score": 5.0,
+      "penalty": 5,
+      "remediation": {
+        "steps": [
+          "Vérifier l'état : lancer msinfo32 et lire « État du démarrage sécurisé ».",
+          "Redémarrer et entrer dans l'UEFI (souvent F10, F2 ou Suppr au démarrage ; F10 sur les HP).",
+          "Dans l'onglet Sécurité ou Démarrage, activer « Secure Boot » (le mode doit être UEFI, pas « Legacy/CSM »).",
+          "Enregistrer et redémarrer. Si le disque est en MBR, le convertir d'abord en GPT avec mbr2gpt."
+        ],
+        "commands": {
+          "windows": [
+            "msinfo32",
+            "Confirm-SecureBootUEFI"
+          ]
+        },
+        "duration": "15 minutes",
+        "requires_admin": true
+      },
+      "references": [
+        "https://learn.microsoft.com/windows-hardware/design/device-experiences/oem-secure-boot"
+      ],
+      "details": null
+    },
+    {
+      "key": "ACC-002",
+      "id": "ACC-002",
+      "domain": "securite",
+      "category": "Comptes",
+      "title": "Compte Invité activé",
+      "severity": "eleve",
+      "status": "conforme",
+      "description": "Le compte Invité intégré de Windows est activé.",
+      "danger": "Le compte Invité permet à n'importe qui d'ouvrir une session sans mot de passe personnel.",
+      "impact": "Accès non contrôlé au poste et aux partages réseau.",
+      "evidence": "Compte « Invité » désactivé",
+      "location": "lusrmgr.msc > Utilisateurs > Invité",
+      "risk_score": 0.0,
+      "penalty": 0,
+      "remediation": {
+        "steps": [
+          "Ouvrir lusrmgr.msc > Utilisateurs.",
+          "Clic droit sur « Invité » > Propriétés > cocher « Le compte est désactivé »."
+        ],
+        "commands": {
+          "windows": [
+            "Get-LocalUser | Where-Object { $_.SID -like '*-501' } | Disable-LocalUser"
+          ]
+        },
+        "duration": "2 minutes",
+        "requires_admin": true
+      },
+      "references": [],
+      "details": null
+    },
+    {
+      "key": "ACC-003",
+      "id": "ACC-003",
+      "domain": "securite",
+      "category": "Comptes",
+      "title": "Compte Administrateur intégré activé",
+      "severity": "moyen",
+      "status": "conforme",
+      "description": "Le compte Administrateur intégré (RID 500) est activé. Il est connu de tous les attaquants et n'est pas soumis au verrouillage.",
+      "danger": "Cible privilégiée des attaques par force brute sur le mot de passe.",
+      "impact": "Prise de contrôle totale si le mot de passe est deviné.",
+      "evidence": "Compte « Administrateur » désactivé",
+      "location": "lusrmgr.msc > Utilisateurs > Administrateur",
+      "risk_score": 0.0,
+      "penalty": 0,
+      "remediation": {
+        "steps": [
+          "S'assurer qu'un autre compte administrateur fonctionne.",
+          "Désactiver le compte Administrateur intégré."
+        ],
+        "commands": {
+          "windows": [
+            "Get-LocalUser | Where-Object { $_.SID -like '*-500' } | Disable-LocalUser"
+          ]
+        },
+        "duration": "2 minutes",
+        "requires_admin": true
+      },
+      "references": [],
+      "details": null
+    },
+    {
+      "key": "ACC-004",
+      "id": "ACC-004",
+      "domain": "securite",
+      "category": "Comptes",
+      "title": "Compte actif sans mot de passe obligatoire",
+      "severity": "eleve",
+      "status": "conforme",
+      "description": "Un compte local actif n'est pas obligé d'avoir un mot de passe.",
+      "danger": "Une session peut être ouverte sur ce compte sans mot de passe, localement ou parfois à distance.",
+      "impact": "Accès direct aux données de l'utilisateur.",
+      "evidence": "Tous les comptes actifs exigent un mot de passe",
+      "location": "lusrmgr.msc > Utilisateurs",
+      "risk_score": 0.0,
+      "penalty": 0,
+      "remediation": {
+        "steps": [
+          "Définir un mot de passe robuste pour le compte (12 caractères ou plus).",
+          "Rendre le mot de passe obligatoire."
+        ],
+        "commands": {
+          "windows": [
+            "net user NOM_DU_COMPTE /passwordreq:yes",
+            "net user NOM_DU_COMPTE *"
+          ]
+        },
+        "duration": "5 minutes",
+        "requires_admin": true
+      },
+      "references": [],
+      "details": null
+    },
+    {
+      "key": "ACC-001",
+      "id": "ACC-001",
+      "domain": "securite",
+      "category": "Comptes",
+      "title": "Trop de comptes administrateurs actifs",
+      "severity": "moyen",
+      "status": "conforme",
+      "description": "Plus de deux comptes actifs font partie du groupe Administrateurs.",
+      "danger": "Chaque compte administrateur est une porte d'entrée vers le contrôle total du poste. Plus ils sont nombreux, plus le risque de vol de mot de passe augmente.",
+      "impact": "Surface d'attaque élargie.",
+      "evidence": "1 administrateur(s) actif(s) : PC-126FA7\\utilisateur1",
+      "location": "Gestion de l'ordinateur > Utilisateurs et groupes locaux > Groupes > Administrateurs",
+      "risk_score": 0.0,
+      "penalty": 0,
+      "remediation": {
+        "steps": [
+          "Lister les membres : lusrmgr.msc > Groupes > Administrateurs.",
+          "Retirer du groupe les comptes qui n'ont pas besoin de droits administrateur.",
+          "Garder un seul compte administrateur pour la maintenance."
+        ],
+        "commands": {
+          "windows": [
+            "Get-LocalGroupMember -SID S-1-5-32-544",
+            "Remove-LocalGroupMember -SID S-1-5-32-544 -Member 'NOM_DU_COMPTE'"
+          ]
+        },
+        "duration": "10 minutes",
+        "requires_admin": true
+      },
+      "references": [],
+      "details": null
+    },
+    {
+      "key": "ACC-005",
+      "id": "ACC-005",
+      "domain": "securite",
+      "category": "Comptes",
+      "title": "Utilisation quotidienne d'un compte administrateur",
+      "severity": "faible",
+      "status": "detecte",
+      "description": "Le compte utilisé au quotidien est membre du groupe Administrateurs.",
+      "danger": "Un logiciel malveillant ouvert par erreur n'est séparé des pleins pouvoirs que par une boîte de dialogue UAC.",
+      "impact": "Une erreur de clic peut compromettre tout le système.",
+      "evidence": "Le compte courant « utilisateur1 » est administrateur",
+      "location": "Paramètres > Comptes > Famille et autres utilisateurs",
+      "risk_score": 2.5,
+      "penalty": 1,
+      "remediation": {
+        "steps": [
+          "Créer un compte administrateur distinct réservé à la maintenance.",
+          "Changer le type du compte quotidien en « Utilisateur standard ».",
+          "Saisir les identifiants administrateur seulement lorsque Windows le demande."
+        ],
+        "commands": {
+          "windows": [
+            "net user admin-maintenance * /add",
+            "net localgroup Administrateurs admin-maintenance /add"
+          ]
+        },
+        "duration": "10 minutes",
+        "requires_admin": true
+      },
+      "references": [],
+      "details": null
+    },
+    {
+      "key": "NET-001",
+      "id": "NET-001",
+      "domain": "securite",
+      "category": "Réseau",
+      "title": "Protocole SMBv1 activé",
+      "severity": "critique",
+      "status": "conforme",
+      "description": "SMBv1 est la première version (1983) du protocole de partage de fichiers de Windows. Il est obsolète et désactivé par défaut depuis Windows 10 1709.",
+      "danger": "SMBv1 a été exploité par les rançongiciels WannaCry et NotPetya (faille EternalBlue) pour se propager automatiquement de poste en poste.",
+      "impact": "Exécution de code à distance sans authentification, propagation de rançongiciels sur le réseau.",
+      "evidence": "EnableSMB1Protocol = False",
+      "location": "Panneau de configuration > Programmes > Activer ou désactiver des fonctionnalités Windows > Support de partage de fichiers SMB 1.0/CIFS",
+      "risk_score": 0.0,
+      "penalty": 0,
+      "remediation": {
+        "steps": [
+          "Ouvrir « Activer ou désactiver des fonctionnalités Windows ».",
+          "Décocher « Support de partage de fichiers SMB 1.0/CIFS ».",
+          "Valider et redémarrer."
+        ],
+        "commands": {
+          "windows": [
+            "Set-SmbServerConfiguration -EnableSMB1Protocol $false -Force",
+            "Disable-WindowsOptionalFeature -Online -FeatureName SMB1Protocol"
+          ]
+        },
+        "duration": "5 minutes",
+        "requires_admin": true
+      },
+      "references": [
+        "https://learn.microsoft.com/windows-server/storage/file-server/troubleshoot/detect-enable-and-disable-smbv1-v2-v3"
+      ],
+      "details": null
+    },
+    {
+      "key": "NET-002",
+      "id": "NET-002",
+      "domain": "securite",
+      "category": "Réseau",
+      "title": "Bureau à distance (RDP) activé",
+      "severity": "moyen",
+      "status": "conforme",
+      "description": "Le poste accepte les connexions Bureau à distance.",
+      "danger": "RDP est l'une des portes d'entrée les plus attaquées (force brute sur les mots de passe, failles comme BlueKeep).",
+      "impact": "Prise de contrôle à distance si un mot de passe est faible ou si une faille existe.",
+      "evidence": "Bureau à distance désactivé (port 3389)",
+      "location": "Paramètres > Système > Bureau à distance",
+      "risk_score": 0.0,
+      "penalty": 0,
+      "remediation": {
+        "steps": [
+          "Si le Bureau à distance n'est pas utilisé : Paramètres > Système > Bureau à distance > Désactiver.",
+          "S'il est nécessaire : l'exposer seulement via un VPN, activer l'authentification NLA et utiliser des mots de passe robustes."
+        ],
+        "commands": {
+          "windows": [
+            "Set-ItemProperty -Path 'HKLM:\\System\\CurrentControlSet\\Control\\Terminal Server' -Name fDenyTSConnections -Value 1"
+          ]
+        },
+        "duration": "2 minutes",
+        "requires_admin": true
+      },
+      "references": [],
+      "details": null
+    },
+    {
+      "key": "NET-004:5432",
+      "id": "NET-004",
+      "domain": "securite",
+      "category": "Réseau",
+      "title": "PostgreSQL accessible depuis le réseau (port 5432)",
+      "severity": "eleve",
+      "status": "detecte",
+      "description": "Un service sensible (base de données, accès à distance, transfert de fichiers) accepte des connexions depuis n'importe quelle adresse réseau.",
+      "danger": "Sur un réseau public (café, école), d'autres appareils peuvent tenter de se connecter au service et d'exploiter une faille ou un mot de passe faible.",
+      "impact": "Fuite de données ou prise de contrôle du service.",
+      "evidence": "Port 5432 (PostgreSQL) en écoute sur 0.0.0.0 par postgres.exe (PID 5364)",
+      "location": "Configuration du service concerné (voir le processus indiqué)",
+      "risk_score": 7.5,
+      "penalty": 10,
+      "remediation": {
+        "steps": [
+          "Identifier le programme indiqué (colonne processus).",
+          "S'il n'est pas utilisé, arrêter le service et désactiver son démarrage automatique.",
+          "S'il est utilisé seulement en local, configurer son adresse d'écoute sur 127.0.0.1 (ex. PostgreSQL : listen_addresses = 'localhost' dans postgresql.conf).",
+          "Vérifier qu'une règle du pare-feu bloque ce port sur le profil Public."
+        ],
+        "commands": {
+          "windows": [
+            "Get-NetTCPConnection -State Listen | Where-Object LocalPort -eq PORT",
+            "Get-Process -Id PID",
+            "New-NetFirewallRule -DisplayName 'Bloquer PORT' -Direction Inbound -LocalPort PORT -Protocol TCP -Action Block -Profile Public"
+          ]
+        },
+        "duration": "10 minutes",
+        "requires_admin": true
+      },
+      "references": [],
+      "details": {
+        "port": 5432,
+        "process": "postgres.exe",
+        "pid": 5364
+      }
+    },
+    {
+      "key": "NET-005",
+      "id": "NET-005",
+      "domain": "securite",
+      "category": "Réseau",
+      "title": "Dossier partagé sur le réseau",
+      "severity": "moyen",
+      "status": "conforme",
+      "description": "Un dossier non administratif est partagé sur le réseau.",
+      "danger": "Selon les permissions, d'autres utilisateurs du réseau peuvent lire, modifier ou chiffrer (rançongiciel) son contenu.",
+      "impact": "Fuite ou destruction de données.",
+      "evidence": "Aucun dossier partagé sur le réseau (seulement 3 partages administratifs par défaut)",
+      "location": "Gestion de l'ordinateur > Dossiers partagés > Partages",
+      "risk_score": 0.0,
+      "penalty": 0,
+      "remediation": {
+        "steps": [
+          "Ouvrir fsmgmt.msc > Partages.",
+          "Supprimer le partage s'il n'est plus utile.",
+          "Sinon, restreindre les autorisations aux seuls utilisateurs nécessaires (retirer « Tout le monde »)."
+        ],
+        "commands": {
+          "windows": [
+            "Get-SmbShare",
+            "Get-SmbShareAccess -Name NOM_DU_PARTAGE",
+            "Remove-SmbShare -Name NOM_DU_PARTAGE"
+          ]
+        },
+        "duration": "5 minutes",
+        "requires_admin": true
+      },
+      "references": [],
+      "details": null
+    },
+    {
+      "key": "FW-001",
+      "id": "FW-001",
+      "domain": "securite",
+      "category": "Pare-feu",
+      "title": "Profil du pare-feu Windows désactivé",
+      "severity": "eleve",
+      "status": "conforme",
+      "description": "Le pare-feu Windows filtre les connexions entrantes. Un de ses profils (Domaine, Privé ou Public) est désactivé.",
+      "danger": "Sur ce type de réseau, tous les services du poste sont directement joignables par les autres appareils.",
+      "impact": "Les connexions non autorisées atteignent directement la machine.",
+      "evidence": "Profils Domain, Private, Public activés",
+      "location": "Sécurité Windows > Pare-feu et protection du réseau",
+      "risk_score": 0.0,
+      "penalty": 0,
+      "remediation": {
+        "steps": [
+          "Ouvrir Paramètres Windows.",
+          "Aller dans Sécurité Windows.",
+          "Ouvrir « Pare-feu et protection du réseau ».",
+          "Activer le pare-feu pour les trois profils réseau (Domaine, Privé, Public)."
+        ],
+        "commands": {
+          "windows": [
+            "Set-NetFirewallProfile -Profile Domain,Private,Public -Enabled True",
+            "netsh advfirewall set allprofiles state on"
+          ]
+        },
+        "duration": "2 minutes",
+        "requires_admin": true
+      },
+      "references": [],
+      "details": null
+    },
+    {
+      "key": "FW-002",
+      "id": "FW-002",
+      "domain": "securite",
+      "category": "Pare-feu",
+      "title": "Connexions entrantes autorisées par défaut",
+      "severity": "eleve",
+      "status": "conforme",
+      "description": "Le pare-feu laisse passer par défaut les connexions entrantes qui ne correspondent à aucune règle.",
+      "danger": "Le pare-feu ne bloque plus que ce qui est explicitement interdit : tout nouveau service est exposé.",
+      "impact": "Pare-feu largement inefficace.",
+      "evidence": "Connexions entrantes bloquées par défaut",
+      "location": "wf.msc > Propriétés du pare-feu Windows Defender",
+      "risk_score": 0.0,
+      "penalty": 0,
+      "remediation": {
+        "steps": [
+          "Ouvrir wf.msc.",
+          "Cliquer « Propriétés du Pare-feu Windows Defender ».",
+          "Pour chaque profil, régler « Connexions entrantes » sur « Bloquer (par défaut) »."
+        ],
+        "commands": {
+          "windows": [
+            "Set-NetFirewallProfile -Profile Domain,Private,Public -DefaultInboundAction Block"
+          ]
+        },
+        "duration": "3 minutes",
+        "requires_admin": true
+      },
+      "references": [],
+      "details": null
+    },
+    {
+      "key": "FW-003",
+      "id": "FW-003",
+      "domain": "securite",
+      "category": "Pare-feu",
+      "title": "Règle entrante autorise un port sensible sur le profil Public",
+      "severity": "moyen",
+      "status": "non_verifiable",
+      "description": "Une règle du pare-feu autorise des connexions entrantes vers un port sensible (partage de fichiers, bureau à distance, base de données) sur les réseaux publics.",
+      "danger": "Sur un Wi-Fi public, n'importe quel appareil peut joindre ce service.",
+      "impact": "Exposition d'un service à des inconnus.",
+      "evidence": "Droits administrateur requis pour ce contrôle (relancer le scan en tant qu'administrateur)",
+      "location": "wf.msc > Règles de trafic entrant",
+      "risk_score": 0.0,
+      "penalty": 0,
+      "remediation": {
+        "steps": [
+          "Ouvrir wf.msc > Règles de trafic entrant.",
+          "Repérer la règle indiquée.",
+          "La désactiver, ou limiter son profil à « Privé » et son étendue au sous-réseau local."
+        ],
+        "commands": {
+          "windows": [
+            "Disable-NetFirewallRule -DisplayName 'NOM_DE_LA_REGLE'"
+          ]
+        },
+        "duration": "5 minutes",
+        "requires_admin": true
+      },
+      "references": [],
+      "details": null
+    },
+    {
+      "key": "AV-001",
+      "id": "AV-001",
+      "domain": "securite",
+      "category": "Antivirus",
+      "title": "Aucun antivirus actif",
+      "severity": "critique",
+      "status": "conforme",
+      "description": "Aucun antivirus actif n'a été détecté sur le poste.",
+      "danger": "Les logiciels malveillants (virus, rançongiciels, voleurs de mots de passe) peuvent s'exécuter sans aucune détection.",
+      "impact": "Infection non détectée, perte ou vol de données.",
+      "evidence": "Antivirus actif : Windows Defender",
+      "location": "Sécurité Windows > Protection contre les virus et menaces",
+      "risk_score": 0.0,
+      "penalty": 0,
+      "remediation": {
+        "steps": [
+          "Ouvrir Sécurité Windows > Protection contre les virus et menaces.",
+          "Activer Microsoft Defender Antivirus, ou installer un antivirus reconnu.",
+          "Lancer une analyse rapide."
+        ],
+        "commands": {
+          "windows": [
+            "Set-MpPreference -DisableRealtimeMonitoring $false",
+            "Start-MpScan -ScanType QuickScan"
+          ]
+        },
+        "duration": "10 minutes",
+        "requires_admin": true
+      },
+      "references": [],
+      "details": null
+    },
+    {
+      "key": "AV-002",
+      "id": "AV-002",
+      "domain": "securite",
+      "category": "Antivirus",
+      "title": "Protection en temps réel désactivée",
+      "severity": "eleve",
+      "status": "conforme",
+      "description": "L'antivirus est installé mais n'analyse pas les fichiers au moment où ils sont ouverts ou téléchargés.",
+      "danger": "Un fichier malveillant peut s'exécuter avant toute analyse.",
+      "impact": "Infection possible malgré la présence d'un antivirus.",
+      "evidence": "RealTimeProtectionEnabled = True",
+      "location": "Sécurité Windows > Protection contre les virus et menaces > Gérer les paramètres",
+      "risk_score": 0.0,
+      "penalty": 0,
+      "remediation": {
+        "steps": [
+          "Ouvrir Sécurité Windows > Protection contre les virus et menaces.",
+          "Cliquer sur « Gérer les paramètres ».",
+          "Activer « Protection en temps réel »."
+        ],
+        "commands": {
+          "windows": [
+            "Set-MpPreference -DisableRealtimeMonitoring $false"
+          ]
+        },
+        "duration": "1 minute",
+        "requires_admin": true
+      },
+      "references": [],
+      "details": null
+    },
+    {
+      "key": "AV-003",
+      "id": "AV-003",
+      "domain": "securite",
+      "category": "Antivirus",
+      "title": "Signatures antivirus obsolètes",
+      "severity": "moyen",
+      "status": "conforme",
+      "description": "Les définitions de virus n'ont pas été mises à jour depuis plus de 7 jours.",
+      "danger": "Les menaces apparues récemment ne sont pas reconnues.",
+      "impact": "Détection réduite des nouveaux logiciels malveillants.",
+      "evidence": "Signatures âgées de 0 jour(s) (mises à jour le 2026-10-09)",
+      "location": "Sécurité Windows > Protection contre les virus et menaces > Mises à jour",
+      "risk_score": 0.0,
+      "penalty": 0,
+      "remediation": {
+        "steps": [
+          "Ouvrir Sécurité Windows > Protection contre les virus et menaces.",
+          "Cliquer « Mises à jour de la protection » > « Rechercher des mises à jour »."
+        ],
+        "commands": {
+          "windows": [
+            "Update-MpSignature"
+          ]
+        },
+        "duration": "2 minutes",
+        "requires_admin": false
+      },
+      "references": [],
+      "details": null
+    },
+    {
+      "key": "ENC-001",
+      "id": "ENC-001",
+      "domain": "securite",
+      "category": "Chiffrement",
+      "title": "Disque système non chiffré (BitLocker désactivé)",
+      "severity": "eleve",
+      "status": "detecte",
+      "description": "Le disque contenant Windows et les données n'est pas chiffré.",
+      "danger": "En cas de perte ou de vol de l'ordinateur, n'importe qui peut lire tout le contenu du disque en le branchant sur une autre machine, sans connaître le mot de passe Windows.",
+      "impact": "Fuite de toutes les données personnelles et professionnelles en cas de vol.",
+      "evidence": "Lecteur C: : Désactivé (méthode : shell)",
+      "location": "Panneau de configuration > Système et sécurité > Chiffrement de lecteur BitLocker",
+      "risk_score": 7.5,
+      "penalty": 10,
+      "remediation": {
+        "steps": [
+          "Ouvrir « Gérer BitLocker » depuis le menu Démarrer.",
+          "Cliquer « Activer BitLocker » sur le lecteur C:.",
+          "Sauvegarder la clé de récupération (compte Microsoft, fichier sur clé USB ou impression), JAMAIS seulement sur le disque chiffré.",
+          "Choisir « Chiffrer uniquement l'espace disque utilisé » et le mode « Nouveau chiffrement ».",
+          "Redémarrer pour lancer le chiffrement (le PC reste utilisable pendant l'opération)."
+        ],
+        "commands": {
+          "windows": [
+            "manage-bde -status C:",
+            "manage-bde -on C: -RecoveryPassword",
+            "Enable-BitLocker -MountPoint 'C:' -EncryptionMethod XtsAes256 -UsedSpaceOnly -RecoveryPasswordProtector"
+          ]
+        },
+        "duration": "10 minutes (+ chiffrement en arrière-plan)",
+        "requires_admin": true
+      },
+      "references": [
+        "https://learn.microsoft.com/windows/security/operating-system-security/data-protection/bitlocker/"
+      ],
+      "details": null
+    },
+    {
+      "key": "WIFI-001",
+      "id": "WIFI-001",
+      "domain": "securite",
+      "category": "Wi-Fi",
+      "title": "Connecté à un réseau Wi-Fi ouvert (non chiffré)",
+      "severity": "eleve",
+      "status": "conforme",
+      "description": "Le réseau Wi-Fi utilisé ne chiffre pas les communications.",
+      "danger": "Toute personne à proximité peut intercepter le trafic non chiffré ; un faux point d'accès portant le même nom est facile à créer.",
+      "impact": "Vol de données et de sessions, attaques de l'intercepteur (« man-in-the-middle »).",
+      "evidence": "Réseau connecté « reseau-wifi-1 » (WPA2 - Personnel, CCMP)",
+      "location": "Paramètres réseau / Wi-Fi",
+      "risk_score": 0.0,
+      "penalty": 0,
+      "remediation": {
+        "steps": [
+          "Se déconnecter de ce réseau dès que possible.",
+          "Utiliser un réseau protégé (WPA2 ou WPA3) ou le partage de connexion de votre téléphone.",
+          "À défaut, utiliser un VPN et uniquement des sites en HTTPS."
+        ],
+        "commands": {
+          "windows": [
+            "netsh wlan disconnect"
+          ],
+          "linux": [
+            "nmcli dev disconnect wlan0"
+          ],
+          "macos": [
+            "networksetup -setairportpower en0 off"
+          ]
+        },
+        "duration": "1 minute",
+        "requires_admin": false
+      },
+      "references": [],
+      "details": null
+    },
+    {
+      "key": "WIFI-002",
+      "id": "WIFI-002",
+      "domain": "securite",
+      "category": "Wi-Fi",
+      "title": "Réseau Wi-Fi protégé par un chiffrement obsolète (WEP / WPA)",
+      "severity": "eleve",
+      "status": "conforme",
+      "description": "Le réseau Wi-Fi connecté utilise WEP ou WPA (TKIP), des protections cassées depuis des années.",
+      "danger": "Le mot de passe WEP se récupère en quelques minutes ; WPA/TKIP est également vulnérable.",
+      "impact": "Interception du trafic et accès au réseau local par des tiers.",
+      "evidence": "Chiffrement WPA2",
+      "location": "Interface d'administration du routeur Wi-Fi",
+      "risk_score": 0.0,
+      "penalty": 0,
+      "remediation": {
+        "steps": [
+          "Se connecter à l'interface du routeur (souvent http://192.168.x.x ou http://192.168.x.x).",
+          "Dans la section Wi-Fi / Sécurité, choisir WPA2-AES ou, mieux, WPA3.",
+          "Définir un mot de passe Wi-Fi long (au moins 12 caractères).",
+          "Reconnecter les appareils."
+        ],
+        "commands": {},
+        "duration": "15 minutes",
+        "requires_admin": false
+      },
+      "references": [],
+      "details": null
+    },
+    {
+      "key": "WIFI-003",
+      "id": "WIFI-003",
+      "domain": "securite",
+      "category": "Wi-Fi",
+      "title": "Réseau ouvert mémorisé avec connexion automatique",
+      "severity": "faible",
+      "status": "conforme",
+      "description": "Un réseau Wi-Fi ouvert est mémorisé et le poste s'y reconnecte automatiquement.",
+      "danger": "Un attaquant peut créer un point d'accès portant le même nom : le poste s'y connectera seul.",
+      "impact": "Interception du trafic sans que l'utilisateur s'en rende compte.",
+      "evidence": "1 réseau(x) mémorisé(s), aucun réseau ouvert en connexion automatique",
+      "location": "Paramètres Wi-Fi > Réseaux connus",
+      "risk_score": 0.0,
+      "penalty": 0,
+      "remediation": {
+        "steps": [
+          "Ouvrir la liste des réseaux connus.",
+          "Supprimer (« Oublier ») le réseau indiqué ou désactiver la connexion automatique."
+        ],
+        "commands": {
+          "windows": [
+            "netsh wlan delete profile name=\"NOM\""
+          ],
+          "linux": [
+            "nmcli con delete \"NOM\""
+          ],
+          "macos": [
+            "sudo networksetup -removepreferredwirelessnetwork en0 \"NOM\""
+          ]
+        },
+        "duration": "1 minute",
+        "requires_admin": false
+      },
+      "references": [],
+      "details": null
+    },
+    {
+      "key": "APP-002:chrome-154",
+      "id": "APP-002",
+      "domain": "logiciels",
+      "category": "Logiciels",
+      "title": "Version dépassée : Google Chrome",
+      "severity": "moyen",
+      "status": "detecte",
+      "description": "Une version plus récente de ce logiciel est disponible dans la même branche supportée.",
+      "danger": "Les mises à jour mineures corrigent souvent des failles de sécurité.",
+      "impact": "Vulnérabilités déjà corrigées par l'éditeur mais encore présentes sur le poste.",
+      "evidence": "Google Chrome 154.0.8037.98 : branche 154 terminée le 2026-10-06, version actuelle de l'éditeur : 155",
+      "location": "Paramètres > Applications > Applications installées",
+      "risk_score": 5.0,
+      "penalty": 5,
+      "remediation": {
+        "steps": [
+          "Ouvrir le logiciel et utiliser sa fonction « Rechercher les mises à jour », ou utiliser winget.",
+          "Activer la mise à jour automatique si elle existe."
+        ],
+        "commands": {
+          "windows": [
+            "winget upgrade",
+            "winget upgrade --id IDENTIFIANT"
+          ]
+        },
+        "duration": "5 minutes",
+        "requires_admin": false
+      },
+      "references": [
+        "https://endoflife.date"
+      ],
+      "details": {
+        "name": "Google Chrome",
+        "version": "154.0.8037.98",
+        "product": "chrome",
+        "rolling": true,
+        "source": "endoflife.date",
+        "newest": "155",
+        "cycle": "154",
+        "eol": "2026-10-06",
+        "latest": null,
+        "lts": false,
+        "status": "fin_de_support"
+      }
+    },
+    {
+      "key": "APP-001:visual-c++-2010-10.0.40219",
+      "id": "APP-001",
+      "domain": "logiciels",
+      "category": "Logiciels",
+      "title": "Logiciel en fin de support : Microsoft Visual C++ 2010 x64 Redistributable - 10.0.40219",
+      "severity": "eleve",
+      "status": "detecte",
+      "description": "Ce logiciel (ou cette branche de version) ne reçoit plus de correctifs de sécurité de son éditeur.",
+      "danger": "Les failles découvertes ne seront plus corrigées ; les logiciels obsolètes sont une porte d'entrée classique.",
+      "impact": "Vulnérabilités permanentes, incompatibilités futures.",
+      "evidence": "Microsoft Visual C++ 2010 x64 Redistributable - 10.0.40219 : fin de support le 2020-07-14 (source Microsoft Lifecycle (liste locale))",
+      "location": "Paramètres > Applications > Applications installées",
+      "risk_score": 7.5,
+      "penalty": 10,
+      "remediation": {
+        "steps": [
+          "Vérifier si le logiciel est encore utilisé.",
+          "S'il ne l'est pas : le désinstaller (Paramètres > Applications).",
+          "S'il l'est : installer la version supportée la plus récente depuis le site officiel de l'éditeur, puis désinstaller l'ancienne."
+        ],
+        "commands": {
+          "windows": [
+            "winget upgrade --all",
+            "winget uninstall --name \"NOM_DU_LOGICIEL\""
+          ]
+        },
+        "duration": "10 à 20 minutes",
+        "requires_admin": true
+      },
+      "references": [
+        "https://endoflife.date"
+      ],
+      "details": {
+        "name": "Microsoft Visual C++ 2010 x64 Redistributable - 10.0.40219",
+        "version": "10.0.40219",
+        "product": "Visual C++ 2010",
+        "source": "Microsoft Lifecycle (liste locale)",
+        "status": "fin_de_support",
+        "eol": "2020-07-14",
+        "rolling": false
+      }
+    },
+    {
+      "key": "APP-002:nodejs-24",
+      "id": "APP-002",
+      "domain": "logiciels",
+      "category": "Logiciels",
+      "title": "Mise à jour disponible : Node.js",
+      "severity": "faible",
+      "status": "detecte",
+      "description": "Une version plus récente de ce logiciel est disponible dans la même branche supportée.",
+      "danger": "Les mises à jour mineures corrigent souvent des failles de sécurité.",
+      "impact": "Vulnérabilités déjà corrigées par l'éditeur mais encore présentes sur le poste.",
+      "evidence": "Node.js 24.19.0 : version 24.21.0 disponible dans la branche 24",
+      "location": "Paramètres > Applications > Applications installées",
+      "risk_score": 2.5,
+      "penalty": 1,
+      "remediation": {
+        "steps": [
+          "Ouvrir le logiciel et utiliser sa fonction « Rechercher les mises à jour », ou utiliser winget.",
+          "Activer la mise à jour automatique si elle existe."
+        ],
+        "commands": {
+          "windows": [
+            "winget upgrade",
+            "winget upgrade --id IDENTIFIANT"
+          ]
+        },
+        "duration": "5 minutes",
+        "requires_admin": false
+      },
+      "references": [
+        "https://endoflife.date"
+      ],
+      "details": {
+        "name": "Node.js",
+        "version": "24.19.0",
+        "product": "nodejs",
+        "rolling": false,
+        "source": "endoflife.date",
+        "newest": "26.11.1",
+        "cycle": "24",
+        "eol": "2028-04-30",
+        "latest": "24.21.0",
+        "lts": "2025-10-28",
+        "status": "maj_disponible",
+        "days_to_eol": 569
+      }
+    },
+    {
+      "key": "APP-002:unity-6000.3",
+      "id": "APP-002",
+      "domain": "logiciels",
+      "category": "Logiciels",
+      "title": "Mise à jour disponible : Unity 6000.3.22f1",
+      "severity": "faible",
+      "status": "detecte",
+      "description": "Une version plus récente de ce logiciel est disponible dans la même branche supportée.",
+      "danger": "Les mises à jour mineures corrigent souvent des failles de sécurité.",
+      "impact": "Vulnérabilités déjà corrigées par l'éditeur mais encore présentes sur le poste.",
+      "evidence": "Unity 6000.3.22f1 : version 6000.3.26f1 disponible dans la branche 6000.3",
+      "location": "Paramètres > Applications > Applications installées",
+      "risk_score": 2.5,
+      "penalty": 1,
+      "remediation": {
+        "steps": [
+          "Ouvrir le logiciel et utiliser sa fonction « Rechercher les mises à jour », ou utiliser winget.",
+          "Activer la mise à jour automatique si elle existe."
+        ],
+        "commands": {
+          "windows": [
+            "winget upgrade",
+            "winget upgrade --id IDENTIFIANT"
+          ]
+        },
+        "duration": "5 minutes",
+        "requires_admin": false
+      },
+      "references": [
+        "https://endoflife.date"
+      ],
+      "details": {
+        "name": "Unity 6000.3.22f1",
+        "version": "6000.3.22f1",
+        "product": "unity",
+        "rolling": true,
+        "source": "endoflife.date",
+        "newest": "6000.6.5f1",
+        "cycle": "6000.3",
+        "eol": "2027-12-04",
+        "latest": "6000.3.26f1",
+        "lts": true,
+        "status": "maj_disponible",
+        "days_to_eol": 421
+      }
+    },
+    {
+      "key": "APP-002:visual-studio-18.9",
+      "id": "APP-002",
+      "domain": "logiciels",
+      "category": "Logiciels",
+      "title": "Version dépassée : Visual Studio Community 2026",
+      "severity": "moyen",
+      "status": "detecte",
+      "description": "Une version plus récente de ce logiciel est disponible dans la même branche supportée.",
+      "danger": "Les mises à jour mineures corrigent souvent des failles de sécurité.",
+      "impact": "Vulnérabilités déjà corrigées par l'éditeur mais encore présentes sur le poste.",
+      "evidence": "Visual Studio Community 2026 18.9.2 : branche 18.9 terminée le 2026-09-08, version actuelle de l'éditeur : 18.10.3",
+      "location": "Paramètres > Applications > Applications installées",
+      "risk_score": 5.0,
+      "penalty": 5,
+      "remediation": {
+        "steps": [
+          "Ouvrir le logiciel et utiliser sa fonction « Rechercher les mises à jour », ou utiliser winget.",
+          "Activer la mise à jour automatique si elle existe."
+        ],
+        "commands": {
+          "windows": [
+            "winget upgrade",
+            "winget upgrade --id IDENTIFIANT"
+          ]
+        },
+        "duration": "5 minutes",
+        "requires_admin": false
+      },
+      "references": [
+        "https://endoflife.date"
+      ],
+      "details": {
+        "name": "Visual Studio Community 2026",
+        "version": "18.9.2",
+        "product": "visual-studio",
+        "rolling": true,
+        "source": "endoflife.date",
+        "newest": "18.10.3",
+        "cycle": "18.9",
+        "eol": "2026-09-08",
+        "latest": "18.9.3",
+        "lts": false,
+        "status": "fin_de_support"
+      }
+    },
+    {
+      "key": "APP-003",
+      "id": "APP-003",
+      "domain": "logiciels",
+      "category": "Logiciels",
+      "title": "Plusieurs versions du même logiciel installées",
+      "severity": "faible",
+      "status": "conforme",
+      "description": "Plusieurs versions d'un même logiciel coexistent (ex. Java 8, 11 et 17).",
+      "danger": "Les anciennes versions restent exploitables même si on ne les utilise plus, et occupent de l'espace disque.",
+      "impact": "Surface d'attaque inutile, espace disque gaspillé, confusion entre versions.",
+      "evidence": "Aucune famille de logiciels installée en plusieurs versions",
+      "location": "Paramètres > Applications > Applications installées",
+      "risk_score": 0.0,
+      "penalty": 0,
+      "remediation": {
+        "steps": [
+          "Identifier la version réellement utilisée par vos projets.",
+          "Désinstaller les autres versions."
+        ],
+        "commands": {
+          "windows": [
+            "winget list --name \"NOM\"",
+            "winget uninstall --name \"NOM VERSION\""
+          ]
+        },
+        "duration": "10 minutes",
+        "requires_admin": true
+      },
+      "references": [],
+      "details": null
+    },
+    {
+      "key": "APP-004",
+      "id": "APP-004",
+      "domain": "logiciels",
+      "category": "Logiciels",
+      "title": "Applications volumineuses",
+      "severity": "info",
+      "status": "detecte",
+      "description": "Applications installées occupant plus de 2 Go d'après leur déclaration au registre.",
+      "danger": "Aucun danger de sécurité, mais un gain d'espace possible si elles ne servent plus.",
+      "impact": "Espace disque.",
+      "evidence": "Copilot (2.7 Go); Microsoft Edge (2.7 Go)",
+      "location": "Paramètres > Applications > Applications installées (trier par taille)",
+      "risk_score": 0.0,
+      "penalty": 0,
+      "remediation": {
+        "steps": [
+          "Trier les applications par taille.",
+          "Désinstaller celles qui ne sont plus utilisées."
+        ],
+        "commands": {
+          "windows": [
+            "start ms-settings:appsfeatures"
+          ]
+        },
+        "duration": "10 minutes",
+        "requires_admin": false
+      },
+      "references": [],
+      "details": {
+        "apps": [
+          {
+            "name": "Copilot",
+            "version": "154.0.4258.62",
+            "publisher": "Microsoft Corporation",
+            "install_date": "2026-10-07T00:00:00",
+            "size_mb": 2812.0,
+            "scope": "machine",
+            "arch": "32"
+          },
+          {
+            "name": "Microsoft Edge",
+            "version": "154.0.4258.62",
+            "publisher": "Microsoft Corporation",
+            "install_date": "2026-10-07T00:00:00",
+            "size_mb": 2812.0,
+            "scope": "machine",
+            "arch": "32"
+          }
+        ]
+      }
+    },
+    {
+      "key": "PERF-001",
+      "id": "PERF-001",
+      "domain": "performance",
+      "category": "Processeur",
+      "title": "Processeur saturé",
+      "severity": "moyen",
+      "status": "conforme",
+      "description": "L'utilisation moyenne du processeur dépasse 85 % pendant la mesure.",
+      "danger": "Pas de danger de sécurité direct ; une saturation inexpliquée peut toutefois signaler un logiciel malveillant (ex. minage de cryptomonnaie).",
+      "impact": "Lenteurs, surchauffe, autonomie réduite.",
+      "evidence": "Utilisation moyenne sur 3 s : 55.7 % (4 cœurs logiques). Plus actifs : MsMpEng.exe (11.0 %), Antigravity IDE.exe (9.7 %), Code.exe (6.4 %)",
+      "location": "Gestionnaire des tâches > Processus (trier par Processeur)",
+      "risk_score": 0.0,
+      "penalty": 0,
+      "remediation": {
+        "steps": [
+          "Ouvrir le Gestionnaire des tâches (Ctrl+Maj+Échap).",
+          "Trier par « Processeur » et identifier le programme responsable (voir la liste des processus gourmands).",
+          "Fermer ou désinstaller le programme s'il n'est pas nécessaire ; lancer une analyse antivirus si le processus est inconnu."
+        ],
+        "commands": {
+          "windows": [
+            "taskmgr",
+            "Get-Process | Sort-Object CPU -Descending | Select-Object -First 10"
+          ]
+        },
+        "duration": "5 minutes",
+        "requires_admin": false
+      },
+      "references": [],
+      "details": null
+    },
+    {
+      "key": "PERF-002",
+      "id": "PERF-002",
+      "domain": "performance",
+      "category": "Mémoire",
+      "title": "Mémoire vive insuffisante",
+      "severity": "moyen",
+      "status": "conforme",
+      "description": "Le poste dispose de moins de 8 Go de mémoire vive, en dessous de la recommandation pour un usage courant actuel.",
+      "danger": "Aucun danger de sécurité.",
+      "impact": "Utilisation du fichier d'échange sur disque, lenteurs importantes.",
+      "evidence": "11.9 Go de mémoire vive",
+      "location": "Paramètres > Système > À propos",
+      "risk_score": 0.0,
+      "penalty": 0,
+      "remediation": {
+        "steps": [
+          "Vérifier le nombre d'emplacements mémoire libres (application CPU-Z ou fiche du fabricant).",
+          "Ajouter une barrette compatible pour atteindre au moins 8 Go (idéalement 16 Go).",
+          "En attendant, limiter le nombre d'applications ouvertes simultanément."
+        ],
+        "commands": {
+          "windows": [
+            "Get-CimInstance Win32_PhysicalMemory | Select-Object Capacity,Speed,DeviceLocator"
+          ]
+        },
+        "duration": "30 minutes",
+        "requires_admin": false
+      },
+      "references": [],
+      "details": null
+    },
+    {
+      "key": "PERF-003",
+      "id": "PERF-003",
+      "domain": "performance",
+      "category": "Mémoire",
+      "title": "Mémoire vive presque saturée",
+      "severity": "moyen",
+      "status": "conforme",
+      "description": "Plus de 85 % de la mémoire vive est utilisée au moment du scan.",
+      "danger": "Aucun danger de sécurité.",
+      "impact": "Ralentissements, fermetures d'applications.",
+      "evidence": "75.2 % utilisés (8.9 / 11.9 Go)",
+      "location": "Gestionnaire des tâches > Performance > Mémoire",
+      "risk_score": 0.0,
+      "penalty": 0,
+      "remediation": {
+        "steps": [
+          "Fermer les applications et onglets de navigateur inutilisés.",
+          "Identifier les programmes les plus gourmands (voir la liste).",
+          "Désactiver les programmes inutiles au démarrage."
+        ],
+        "commands": {
+          "windows": [
+            "Get-Process | Sort-Object WorkingSet64 -Descending | Select-Object -First 10 Name,@{n='Mo';e={[int]($_.WorkingSet64/1MB)}}"
+          ]
+        },
+        "duration": "5 minutes",
+        "requires_admin": false
+      },
+      "references": [],
+      "details": null
+    },
+    {
+      "key": "PERF-004",
+      "id": "PERF-004",
+      "domain": "performance",
+      "category": "Démarrage",
+      "title": "Nombreux programmes lancés au démarrage",
+      "severity": "faible",
+      "status": "conforme",
+      "description": "Plusieurs programmes se lancent automatiquement à l'ouverture de session.",
+      "danger": "Les programmes de démarrage sont aussi un mécanisme de persistance des logiciels malveillants : chaque entrée inconnue doit être vérifiée.",
+      "impact": "Démarrage plus lent et mémoire occupée en permanence.",
+      "evidence": "5 programme(s) actif(s) au démarrage : SecurityHealth, RtsCM, OneDrive, Teams, MicrosoftEdgeAutoLaunch_58BAA9065908A578448B327828BF3E64",
+      "location": "Gestionnaire des tâches > Démarrage",
+      "risk_score": 0.0,
+      "penalty": 0,
+      "remediation": {
+        "steps": [
+          "Ouvrir le Gestionnaire des tâches > onglet « Démarrage ».",
+          "Désactiver les programmes non indispensables (garder l'antivirus et les pilotes).",
+          "Rechercher sur Internet toute entrée inconnue avant de la désactiver."
+        ],
+        "commands": {
+          "windows": [
+            "taskmgr /0 /startup",
+            "Get-CimInstance Win32_StartupCommand | Select-Object Name,Command,Location"
+          ]
+        },
+        "duration": "5 minutes",
+        "requires_admin": false
+      },
+      "references": [],
+      "details": null
+    },
+    {
+      "key": "PERF-006",
+      "id": "PERF-006",
+      "domain": "performance",
+      "category": "Système",
+      "title": "Ordinateur non redémarré depuis longtemps",
+      "severity": "faible",
+      "status": "conforme",
+      "description": "Le poste n'a pas été redémarré depuis plus de 14 jours.",
+      "danger": "Certains correctifs de sécurité ne s'appliquent qu'après un redémarrage.",
+      "impact": "Correctifs en attente, fuites de mémoire accumulées.",
+      "evidence": "Dernier démarrage le 2026-10-08T00:15 (1.8 jours)",
+      "location": "Gestionnaire des tâches > Performance > Processeur (Temps d'activité)",
+      "risk_score": 0.0,
+      "penalty": 0,
+      "remediation": {
+        "steps": [
+          "Enregistrer son travail et redémarrer le poste (Redémarrer, pas Arrêter : le démarrage rapide ne réinitialise pas tout)."
+        ],
+        "commands": {
+          "windows": [
+            "shutdown /r /t 0"
+          ]
+        },
+        "duration": "3 minutes",
+        "requires_admin": false
+      },
+      "references": [],
+      "details": null
+    },
+    {
+      "key": "PERF-007",
+      "id": "PERF-007",
+      "domain": "performance",
+      "category": "Disque",
+      "title": "Système installé sur un disque mécanique (HDD)",
+      "severity": "moyen",
+      "status": "conforme",
+      "description": "Le disque principal est un disque dur mécanique, beaucoup plus lent qu'un SSD.",
+      "danger": "Aucun danger de sécurité.",
+      "impact": "Démarrage et ouverture des applications lents.",
+      "evidence": "Disque(s) : MTFDDAK256MAY-1AH12ABHA (SSD)",
+      "location": "Gestionnaire des tâches > Performance > Disque",
+      "risk_score": 0.0,
+      "penalty": 0,
+      "remediation": {
+        "steps": [
+          "Remplacer le disque par un SSD et cloner le système (Macrium Reflect, Clonezilla, outil du fabricant)."
+        ],
+        "commands": {
+          "windows": [
+            "Get-PhysicalDisk | Select-Object FriendlyName,MediaType"
+          ]
+        },
+        "duration": "1 à 2 heures",
+        "requires_admin": true
+      },
+      "references": [],
+      "details": null
+    },
+    {
+      "key": "HW-001",
+      "id": "HW-001",
+      "domain": "performance",
+      "category": "Batterie",
+      "title": "Batterie usée",
+      "severity": "faible",
+      "status": "non_verifiable",
+      "description": "La capacité maximale actuelle de la batterie est nettement inférieure à sa capacité d'origine.",
+      "danger": "Aucun danger de sécurité ; une batterie très usée peut toutefois gonfler.",
+      "impact": "Autonomie réduite, arrêts inattendus.",
+      "evidence": "Le système ne publie pas les capacités de la batterie",
+      "location": "Rapport de batterie du système",
+      "risk_score": 0.0,
+      "penalty": 0,
+      "remediation": {
+        "steps": [
+          "Consulter le rapport de batterie pour confirmer l'usure.",
+          "Prévoir le remplacement de la batterie en dessous de 60 % de la capacité d'origine.",
+          "Éviter de laisser la batterie à 100 % en permanence (option de recharge optimisée)."
+        ],
+        "commands": {
+          "windows": [
+            "powercfg /batteryreport"
+          ],
+          "linux": [
+            "upower -i $(upower -e | grep BAT)"
+          ],
+          "macos": [
+            "system_profiler SPPowerDataType"
+          ]
+        },
+        "duration": "5 minutes",
+        "requires_admin": false
+      },
+      "references": [],
+      "details": null
+    },
+    {
+      "key": "STO-001:C:",
+      "id": "STO-001",
+      "domain": "stockage",
+      "category": "Disque",
+      "title": "Espace disque faible",
+      "severity": "moyen",
+      "status": "detecte",
+      "description": "La partition dispose de moins de 20 % d'espace libre.",
+      "danger": "Les mises à jour de Windows peuvent échouer faute d'espace, ce qui crée indirectement un risque de sécurité.",
+      "impact": "Ralentissements, échec des mises à jour et des sauvegardes.",
+      "evidence": "C: : 42.9 Go libres sur 237.9 Go (18.0 % libre)",
+      "location": "Paramètres > Système > Stockage",
+      "risk_score": 5.0,
+      "penalty": 5,
+      "remediation": {
+        "steps": [
+          "Ouvrir Paramètres > Système > Stockage et lancer « Recommandations de nettoyage ».",
+          "Supprimer les fichiers en double et les gros fichiers inutiles listés par KMB.",
+          "Vider la Corbeille et le dossier Téléchargements.",
+          "Activer l'Assistant Stockage."
+        ],
+        "commands": {
+          "windows": [
+            "cleanmgr /d C:",
+            "start ms-settings:storagesense"
+          ]
+        },
+        "duration": "15 minutes",
+        "requires_admin": false
+      },
+      "references": [],
+      "details": null
+    },
+    {
+      "key": "STO-002",
+      "id": "STO-002",
+      "domain": "stockage",
+      "category": "Doublons",
+      "title": "Fichiers en double",
+      "severity": "info",
+      "status": "detecte",
+      "description": "Des fichiers au contenu strictement identique (même empreinte SHA-256) existent à plusieurs endroits.",
+      "danger": "Aucun danger de sécurité.",
+      "impact": "Espace disque gaspillé et confusion entre versions d'un même fichier.",
+      "evidence": "4 fichier(s) en double dans 3 groupe(s) : 2.1 Mo récupérables (9 fichiers analysés)",
+      "location": "Voir la liste des groupes de doublons dans l'onglet Stockage",
+      "risk_score": 0.0,
+      "penalty": 0,
+      "remediation": {
+        "steps": [
+          "Consulter la liste des doublons (le fichier le plus ancien est présenté en premier).",
+          "Garder une seule copie, à l'emplacement le plus logique.",
+          "Supprimer les autres copies, puis vider la Corbeille."
+        ],
+        "commands": {
+          "windows": [
+            "Get-FileHash -Algorithm SHA256 'CHEMIN1','CHEMIN2'"
+          ]
+        },
+        "duration": "10 à 30 minutes",
+        "requires_admin": false
+      },
+      "references": [],
+      "details": {
+        "wasted_bytes": 2170000
+      }
+    },
+    {
+      "key": "STO-003",
+      "id": "STO-003",
+      "domain": "stockage",
+      "category": "Fichiers",
+      "title": "Fichiers volumineux",
+      "severity": "info",
+      "status": "detecte",
+      "description": "Fichiers de plus de 500 Mo stockés localement dans les dossiers personnels.",
+      "danger": "Aucun danger de sécurité.",
+      "impact": "Gain d'espace possible (installateurs déjà utilisés, vidéos, archives).",
+      "evidence": "UnitySetup64-6000.3.23f1.exe (3.84 Go); android-studio-2022-3-1-21.exe (1.05 Go)",
+      "location": "Voir la liste dans l'onglet Stockage",
+      "risk_score": 0.0,
+      "penalty": 0,
+      "remediation": {
+        "steps": [
+          "Supprimer les installateurs (.exe, .msi) déjà utilisés.",
+          "Déplacer les vidéos et archives vers un disque externe ou un stockage en ligne."
+        ],
+        "commands": {
+          "windows": [
+            "Get-ChildItem $env:USERPROFILE\\Downloads -File | Sort-Object Length -Descending | Select-Object -First 10 Name,@{n='Go';e={[math]::Round($_.Length/1GB,2)}}"
+          ]
+        },
+        "duration": "10 minutes",
+        "requires_admin": false
+      },
+      "references": [],
+      "details": null
+    },
+    {
+      "key": "STO-004",
+      "id": "STO-004",
+      "domain": "stockage",
+      "category": "Fichiers",
+      "title": "Dossier Téléchargements volumineux",
+      "severity": "faible",
+      "status": "detecte",
+      "description": "Le dossier Téléchargements occupe plus de 5 Go.",
+      "danger": "Des installateurs anciens peuvent être relancés par erreur.",
+      "impact": "Espace disque gaspillé.",
+      "evidence": "Téléchargements : 5.84 Go (671 fichiers)",
+      "location": "Explorateur de fichiers > Téléchargements",
+      "risk_score": 2.5,
+      "penalty": 1,
+      "remediation": {
+        "steps": [
+          "Trier le dossier Téléchargements par taille.",
+          "Supprimer les installateurs et archives déjà utilisés.",
+          "Activer le nettoyage automatique des Téléchargements dans l'Assistant Stockage."
+        ],
+        "commands": {
+          "windows": [
+            "explorer shell:Downloads"
+          ]
+        },
+        "duration": "10 minutes",
+        "requires_admin": false
+      },
+      "references": [],
+      "details": null
+    }
+  ],
+  "plan": [
+    {
+      "priority": 1,
+      "key": "SYS-001",
+      "title": "Système d'exploitation en fin de support",
+      "severity": "critique",
+      "domain": "securite",
+      "gain": "+15 sécurité",
+      "duration": "1 à 3 heures"
+    },
+    {
+      "priority": 2,
+      "key": "NET-004:5432",
+      "title": "PostgreSQL accessible depuis le réseau (port 5432)",
+      "severity": "eleve",
+      "domain": "securite",
+      "gain": "+10 sécurité",
+      "duration": "10 minutes"
+    },
+    {
+      "priority": 3,
+      "key": "ENC-001",
+      "title": "Disque système non chiffré (BitLocker désactivé)",
+      "severity": "eleve",
+      "domain": "securite",
+      "gain": "+10 sécurité",
+      "duration": "10 minutes (+ chiffrement en arrière-plan)"
+    },
+    {
+      "priority": 4,
+      "key": "APP-001:visual-c++-2010-10.0.40219",
+      "title": "Logiciel en fin de support : Microsoft Visual C++ 2010 x64 Redistributable - 10.0.40219",
+      "severity": "eleve",
+      "domain": "logiciels",
+      "gain": "+10 logiciels",
+      "duration": "10 à 20 minutes"
+    },
+    {
+      "priority": 5,
+      "key": "SYS-003",
+      "title": "Correctifs Windows en attente d'installation",
+      "severity": "moyen",
+      "domain": "securite",
+      "gain": "+5 sécurité",
+      "duration": "15 à 60 minutes"
+    },
+    {
+      "priority": 6,
+      "key": "SYS-007",
+      "title": "Démarrage sécurisé (Secure Boot) désactivé",
+      "severity": "moyen",
+      "domain": "securite",
+      "gain": "+5 sécurité",
+      "duration": "15 minutes"
+    },
+    {
+      "priority": 7,
+      "key": "APP-002:chrome-154",
+      "title": "Version dépassée : Google Chrome",
+      "severity": "moyen",
+      "domain": "logiciels",
+      "gain": "+5 logiciels",
+      "duration": "5 minutes"
+    },
+    {
+      "priority": 8,
+      "key": "APP-002:visual-studio-18.9",
+      "title": "Version dépassée : Visual Studio Community 2026",
+      "severity": "moyen",
+      "domain": "logiciels",
+      "gain": "+5 logiciels",
+      "duration": "5 minutes"
+    },
+    {
+      "priority": 9,
+      "key": "STO-001:C:",
+      "title": "Espace disque faible",
+      "severity": "moyen",
+      "domain": "stockage",
+      "gain": "+5 stockage",
+      "duration": "15 minutes"
+    },
+    {
+      "priority": 10,
+      "key": "ACC-005",
+      "title": "Utilisation quotidienne d'un compte administrateur",
+      "severity": "faible",
+      "domain": "securite",
+      "gain": "+1 sécurité",
+      "duration": "10 minutes"
+    },
+    {
+      "priority": 11,
+      "key": "APP-002:nodejs-24",
+      "title": "Mise à jour disponible : Node.js",
+      "severity": "faible",
+      "domain": "logiciels",
+      "gain": "+1 logiciels",
+      "duration": "5 minutes"
+    },
+    {
+      "priority": 12,
+      "key": "APP-002:unity-6000.3",
+      "title": "Mise à jour disponible : Unity 6000.3.22f1",
+      "severity": "faible",
+      "domain": "logiciels",
+      "gain": "+1 logiciels",
+      "duration": "5 minutes"
+    },
+    {
+      "priority": 13,
+      "key": "STO-004",
+      "title": "Dossier Téléchargements volumineux",
+      "severity": "faible",
+      "domain": "stockage",
+      "gain": "+1 stockage",
+      "duration": "10 minutes"
+    }
+  ],
+  "inventory": {
+    "system": {
+      "os": {
+        "caption": "Microsoft Windows 10 Professionnel",
+        "version": "10.0.19045",
+        "build": "19045",
+        "ubr": 7725,
+        "display_version": "22H2",
+        "edition": "Professional",
+        "architecture": "64 bits",
+        "last_boot": "2026-10-08T00:15:25.0207920-04:00",
+        "install_date": "2026-08-18T21:38:51.0000000-04:00"
+      },
+      "hardware": {
+        "manufacturer": "Hewlett-Packard",
+        "model": "HP EliteBook Folio 9480m",
+        "cpu": "Intel(R) Core(TM) i5-4310U CPU @ 2.00GHz"
+      },
+      "firmware": "UEFI",
+      "hotfixes": {
+        "count": 23,
+        "latest_date": "2026-09-11",
+        "recent": [
+          {
+            "id": "KB5122878",
+            "type": "Security Update",
+            "date": "2026-09-11"
+          },
+          {
+            "id": "KB5122877",
+            "type": "Security Update",
+            "date": "2026-09-10"
+          },
+          {
+            "id": "KB5126421",
+            "type": "Update",
+            "date": "2026-09-08"
+          },
+          {
+            "id": "KB5104021",
+            "type": "Security Update",
+            "date": "2026-09-07"
+          },
+          {
+            "id": "KB5013624",
+            "type": "Update",
+            "date": "2026-08-19"
+          },
+          {
+            "id": "KB4562830",
+            "type": "Update",
+            "date": "2026-08-19"
+          },
+          {
+            "id": "KB4570334",
+            "type": "Security Update",
+            "date": "2026-08-19"
+          },
+          {
+            "id": "KB4577266",
+            "type": "Security Update",
+            "date": "2026-08-19"
+          }
+        ]
+      },
+      "last_update_date": null,
+      "pending_updates": [
+        {
+          "title": "Mise à jour de la sélection disjointe pour Microsoft Defender Antivirus – 2267602 Ko (version 1.459.x.x) – Canal actuel (large)",
+          "severity": null,
+          "kb": "2267602",
+          "categories": "Definition Updates, Microsoft Defender Antivirus"
+        }
+      ],
+      "os_lifecycle": {
+        "product": "windows",
+        "build": "19045",
+        "display_version": "22H2",
+        "cycle": "10-22h2",
+        "eol": "2025-10-14",
+        "latest": null,
+        "lts": false,
+        "status": "fin_de_support",
+        "label": "10 22H2"
+      }
+    },
+    "wifi": {
+      "available": true,
+      "current": {
+        "ssid": "reseau-wifi-1",
+        "auth": "WPA2 - Personnel",
+        "cipher": "CCMP",
+        "security": "wpa2"
+      },
+      "profiles": [
+        {
+          "name": "reseau-wifi-1",
+          "auth": "WPA2 - Personnel",
+          "security": "wpa2",
+          "autoconnect": true
+        }
+      ]
+    },
+    "hardware": {
+      "battery_present": true,
+      "battery": null,
+      "temperatures": [],
+      "max_temperature_c": null
+    },
+    "software": [
+      {
+        "name": "Android Studio",
+        "version": "2022.3",
+        "publisher": "Google LLC",
+        "install_date": null,
+        "size_mb": null,
+        "scope": "machine",
+        "arch": "64",
+        "lifecycle": "non_suivi",
+        "eol": null,
+        "latest": null,
+        "product": null
+      },
+      {
+        "name": "Antigravity 2.11.0",
+        "version": "2.11.0",
+        "publisher": "Google",
+        "install_date": null,
+        "size_mb": 522.7,
+        "scope": "utilisateur",
+        "arch": null,
+        "lifecycle": "non_suivi",
+        "eol": null,
+        "latest": null,
+        "product": null
+      },
+      {
+        "name": "Antigravity IDE (User)",
+        "version": "2.5.5",
+        "publisher": "Google",
+        "install_date": "2026-08-26T00:00:00",
+        "size_mb": 1042.3,
+        "scope": "utilisateur",
+        "arch": null,
+        "lifecycle": "non_suivi",
+        "eol": null,
+        "latest": null,
+        "product": null
+      },
+      {
+        "name": "Copilot",
+        "version": "154.0.4258.62",
+        "publisher": "Microsoft Corporation",
+        "install_date": "2026-10-07T00:00:00",
+        "size_mb": 2812.0,
+        "scope": "machine",
+        "arch": "32",
+        "lifecycle": "non_suivi",
+        "eol": null,
+        "latest": null,
+        "product": null
+      },
+      {
+        "name": "Git",
+        "version": "2.55.x.x",
+        "publisher": "The Git Development Community",
+        "install_date": "2026-09-10T00:00:00",
+        "size_mb": 336.1,
+        "scope": "machine",
+        "arch": "64",
+        "lifecycle": "non_suivi",
+        "eol": null,
+        "latest": null,
+        "product": null
+      },
+      {
+        "name": "GitHub CLI",
+        "version": "2.100.0",
+        "publisher": "GitHub, Inc.",
+        "install_date": "2026-09-10T00:00:00",
+        "size_mb": 41.0,
+        "scope": "machine",
+        "arch": "64",
+        "lifecycle": "non_suivi",
+        "eol": null,
+        "latest": null,
+        "product": null
+      },
+      {
+        "name": "Google Chrome",
+        "version": "154.0.8037.98",
+        "publisher": "Google LLC",
+        "install_date": "2026-10-05T00:00:00",
+        "size_mb": 502.9,
+        "scope": "machine",
+        "arch": "32",
+        "lifecycle": "fin_de_support",
+        "eol": "2026-10-06",
+        "latest": null,
+        "product": "chrome"
+      },
+      {
+        "name": "Microsoft .NET SDK 10.0.400 (x64) from Visual Studio",
+        "version": "40.11.17119",
+        "publisher": "Microsoft Corporation",
+        "install_date": "2026-08-28T00:00:00",
+        "size_mb": 0.4,
+        "scope": "machine",
+        "arch": "64",
+        "lifecycle": "supporte",
+        "eol": "2028-11-14",
+        "latest": null,
+        "product": "dotnet"
+      },
+      {
+        "name": "Microsoft 365 - fr-ca",
+        "version": "16.0.20430.20092",
+        "publisher": "Microsoft Corporation",
+        "install_date": null,
+        "size_mb": null,
+        "scope": "machine",
+        "arch": "64",
+        "lifecycle": "non_suivi",
+        "eol": null,
+        "latest": null,
+        "product": null
+      },
+      {
+        "name": "Microsoft Edge",
+        "version": "154.0.4258.62",
+        "publisher": "Microsoft Corporation",
+        "install_date": "2026-10-07T00:00:00",
+        "size_mb": 2812.0,
+        "scope": "machine",
+        "arch": "32",
+        "lifecycle": "non_suivi",
+        "eol": null,
+        "latest": null,
+        "product": null
+      },
+      {
+        "name": "Microsoft OneDrive",
+        "version": "26.173.0906.0008",
+        "publisher": "Microsoft Corporation",
+        "install_date": null,
+        "size_mb": 586.1,
+        "scope": "machine",
+        "arch": "64",
+        "lifecycle": "non_suivi",
+        "eol": null,
+        "latest": null,
+        "product": null
+      },
+      {
+        "name": "Microsoft System CLR Types pour SQL Server 2019",
+        "version": "15.0.2000.5",
+        "publisher": "Microsoft Corporation",
+        "install_date": "2026-08-28T00:00:00",
+        "size_mb": 3.8,
+        "scope": "machine",
+        "arch": "64",
+        "lifecycle": "non_suivi",
+        "eol": null,
+        "latest": null,
+        "product": null
+      },
+      {
+        "name": "Microsoft Teams Meeting Add-in for Microsoft Office",
+        "version": "1.26.21803",
+        "publisher": "Microsoft",
+        "install_date": "2026-10-08T00:00:00",
+        "size_mb": 34.0,
+        "scope": "machine",
+        "arch": "64",
+        "lifecycle": "non_suivi",
+        "eol": null,
+        "latest": null,
+        "product": null
+      },
+      {
+        "name": "Microsoft Update Health Tools",
+        "version": "3.74.x.x",
+        "publisher": "Microsoft Corporation",
+        "install_date": "2026-08-19T00:00:00",
+        "size_mb": 1.0,
+        "scope": "machine",
+        "arch": "64",
+        "lifecycle": "non_suivi",
+        "eol": null,
+        "latest": null,
+        "product": null
+      },
+      {
+        "name": "Microsoft Visual C++ 2010 x64 Redistributable - 10.0.40219",
+        "version": "10.0.40219",
+        "publisher": "Microsoft Corporation",
+        "install_date": "2026-08-28T00:00:00",
+        "size_mb": 13.9,
+        "scope": "machine",
+        "arch": "64",
+        "lifecycle": "fin_de_support",
+        "eol": "2020-07-14",
+        "latest": null,
+        "product": "Visual C++ 2010"
+      },
+      {
+        "name": "Microsoft Visual C++ v14 Redistributable (x64) - 14.51.36247",
+        "version": "14.51.36247.0",
+        "publisher": "Microsoft Corporation",
+        "install_date": null,
+        "size_mb": 20.8,
+        "scope": "machine",
+        "arch": "32",
+        "lifecycle": "non_suivi",
+        "eol": null,
+        "latest": null,
+        "product": null
+      },
+      {
+        "name": "Microsoft Visual C++ v14 Redistributable (x86) - 14.51.36247",
+        "version": "14.51.36247.0",
+        "publisher": "Microsoft Corporation",
+        "install_date": null,
+        "size_mb": 18.5,
+        "scope": "machine",
+        "arch": "32",
+        "lifecycle": "non_suivi",
+        "eol": null,
+        "latest": null,
+        "product": null
+      },
+      {
+        "name": "Microsoft Visual Studio Code (User)",
+        "version": "1.141.0",
+        "publisher": "Microsoft Corporation",
+        "install_date": "2026-10-08T00:00:00",
+        "size_mb": 1030.8,
+        "scope": "utilisateur",
+        "arch": null,
+        "lifecycle": "non_suivi",
+        "eol": null,
+        "latest": null,
+        "product": null
+      },
+      {
+        "name": "Microsoft Visual Studio Installer",
+        "version": "4.9.50.62957",
+        "publisher": "Microsoft Corporation",
+        "install_date": "2026-08-28T00:00:00",
+        "size_mb": null,
+        "scope": "machine",
+        "arch": "64",
+        "lifecycle": "non_suivi",
+        "eol": null,
+        "latest": null,
+        "product": null
+      },
+      {
+        "name": "Node.js",
+        "version": "24.19.0",
+        "publisher": "Node.js Foundation",
+        "install_date": "2026-09-23T00:00:00",
+        "size_mb": 104.9,
+        "scope": "machine",
+        "arch": "64",
+        "lifecycle": "maj_disponible",
+        "eol": "2028-04-30",
+        "latest": "24.21.0",
+        "product": "nodejs"
+      },
+      {
+        "name": "PostgreSQL 17",
+        "version": "17.11-4",
+        "publisher": "PostgreSQL Global Development Group",
+        "install_date": "2026-09-30T00:00:00",
+        "size_mb": 1131.3,
+        "scope": "machine",
+        "arch": "64",
+        "lifecycle": "supporte",
+        "eol": "2029-11-08",
+        "latest": "17.11",
+        "product": "postgresql"
+      },
+      {
+        "name": "Python Launcher",
+        "version": "3.14.7150.0",
+        "publisher": "Python Software Foundation",
+        "install_date": "2026-08-19T00:00:00",
+        "size_mb": 1.5,
+        "scope": "machine",
+        "arch": "32",
+        "lifecycle": "non_suivi",
+        "eol": null,
+        "latest": null,
+        "product": null
+      },
+      {
+        "name": "Synaptics Pointing Device Driver",
+        "version": "19.0.x.x",
+        "publisher": "Synaptics Incorporated",
+        "install_date": null,
+        "size_mb": 46.4,
+        "scope": "machine",
+        "arch": "64",
+        "lifecycle": "non_suivi",
+        "eol": null,
+        "latest": null,
+        "product": null
+      },
+      {
+        "name": "Unity 6000.3.22f1",
+        "version": "6000.3.22f1",
+        "publisher": "Unity Technologies ApS",
+        "install_date": null,
+        "size_mb": null,
+        "scope": "machine",
+        "arch": "64",
+        "lifecycle": "maj_disponible",
+        "eol": "2027-12-04",
+        "latest": "6000.3.26f1",
+        "product": "unity"
+      },
+      {
+        "name": "Unity Hub 3.21.2",
+        "version": "3.21.2",
+        "publisher": "Unity Technologies Inc.",
+        "install_date": null,
+        "size_mb": 578.8,
+        "scope": "machine",
+        "arch": "64",
+        "lifecycle": "non_suivi",
+        "eol": null,
+        "latest": null,
+        "product": null
+      },
+      {
+        "name": "Visual Studio Community 2026",
+        "version": "18.9.2",
+        "publisher": "Microsoft Corporation",
+        "install_date": "2026-08-28T00:00:00",
+        "size_mb": null,
+        "scope": "machine",
+        "arch": "32",
+        "lifecycle": "fin_de_support",
+        "eol": "2026-09-08",
+        "latest": "18.9.3",
+        "product": "visual-studio"
+      },
+      {
+        "name": "vs_CoreEditorFonts",
+        "version": "17.7.40001",
+        "publisher": "Microsoft Corporation",
+        "install_date": "2026-08-28T00:00:00",
+        "size_mb": 0.7,
+        "scope": "machine",
+        "arch": "32",
+        "lifecycle": "non_suivi",
+        "eol": null,
+        "latest": null,
+        "product": null
+      }
+    ],
+    "software_cleaning": {
+      "raw_entries": 158,
+      "without_name": 38,
+      "system_components": 92,
+      "updates": 1,
+      "duplicates": 0,
+      "kept": 27
+    },
+    "performance": {
+      "cpu": {
+        "logical_cores": 4,
+        "physical_cores": 2,
+        "usage_percent": 55.7,
+        "usage_samples": [
+          45.7,
+          63.7,
+          57.8
+        ],
+        "frequency_mhz": 2601,
+        "frequency_max_mhz": 2601,
+        "temperature_c": null
+      },
+      "memory": {
+        "total_gb": 11.9,
+        "used_gb": 8.9,
+        "available_gb": 2.9,
+        "percent": 75.2,
+        "swap_total_gb": 12.0,
+        "swap_percent": 6.5
+      },
+      "top_memory": [
+        {
+          "name": "Code.exe",
+          "count": 16,
+          "memory_mb": 2227,
+          "cpu_percent": 6.4
+        },
+        {
+          "name": "Antigravity IDE.exe",
+          "count": 12,
+          "memory_mb": 1778,
+          "cpu_percent": 9.7
+        },
+        {
+          "name": "svchost.exe",
+          "count": 84,
+          "memory_mb": 1164,
+          "cpu_percent": 0.7
+        },
+        {
+          "name": "MemCompression",
+          "count": 1,
+          "memory_mb": 1022,
+          "cpu_percent": 0.0
+        },
+        {
+          "name": "claude.exe",
+          "count": 3,
+          "memory_mb": 711,
+          "cpu_percent": 1.7
+        },
+        {
+          "name": "mscopilot.exe",
+          "count": 11,
+          "memory_mb": 692,
+          "cpu_percent": 0.0
+        },
+        {
+          "name": "chrome.exe",
+          "count": 11,
+          "memory_mb": 679,
+          "cpu_percent": 0.0
+        },
+        {
+          "name": "msedge.exe",
+          "count": 11,
+          "memory_mb": 601,
+          "cpu_percent": 0.2
+        },
+        {
+          "name": "msedgewebview2.exe",
+          "count": 20,
+          "memory_mb": 501,
+          "cpu_percent": 0.0
+        },
+        {
+          "name": "MsMpEng.exe",
+          "count": 1,
+          "memory_mb": 361,
+          "cpu_percent": 11.0
+        }
+      ],
+      "top_cpu": [
+        {
+          "name": "MsMpEng.exe",
+          "count": 1,
+          "memory_mb": 361,
+          "cpu_percent": 11.0
+        },
+        {
+          "name": "Antigravity IDE.exe",
+          "count": 12,
+          "memory_mb": 1778,
+          "cpu_percent": 9.7
+        },
+        {
+          "name": "Code.exe",
+          "count": 16,
+          "memory_mb": 2227,
+          "cpu_percent": 6.4
+        },
+        {
+          "name": "python3.13.exe",
+          "count": 3,
+          "memory_mb": 146,
+          "cpu_percent": 5.8
+        },
+        {
+          "name": "dwm.exe",
+          "count": 1,
+          "memory_mb": 65,
+          "cpu_percent": 3.8
+        },
+        {
+          "name": "claude.exe",
+          "count": 3,
+          "memory_mb": 711,
+          "cpu_percent": 1.7
+        },
+        {
+          "name": "Photos.exe",
+          "count": 2,
+          "memory_mb": 190,
+          "cpu_percent": 1.5
+        },
+        {
+          "name": "System",
+          "count": 1,
+          "memory_mb": 0,
+          "cpu_percent": 0.7
+        },
+        {
+          "name": "svchost.exe",
+          "count": 84,
+          "memory_mb": 1164,
+          "cpu_percent": 0.7
+        },
+        {
+          "name": "postgres.exe",
+          "count": 7,
+          "memory_mb": 108,
+          "cpu_percent": 0.3
+        }
+      ],
+      "process_count": 317,
+      "startup": [
+        {
+          "name": "SecurityHealth",
+          "command": "%windir%\\system32\\SecurityHealthSystray.exe",
+          "source": "HKLM\\Run",
+          "scope": "machine",
+          "enabled": true
+        },
+        {
+          "name": "RtsCM",
+          "command": "RTSCM64.EXE",
+          "source": "HKLM\\Run",
+          "scope": "machine",
+          "enabled": true
+        },
+        {
+          "name": "OneDrive",
+          "command": "\"C:\\Program Files\\Microsoft OneDrive\\OneDrive.exe\" /background",
+          "source": "HKCU\\Run",
+          "scope": "utilisateur",
+          "enabled": true
+        },
+        {
+          "name": "Teams",
+          "command": "\"C:\\Users\\utilisateur1\\AppData\\Local\\Microsoft\\WindowsApps\\MSTeams_8wekyb3d8bbwe\\ms-teams.exe\" msteams:system-initiated",
+          "source": "HKCU\\Run",
+          "scope": "utilisateur",
+          "enabled": true
+        },
+        {
+          "name": "MicrosoftEdgeAutoLaunch_58BAA9065908A578448B327828BF3E64",
+          "command": "\"C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe\" --win-session-start",
+          "source": "HKCU\\Run",
+          "scope": "utilisateur",
+          "enabled": true
+        }
+      ],
+      "services_enabled": null,
+      "boot_time": "2026-10-08T00:15:24-04:00",
+      "uptime_days": 1.8,
+      "battery": {
+        "percent": 94,
+        "plugged": true
+      }
+    },
+    "storage": {
+      "partitions": [
+        {
+          "mount": "C:\\",
+          "fstype": "NTFS",
+          "total_gb": 237.9,
+          "used_gb": 195.0,
+          "free_gb": 42.9,
+          "percent_used": 82.0
+        }
+      ],
+      "physical_disks": [
+        {
+          "name": "MTFDDAK256MAY-1AH12ABHA",
+          "media_type": "SSD",
+          "bus": "SATA",
+          "health": "Healthy",
+          "status": "OK",
+          "size_gb": 238.5
+        }
+      ],
+      "folders": [
+        {
+          "name": "Téléchargements",
+          "path": "C:\\Users\\utilisateur1\\Downloads",
+          "local_gb": 5.84,
+          "cloud_only_gb": 0.0,
+          "files": 671,
+          "truncated": false
+        },
+        {
+          "name": "Bureau",
+          "path": "C:\\Users\\utilisateur1\\OneDrive\\Desktop",
+          "local_gb": 0.84,
+          "cloud_only_gb": 0.0,
+          "files": 18133,
+          "truncated": false
+        },
+        {
+          "name": "Vidéos",
+          "path": "C:\\Users\\utilisateur1\\Videos",
+          "local_gb": 0.17,
+          "cloud_only_gb": 0.0,
+          "files": 15,
+          "truncated": false
+        },
+        {
+          "name": "Images",
+          "path": "C:\\Users\\utilisateur1\\OneDrive\\Images",
+          "local_gb": 0.06,
+          "cloud_only_gb": 0.0,
+          "files": 52,
+          "truncated": false
+        },
+        {
+          "name": "Documents",
+          "path": "C:\\Users\\utilisateur1\\OneDrive\\Documents",
+          "local_gb": 0.01,
+          "cloud_only_gb": 0.0,
+          "files": 16,
+          "truncated": false
+        },
+        {
+          "name": "Musique",
+          "path": "C:\\Users\\utilisateur1\\Music",
+          "local_gb": 0.0,
+          "cloud_only_gb": 0.0,
+          "files": 1,
+          "truncated": false
+        }
+      ],
+      "large_files": [
+        {
+          "path": "C:\\Users\\utilisateur1\\Downloads\\UnitySetup64-6000.3.23f1.exe",
+          "size_gb": 3.84
+        },
+        {
+          "path": "C:\\Users\\utilisateur1\\Downloads\\android-studio-2022-3-1-21.exe",
+          "size_gb": 1.05
+        }
+      ],
+      "truncated": false
+    },
+    "duplicates": {
+      "roots": [
+        "data\\demo"
+      ],
+      "files_scanned": 9,
+      "cloud_only_skipped": 0,
+      "files_hashed": 7,
+      "truncated": false,
+      "group_count": 3,
+      "duplicate_files": 4,
+      "wasted_bytes": 2170000,
+      "by_category": {
+        "images": {
+          "groups": 2,
+          "wasted_bytes": 2050000
+        },
+        "documents": {
+          "groups": 1,
+          "wasted_bytes": 120000
+        }
+      },
+      "groups": [
+        {
+          "sha256": "f271b214c5c2baadf225cc63c09b178fbfab205feda3e676fbb1cce26b4b2c0e",
+          "size_bytes": 800000,
+          "category": "images",
+          "count": 3,
+          "wasted_bytes": 1600000,
+          "files": [
+            "data\\demo\\photos\\vacances.jpg",
+            "data\\demo\\photos\\vacances (1).jpg",
+            "data\\demo\\photos\\vacances - Copie.jpg"
+          ]
+        },
+        {
+          "sha256": "0227835188c8337fcf1aca2451faa2585f7d5fc79beb95aa4f3a7b8d007b16b7",
+          "size_bytes": 450000,
+          "category": "images",
+          "count": 2,
+          "wasted_bytes": 450000,
+          "files": [
+            "data\\demo\\photos\\diplome.png",
+            "data\\demo\\photos\\diplome_copy.png"
+          ]
+        },
+        {
+          "sha256": "7cfede55ad4306aabfdab25a062bf863a71ee0a5feeaf981ebfb4a62a05a2082",
+          "size_bytes": 120000,
+          "category": "documents",
+          "count": 2,
+          "wasted_bytes": 120000,
+          "files": [
+            "data\\demo\\documents\\facture.pdf",
+            "data\\demo\\documents\\facture(1).pdf"
+          ]
+        }
+      ],
+      "similar_names": [
+        {
+          "normalized_name": "rapport.docx",
+          "count": 2,
+          "files": [
+            "data\\demo\\documents\\rapport-final-v2.docx",
+            "data\\demo\\documents\\rapport.docx"
+          ]
+        }
+      ]
+    },
+    "network": {
+      "listening": [
+        {
+          "ip": "0.0.0.0",
+          "port": 135,
+          "pid": 1064,
+          "process": "svchost.exe",
+          "exposed": true
+        },
+        {
+          "ip": "::",
+          "port": 135,
+          "pid": 1064,
+          "process": "svchost.exe",
+          "exposed": true
+        },
+        {
+          "ip": "10.0.x.x",
+          "port": 139,
+          "pid": 4,
+          "process": "System",
+          "exposed": false
+        },
+        {
+          "ip": "172.31.x.x",
+          "port": 139,
+          "pid": 4,
+          "process": "System",
+          "exposed": false
+        },
+        {
+          "ip": "0.0.0.0",
+          "port": 445,
+          "pid": 4,
+          "process": "System",
+          "exposed": true
+        },
+        {
+          "ip": "::",
+          "port": 445,
+          "pid": 4,
+          "process": "System",
+          "exposed": true
+        },
+        {
+          "ip": "0.0.0.0",
+          "port": 2179,
+          "pid": 2168,
+          "process": "vmms.exe",
+          "exposed": true
+        },
+        {
+          "ip": "::",
+          "port": 2179,
+          "pid": 2168,
+          "process": "vmms.exe",
+          "exposed": true
+        },
+        {
+          "ip": "127.0.0.1",
+          "port": 3000,
+          "pid": 17184,
+          "process": "node.exe",
+          "exposed": false
+        },
+        {
+          "ip": "0.0.0.0",
+          "port": 5040,
+          "pid": 6772,
+          "process": "svchost.exe",
+          "exposed": true
+        },
+        {
+          "ip": "0.0.0.0",
+          "port": 5432,
+          "pid": 5364,
+          "process": "postgres.exe",
+          "exposed": true
+        },
+        {
+          "ip": "::",
+          "port": 5432,
+          "pid": 5364,
+          "process": "postgres.exe",
+          "exposed": true
+        },
+        {
+          "ip": "0.0.0.0",
+          "port": 7680,
+          "pid": 960,
+          "process": "svchost.exe",
+          "exposed": true
+        },
+        {
+          "ip": "::",
+          "port": 7680,
+          "pid": 960,
+          "process": "svchost.exe",
+          "exposed": true
+        },
+        {
+          "ip": "127.0.0.1",
+          "port": 8000,
+          "pid": 17424,
+          "process": "python3.13.exe",
+          "exposed": false
+        },
+        {
+          "ip": "::1",
+          "port": 42050,
+          "pid": 19676,
+          "process": "OneDrive.Sync.Service.exe",
+          "exposed": false
+        },
+        {
+          "ip": "127.0.0.1",
+          "port": 49465,
+          "pid": 11456,
+          "process": "Code.exe",
+          "exposed": false
+        },
+        {
+          "ip": "0.0.0.0",
+          "port": 49664,
+          "pid": 896,
+          "process": "lsass.exe",
+          "exposed": true
+        },
+        {
+          "ip": "::",
+          "port": 49664,
+          "pid": 896,
+          "process": "lsass.exe",
+          "exposed": true
+        },
+        {
+          "ip": "0.0.0.0",
+          "port": 49665,
+          "pid": 684,
+          "process": "wininit.exe",
+          "exposed": true
+        },
+        {
+          "ip": "::",
+          "port": 49665,
+          "pid": 684,
+          "process": "wininit.exe",
+          "exposed": true
+        },
+        {
+          "ip": "0.0.0.0",
+          "port": 49666,
+          "pid": 1632,
+          "process": "svchost.exe",
+          "exposed": true
+        },
+        {
+          "ip": "::",
+          "port": 49666,
+          "pid": 1632,
+          "process": "svchost.exe",
+          "exposed": true
+        },
+        {
+          "ip": "0.0.0.0",
+          "port": 49667,
+          "pid": 1752,
+          "process": "svchost.exe",
+          "exposed": true
+        },
+        {
+          "ip": "::",
+          "port": 49667,
+          "pid": 1752,
+          "process": "svchost.exe",
+          "exposed": true
+        },
+        {
+          "ip": "0.0.0.0",
+          "port": 49668,
+          "pid": 3360,
+          "process": "spoolsv.exe",
+          "exposed": true
+        },
+        {
+          "ip": "::",
+          "port": 49668,
+          "pid": 3360,
+          "process": "spoolsv.exe",
+          "exposed": true
+        },
+        {
+          "ip": "0.0.0.0",
+          "port": 49671,
+          "pid": 772,
+          "process": "services.exe",
+          "exposed": true
+        },
+        {
+          "ip": "::",
+          "port": 49671,
+          "pid": 772,
+          "process": "services.exe",
+          "exposed": true
+        },
+        {
+          "ip": "127.0.0.1",
+          "port": 49924,
+          "pid": 20652,
+          "process": "Antigravity IDE.exe",
+          "exposed": false
+        },
+        {
+          "ip": "127.0.0.1",
+          "port": 49928,
+          "pid": 13288,
+          "process": "language_server_windows_x64.exe",
+          "exposed": false
+        },
+        {
+          "ip": "127.0.0.1",
+          "port": 49929,
+          "pid": 13288,
+          "process": "language_server_windows_x64.exe",
+          "exposed": false
+        },
+        {
+          "ip": "127.0.0.1",
+          "port": 49941,
+          "pid": 13288,
+          "process": "language_server_windows_x64.exe",
+          "exposed": false
+        },
+        {
+          "ip": "127.0.0.1",
+          "port": 50082,
+          "pid": 20652,
+          "process": "Antigravity IDE.exe",
+          "exposed": false
+        },
+        {
+          "ip": "127.0.0.1",
+          "port": 59071,
+          "pid": 7568,
+          "process": "Code.exe",
+          "exposed": false
+        },
+        {
+          "ip": "127.0.0.1",
+          "port": 59094,
+          "pid": 11456,
+          "process": "Code.exe",
+          "exposed": false
+        },
+        {
+          "ip": "127.0.0.1",
+          "port": 60881,
+          "pid": 20652,
+          "process": "Antigravity IDE.exe",
+          "exposed": false
+        },
+        {
+          "ip": "127.0.0.1",
+          "port": 61917,
+          "pid": 8364,
+          "process": "Antigravity IDE.exe",
+          "exposed": false
+        },
+        {
+          "ip": "127.0.0.1",
+          "port": 61918,
+          "pid": 8364,
+          "process": "Antigravity IDE.exe",
+          "exposed": false
+        },
+        {
+          "ip": "127.0.0.1",
+          "port": 61919,
+          "pid": 6268,
+          "process": "language_server_windows_x64.exe",
+          "exposed": false
+        },
+        {
+          "ip": "127.0.0.1",
+          "port": 61920,
+          "pid": 6268,
+          "process": "language_server_windows_x64.exe",
+          "exposed": false
+        }
+      ],
+      "dns_servers": [
+        {
+          "interface": "Wi-Fi",
+          "servers": [
+            "24.201.x.x",
+            "24.200.x.x"
+          ]
+        }
+      ],
+      "interfaces": [
+        {
+          "name": "Ethernet",
+          "up": false,
+          "ipv4": [
+            "169.254.x.x"
+          ],
+          "speed_mbps": 0
+        },
+        {
+          "name": "vEthernet (Default Switch)",
+          "up": true,
+          "ipv4": [
+            "172.31.x.x"
+          ],
+          "speed_mbps": 4294
+        },
+        {
+          "name": "Connexion au réseau local* 1",
+          "up": false,
+          "ipv4": [
+            "169.254.x.x"
+          ],
+          "speed_mbps": 0
+        },
+        {
+          "name": "Connexion au réseau local* 2",
+          "up": false,
+          "ipv4": [
+            "169.254.x.x"
+          ],
+          "speed_mbps": 0
+        },
+        {
+          "name": "Wi-Fi",
+          "up": true,
+          "ipv4": [
+            "10.0.x.x"
+          ],
+          "speed_mbps": 173
+        },
+        {
+          "name": "Loopback Pseudo-Interface 1",
+          "up": true,
+          "ipv4": [
+            "127.0.0.1"
+          ],
+          "speed_mbps": 1073
+        }
+      ],
+      "smb_shares": [
+        {
+          "name": "ADMIN$",
+          "path": "C:\\WINDOWS",
+          "description": "Administration à distance",
+          "administrative": true
+        },
+        {
+          "name": "C$",
+          "path": "C:\\",
+          "description": "Partage par défaut",
+          "administrative": true
+        },
+        {
+          "name": "IPC$",
+          "path": "",
+          "description": "IPC distant",
+          "administrative": true
+        }
+      ]
+    }
+  },
+  "collectors": {
+    "system": {
+      "status": "ok",
+      "duration_s": 15.93,
+      "errors": {}
+    },
+    "accounts": {
+      "status": "ok",
+      "duration_s": 1.88,
+      "errors": {}
+    },
+    "network": {
+      "status": "ok",
+      "duration_s": 4.18,
+      "errors": {}
+    },
+    "firewall": {
+      "status": "partiel",
+      "duration_s": 5.78,
+      "errors": {
+        "sensitive_rules": "CommandError: Get-NetFirewallRule : Accès refusé."
+      }
+    },
+    "antivirus": {
+      "status": "ok",
+      "duration_s": 2.89,
+      "errors": {}
+    },
+    "encryption": {
+      "status": "ok",
+      "duration_s": 6.78,
+      "errors": {}
+    },
+    "software": {
+      "status": "ok",
+      "duration_s": 0.05,
+      "errors": {}
+    },
+    "performance": {
+      "status": "ok",
+      "duration_s": 7.13,
+      "errors": {}
+    },
+    "storage": {
+      "status": "ok",
+      "duration_s": 3.27,
+      "errors": {}
+    },
+    "wifi": {
+      "status": "ok",
+      "duration_s": 0.73,
+      "errors": {}
+    },
+    "hardware": {
+      "status": "ok",
+      "duration_s": 0.42,
+      "errors": {}
+    },
+    "duplicates": {
+      "status": "ok",
+      "duration_s": 0.06,
+      "errors": {}
+    }
+  },
+  "sources": [
+    {
+      "name": "endoflife.date",
+      "product": "chrome",
+      "url": "https://endoflife.date/api/chrome.json",
+      "origin": "cache",
+      "fetched_at": "2026-10-09T19:43:32-04:00"
+    },
+    {
+      "name": "endoflife.date",
+      "product": "dotnet",
+      "url": "https://endoflife.date/api/dotnet.json",
+      "origin": "cache",
+      "fetched_at": "2026-10-09T19:43:33-04:00"
+    },
+    {
+      "name": "endoflife.date",
+      "product": "nodejs",
+      "url": "https://endoflife.date/api/nodejs.json",
+      "origin": "cache",
+      "fetched_at": "2026-10-09T19:43:34-04:00"
+    },
+    {
+      "name": "endoflife.date",
+      "product": "postgresql",
+      "url": "https://endoflife.date/api/postgresql.json",
+      "origin": "cache",
+      "fetched_at": "2026-10-09T19:43:34-04:00"
+    },
+    {
+      "name": "endoflife.date",
+      "product": "unity",
+      "url": "https://endoflife.date/api/unity.json",
+      "origin": "cache",
+      "fetched_at": "2026-10-09T19:43:35-04:00"
+    },
+    {
+      "name": "endoflife.date",
+      "product": "visual-studio",
+      "url": "https://endoflife.date/api/visual-studio.json",
+      "origin": "cache",
+      "fetched_at": "2026-10-09T19:43:36-04:00"
+    },
+    {
+      "name": "endoflife.date",
+      "product": "windows",
+      "url": "https://endoflife.date/api/windows.json",
+      "origin": "cache",
+      "fetched_at": "2026-10-09T19:43:37-04:00"
+    }
+  ]
+}

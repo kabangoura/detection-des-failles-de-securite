@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>KMB Library</title>
+  <meta name="description" content="Vérifiez gratuitement la sécurité, la performance et le stockage de votre ordinateur. Vos données restent sur votre machine.">
+  <link rel="stylesheet" href="style.css">
+  <script src="config.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+<header class="topbar">
+  <a class="brand" href="#accueil"><span class="logo">KMB</span><div><strong>KMB Library</strong><small>Audit de votre ordinateur</small></div></a>
+  <nav class="mainnav" aria-label="Navigation principale">
+    <a href="#accueil" data-page="accueil">Accueil</a>
+    <a href="#guide" data-page="guide">Guide d'installation</a>
+    <a href="#analyser" data-page="analyser" class="cta">Analyser mon rapport</a>
+    <a href="#questions" data-page="questions">Questions</a>
+  </nav>
+</header>
+
+<div id="toast" class="toast" hidden></div>
+
+<!-- =============================================================== ACCUEIL -->
+<main id="page-accueil" class="page">
+  <section class="hero">
+    <h1>Votre ordinateur est-il bien protégé&nbsp;?</h1>
+    <p class="lead">KMB Library vérifie gratuitement la <b>sécurité</b>, les <b>logiciels</b>, la <b>performance</b> et le <b>stockage</b>
+      de votre ordinateur, puis vous explique <b>simplement</b> quoi corriger, étape par étape.</p>
+    <div class="hero-actions">
+      <a class="btn big" href="#guide">Commencer le guide</a>
+      <a class="btn big ghost" href="#analyser">J'ai déjà mon rapport</a>
+    </div>
+    <p class="reassure">🔒 Vos données restent sur votre ordinateur : le rapport est lu par votre navigateur, rien n'est envoyé.</p>
+  </section>
+
+  <section class="steps3">
+    <div class="step"><span class="stepnum">1</span><h3>Installer</h3><p>Une seule fois, environ 5 minutes : Python (logiciel officiel et gratuit), puis KMB en une commande.</p></div>
+    <div class="step"><span class="stepnum">2</span><h3>Scanner</h3><p>Une seule commande à copier. KMB examine votre ordinateur pendant 1 à 3 minutes, sans rien modifier.</p></div>
+    <div class="step"><span class="stepnum">3</span><h3>Voir le résultat</h3><p>Revenez ici, cliquez sur « Analyser mon rapport » et choisissez le fichier créé.</p></div>
+  </section>
+
+  <section class="panel checks">
+    <h2>Ce que KMB vérifie</h2>
+    <ul class="checklist">
+      <li><b>Système</b> : votre Windows/macOS/Linux reçoit-il encore des mises à jour de sécurité&nbsp;?</li>
+      <li><b>Protection</b> : antivirus, pare-feu, chiffrement du disque, comptes</li>
+      <li><b>Réseau et Wi-Fi</b> : services exposés, réseau Wi-Fi non protégé</li>
+      <li><b>Logiciels</b> : programmes obsolètes ou plus mis à jour par leur éditeur</li>
+      <li><b>Performance</b> : mémoire, processeur, programmes au démarrage, batterie</li>
+      <li><b>Stockage</b> : espace libre, fichiers en double, gros fichiers</li>
+    </ul>
+  </section>
+</main>
+
+<!-- =============================================================== GUIDE -->
+<main id="page-guide" class="page" hidden>
+  <h1>Guide d'installation et de scan</h1>
+  <p class="lead">Choisissez votre système. Suivez les étapes dans l'ordre : chaque étape dit exactement quoi faire.</p>
+  <div class="ostabs" role="tablist">
+    <button data-os="windows" class="active">Windows</button>
+    <button data-os="linux">Linux</button>
+    <button data-os="macos">macOS</button>
+  </div>
+
+  <section class="guide" data-os-panel="windows">
+    <p class="tip">Comptez environ <b>5 minutes la première fois</b>. Les fois suivantes, seule l'étape 4 est nécessaire (1 minute).</p>
+    <ol class="bigsteps">
+      <li><h3>Installez Python (une seule fois)</h3>
+        <p>Python est un logiciel gratuit et officiel qui permet à KMB de fonctionner.</p>
+        <ol>
+          <li>Ouvrez <a href="https://www.python.org/downloads/" target="_blank" rel="noopener">python.org/downloads</a> et cliquez sur le bouton jaune <b>Download Python</b>.</li>
+          <li>Ouvrez le fichier téléchargé.</li>
+          <li><b>Important :</b> en bas de la première fenêtre, <b>cochez « Add python.exe to PATH »</b>.</li>
+          <li>Cliquez sur <b>Install Now</b>, attendez, puis sur <b>Close</b>.</li>
+        </ol>
+        <p class="note">Déjà installé&nbsp;? Passez à l'étape 2. Si vous avez oublié la case « Add python.exe to PATH », relancez l'installateur, choisissez <b>Modify</b> puis cochez « Add Python to environment variables ».</p></li>
+      <li><h3>Ouvrez l'invite de commandes</h3>
+        <p>Cliquez sur le bouton <b>Démarrer</b> de Windows, tapez <code>cmd</code> puis appuyez sur <b>Entrée</b>. Une fenêtre noire s'ouvre.</p></li>
+      <li><h3>Installez KMB (une seule fois)</h3>
+        <p>Copiez cette commande (bouton « Copier »), collez-la dans la fenêtre noire (clic droit) et appuyez sur <b>Entrée</b> :</p>
+        <pre data-install>python -m pip install {URL_ZIP}</pre>
+        <p class="muted small">L'installation prend 1 à 3 minutes. C'est terminé quand vous voyez <code>Successfully installed … kmb-library</code>.
+          Des messages jaunes <code>WARNING … is not on PATH</code> peuvent apparaître : ils sont sans importance.</p></li>
+      <li><h3>Scannez votre ordinateur</h3>
+        <pre>python -m kmb_library scan</pre>
+        <p>KMB trouve tout seul le nom de votre ordinateur et toutes les informations. Le scan dure 1 à 3 minutes et ne modifie rien.</p>
+        <p class="muted small">Les fois suivantes : ouvrez l'invite de commandes (étape 2) et tapez seulement cette commande.</p>
+        <p class="tip">Examen complet (facultatif) : dans le menu Démarrer, tapez <code>cmd</code>, faites un clic droit sur « Invite de commandes »,
+          choisissez <b>Exécuter en tant qu'administrateur</b>, puis tapez la même commande.</p></li>
+      <li><h3>Voyez le résultat</h3>
+        <p>À la fin, le dossier <code>Documents\KMB Library</code> s'ouvre tout seul. Votre rapport s'appelle par exemple :</p>
+        <p><code class="filename">KMB-rapport_DESKTOP-ABC123_2026-10-18_14h30.json</code></p>
+        <p><a class="btn" href="#analyser">Analyser mon rapport</a> puis choisissez ce fichier.</p></li>
+    </ol>
+  </section>
+
+  <section class="guide" data-os-panel="linux" hidden>
+    <ol class="bigsteps">
+      <li><h3>Vérifiez Python</h3><p>Ouvrez un terminal :</p><pre>python3 --version</pre>
+        <p class="muted small">Ubuntu / Debian, si nécessaire :</p><pre>sudo apt install python3-venv</pre></li>
+      <li><h3>Installez KMB (une seule fois)</h3>
+        <p>KMB s'installe dans son propre dossier <code>~/.kmb</code>, sans toucher au Python du système. Copiez les deux lignes, une à la fois :</p>
+        <pre>python3 -m venv ~/.kmb</pre>
+        <pre data-install>~/.kmb/bin/python -m pip install {URL_ZIP}</pre></li>
+      <li><h3>Scannez</h3><pre>~/.kmb/bin/python -m kmb_library scan</pre>
+        <p class="muted small">Examen complet : <code>sudo ~/.kmb/bin/python -m kmb_library scan</code></p></li>
+      <li><h3>Voyez le résultat</h3><p>Votre rapport est dans <code>~/Documents/KMB Library</code> : <a href="#analyser">téléversez</a> le fichier <code>KMB-rapport_….json</code>.</p></li>
+    </ol>
+  </section>
+
+  <section class="guide" data-os-panel="macos" hidden>
+    <ol class="bigsteps">
+      <li><h3>Installez Python</h3><p>Depuis <a href="https://www.python.org/downloads/macos/" target="_blank" rel="noopener">python.org</a> : ouvrez le fichier téléchargé et suivez l'installation.</p></li>
+      <li><h3>Installez KMB (une seule fois)</h3>
+        <p>Ouvrez le <b>Terminal</b> (Applications &gt; Utilitaires) et copiez les deux lignes, une à la fois :</p>
+        <pre>python3 -m venv ~/.kmb</pre>
+        <pre data-install>~/.kmb/bin/python -m pip install {URL_ZIP}</pre></li>
+      <li><h3>Scannez</h3><pre>~/.kmb/bin/python -m kmb_library scan</pre></li>
+      <li><h3>Voyez le résultat</h3><p>Votre rapport est dans <code>Documents/KMB Library</code> : <a href="#analyser">téléversez</a> le fichier <code>KMB-rapport_….json</code>.</p></li>
+    </ol>
+  </section>
+</main>
+
+<!-- =============================================================== ANALYSER -->
+<main id="page-analyser" class="page" hidden>
+  <section id="upload-zone" class="dropzone">
+    <h1>Analyser mon rapport</h1>
+    <p>Glissez ici votre fichier <code>KMB-rapport_….json</code>, ou&nbsp;:</p>
+    <label class="btn big">Choisir mon rapport<input type="file" id="upload" accept=".json,application/json" multiple hidden></label>
+    <p class="muted small">Vous pouvez choisir deux rapports (avant et après vos corrections) pour les comparer.
+      <a href="#" id="load-example">Voir un exemple</a></p>
+    <p class="reassure">🔒 Le fichier est lu par votre navigateur. Il n'est ni envoyé ni conservé.</p>
+  </section>
+
+  <section id="dashboard" hidden>
+    <div class="dash-head">
+      <div class="toolbar">
+        <label class="sr" for="scan-select">Rapport affiché</label>
+        <select id="scan-select"></select>
+        <label class="btn ghost" title="Ajouter un autre rapport (par exemple après corrections)">+ Ajouter un rapport<input type="file" id="upload2" accept=".json,application/json" multiple hidden></label>
+        <button class="btn ghost" id="print-btn" type="button" title="Imprimer ou enregistrer en PDF">Imprimer / PDF</button>
+        <button class="btn ghost" id="clear-btn" type="button">Fermer</button>
+      </div>
+    </div>
+
+    <nav class="tabs" role="tablist">
+      <button role="tab" data-tab="overview" class="active">Vue d'ensemble</button>
+      <button role="tab" data-tab="findings">Problèmes</button>
+      <button role="tab" data-tab="plan">Plan de correction</button>
+      <button role="tab" data-tab="software">Logiciels</button>
+      <button role="tab" data-tab="storage">Stockage</button>
+      <button role="tab" data-tab="performance">Performance et matériel</button>
+      <button role="tab" data-tab="compare">Comparaison</button>
+    </nav>
+
+    <section id="tab-overview" class="tab-panel">
+      <div class="meta" id="meta"></div>
+      <div class="scores" id="scores"></div>
+      <div class="grid2">
+        <div class="panel"><h3>Problèmes par gravité</h3><div class="chart-box"><canvas id="chart-sev"></canvas></div><div id="sev-legend" class="legend"></div></div>
+        <div class="panel"><h3>Évolution des scores</h3><div class="chart-box"><canvas id="chart-evo"></canvas></div><p class="muted small" id="evo-note"></p></div>
+      </div>
+      <div class="grid2">
+        <div class="panel"><h3>À corriger en priorité</h3><ol id="top-plan" class="plan-list"></ol></div>
+        <div class="panel"><h3>Examen</h3><div class="table-wrap"><table id="collectors"></table></div></div>
+      </div>
+    </section>
+
+    <section id="tab-findings" class="tab-panel" hidden>
+      <form class="filters" id="f-form">
+        <select name="statut"><option value="detecte">Problèmes détectés</option><option value="conforme">Points conformes</option><option value="non_verifiable">Non vérifiables</option><option value="tous">Tout</option></select>
+        <select name="severite"><option value="">Toutes gravités</option><option value="critique">Critique</option><option value="eleve">Élevé</option><option value="moyen">Moyen</option><option value="faible">Faible</option><option value="info">Information</option></select>
+        <select name="domaine"><option value="">Tous domaines</option><option value="securite">Sécurité</option><option value="performance">Performance</option><option value="stockage">Stockage</option><option value="logiciels">Logiciels</option></select>
+        <input name="recherche" type="search" placeholder="Rechercher (2 caractères min.)">
+      </form>
+      <p class="muted small" id="f-count"></p>
+      <div id="f-list"></div>
+    </section>
+
+    <section id="tab-plan" class="tab-panel" hidden>
+      <div class="panel">
+        <h3>Plan de correction</h3>
+        <p class="muted small">Dans l'ordre : le plus grave d'abord. Le gain correspond aux points récupérés sur le score.</p>
+        <div class="table-wrap"><table id="plan-table"></table></div>
+      </div>
+      <div class="panel" id="ai-panel">
+        <div class="row-between"><h3>Assistant IA (Grok)</h3><button class="btn" id="ai-btn">Générer le plan IA</button></div>
+        <p class="muted small" id="ai-note">Seuls les problèmes détectés, les scores et la version du système sont envoyés, sans le nom de la machine ni les noms de comptes. Chaque étape proposée par l'IA est vérifiée par rapport au scan.</p>
+        <div id="ai-out"></div>
+      </div>
+    </section>
+
+    <section id="tab-software" class="tab-panel" hidden>
+      <form class="filters" id="s-form">
+        <select name="cycle_de_vie"><option value="">Tous</option><option value="fin_de_support">Fin de support</option><option value="maj_disponible">Mise à jour disponible</option><option value="supporte">Supportés</option><option value="non_suivi">Non suivis</option></select>
+        <input name="recherche" type="search" placeholder="Nom ou éditeur">
+      </form>
+      <p class="muted small" id="s-count"></p>
+      <div class="table-wrap"><table id="s-table"></table></div>
+      <p class="muted small" id="s-clean"></p>
+    </section>
+
+    <section id="tab-storage" class="tab-panel" hidden>
+      <div class="grid2">
+        <div class="panel"><h3>Disques</h3><div id="partitions"></div></div>
+        <div class="panel"><h3>Dossiers personnels (espace utilisé)</h3><div class="chart-box"><canvas id="chart-folders"></canvas></div></div>
+      </div>
+      <div class="panel"><h3>Fichiers en double</h3><p id="dup-sum"></p><div id="dup-list"></div></div>
+      <div class="panel"><h3>Gros fichiers (500 Mo et plus)</h3><div class="table-wrap"><table id="large"></table></div></div>
+    </section>
+
+    <section id="tab-performance" class="tab-panel" hidden>
+      <div class="scores" id="perf-cards"></div>
+      <div class="grid2">
+        <div class="panel"><h3>Applications qui utilisent le plus de mémoire</h3><div class="table-wrap"><table id="top-mem"></table></div></div>
+        <div class="panel"><h3>Programmes lancés au démarrage</h3><div class="table-wrap"><table id="startup"></table></div><p class="small muted" id="services"></p></div>
+      </div>
+      <div class="grid2" id="hw-grid">
+        <div class="panel"><h3>Santé matérielle</h3><div id="hw"></div></div>
+        <div class="panel"><h3>Wi-Fi</h3><div id="wifi"></div></div>
+      </div>
+    </section>
+
+    <section id="tab-compare" class="tab-panel" hidden>
+      <form class="filters" id="c-form">
+        <label>Avant <select name="ancien" id="c-old"></select></label>
+        <label>Après <select name="nouveau" id="c-new"></select></label>
+        <button class="btn" type="submit">Comparer</button>
+      </form>
+      <div id="c-out"></div>
+    </section>
+  </section>
+</main>
+
+<!-- =============================================================== QUESTIONS -->
+<main id="page-questions" class="page" hidden>
+  <h1>Questions fréquentes</h1>
+  <details class="faq" open><summary>Mes données sont-elles envoyées sur Internet&nbsp;?</summary>
+    <p>Non. Le rapport est lu par votre navigateur, sur votre ordinateur. Il n'est ni envoyé ni conservé par ce site.
+      Le scanner contacte seulement le site public endoflife.date pour connaître les dates de fin de support des logiciels (sans rien envoyer de personnel).</p></details>
+  <details class="faq"><summary>Le scanner peut-il abîmer mon ordinateur&nbsp;?</summary>
+    <p>Non. Il lit des informations, il ne modifie rien. Les corrections sont proposées : c'est vous qui décidez de les appliquer.</p></details>
+  <details class="faq"><summary>Pourquoi faut-il installer Python&nbsp;?</summary>
+    <p>KMB Library est une librairie Python, comme beaucoup d'outils informatiques. Python s'installe depuis son site officiel, puis une seule commande
+      installe KMB directement depuis ce site : pas de programme inconnu à ouvrir, et le code de KMB reste consultable.</p></details>
+  <details class="faq"><summary>« python » n'est pas reconnu, ou le Microsoft Store s'ouvre&nbsp;?</summary>
+    <p>Python n'est pas installé, ou la case « Add python.exe to PATH » n'a pas été cochée. Relancez l'installateur de Python, choisissez « Modify »,
+      cochez « Add Python to environment variables », puis fermez et rouvrez l'invite de commandes.</p></details>
+  <details class="faq"><summary>Comment mettre KMB à jour ou le désinstaller&nbsp;?</summary>
+    <p>Mise à jour : reprenez la commande de l'étape 3 en ajoutant <code>--upgrade</code> après <code>install</code>.
+      Désinstallation : <code>python -m pip uninstall kmb-library</code>.</p>
+    <p class="muted small">Pour consulter le code : <a data-dl-zip href="#">télécharger KMB Library (ZIP)</a>.</p></details>
+  <details class="faq"><summary>Que veut dire « non vérifiable »&nbsp;?</summary>
+    <p>Certains contrôles exigent les droits d'administrateur. Pour un examen complet, lancez le scan depuis une invite de commandes ouverte « en tant qu'administrateur » (voir le guide, étape 4).
+      Ces contrôles ne retirent aucun point.</p></details>
+  <details class="faq"><summary>Comment voir mes progrès après mes corrections&nbsp;?</summary>
+    <p>Refaites un scan, puis dans « Analyser mon rapport », ajoutez l'ancien <b>et</b> le nouveau rapport. L'onglet « Comparaison » montre ce qui est corrigé, ce qui reste et ce qui est nouveau.</p></details>
+  <details class="faq"><summary>Quel fichier dois-je choisir&nbsp;?</summary>
+    <p>Celui qui commence par <code>KMB-rapport_</code> et finit par <code>.json</code>. Le fichier <code>.html</code> du même nom se lit directement d'un double-clic.
+      Le dossier <code>donnees-brutes</code> sert uniquement à la vérification.</p></details>
+</main>
+
+<footer class="muted small">KMB Library · audit de poste de travail · <span id="mode-note"></span></footer>
+</body>
+</html>

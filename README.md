@@ -1,0 +1,18 @@
+# Détection des failles de sécurité · KMB Library
+
+Site public de **KMB Library** : vérifiez gratuitement la sécurité, les logiciels, la performance et le stockage de votre ordinateur (Windows, Linux, macOS).
+
+**Site :** https://kabangoura.github.io/detection-des-failles-de-securite/
+
+1. Suivez le **Guide d'installation** du site : installez Python, puis KMB en une commande.
+2. Lancez `python -m kmb_library scan`. Votre rapport `KMB-rapport_….json` est créé dans *Documents/KMB Library*.
+3. Sur le site, cliquez sur **Analyser mon rapport** et choisissez ce fichier.
+
+Le rapport est lu **dans votre navigateur** : il n'est ni envoyé ni conservé.
+
+| Fichier | Rôle |
+|---|---|
+| `index.html`, `style.css`, `app.js` | le site (guide + analyse du rapport dans le navigateur) |
+| `config.js` | réglages (adresse du code à installer, exemple) |
+| `telechargements/kmb-library.zip` | code de KMB Library, installé par `pip install <adresse de ce fichier>` |
+| `exemple/KMB-rapport_exemple.json` | rapport d'exemple anonymisé |
