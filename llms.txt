@@ -1,0 +1,32 @@
+# KMB Library
+
+> KMB Library est un outil gratuit qui audite un ordinateur (Windows, Linux, macOS) : sécurité, logiciels, performance et stockage.
+> Il produit un rapport JSON que l'on ouvre sur le site https://kabangoura.github.io/detection-des-failles-de-securite/ ; le rapport est lu par le navigateur et n'est envoyé nulle part.
+
+Projet scolaire en français. Version actuelle : 2.1.0. Code : https://github.com/kabangoura/detection-des-failles-de-securite
+
+## Utilisation
+1. Installer Python 3.10+ (python.org ; sous Windows, cocher « Add python.exe to PATH »).
+2. Installer KMB Library : `python -m pip install https://kabangoura.github.io/detection-des-failles-de-securite/telechargements/kmb-library.zip`
+3. Scanner l'ordinateur (3 à 5 minutes, ne modifie rien) : `python -m kmb_library scan`
+4. Le rapport `KMB-rapport_<ordinateur>_<date>.json` est créé dans Documents/KMB Library ; l'ouvrir sur le site avec « Analyser mon rapport ».
+Linux / macOS : `python3 -m venv ~/.kmb` puis `~/.kmb/bin/python -m pip install …` et `~/.kmb/bin/python -m kmb_library scan`.
+
+## Ce que KMB vérifie
+- Système : fin de support et mises à jour de sécurité en attente
+- Protection : antivirus, pare-feu, chiffrement du disque (BitLocker, FileVault, LUKS), comptes
+- Réseau et Wi-Fi : services exposés, Wi-Fi ouvert ou mal chiffré
+- Logiciels : versions obsolètes ou sans support (données endoflife.date)
+- Performance : mémoire, processeur, programmes au démarrage, batterie
+- Stockage : gros dossiers et fichiers, doublons, taille réelle des applications, espace récupérable sans risque (dossiers système jamais touchés)
+
+## Résultats
+Score global et par domaine sur 100, liste des problèmes par gravité, plan de correction.
+Chaque problème a un guide en trois temps : Vérifier, Ouvrir le réglage, Corriger, avec l'endroit où taper la commande, son effet, le résultat attendu et les précautions. KMB ne corrige rien lui-même : l'utilisateur applique les commandes.
+
+## Pages
+- [Accueil](https://kabangoura.github.io/detection-des-failles-de-securite/)
+- [Guide d'installation](https://kabangoura.github.io/detection-des-failles-de-securite/#guide)
+- [Analyser un rapport](https://kabangoura.github.io/detection-des-failles-de-securite/#analyser)
+- [Questions fréquentes](https://kabangoura.github.io/detection-des-failles-de-securite/#questions)
+- [Exemple de rapport](https://kabangoura.github.io/detection-des-failles-de-securite/?exemple=1#analyser)
