@@ -16,3 +16,5 @@ Le rapport est lu **dans votre navigateur** : il n'est ni envoyé ni conservé.
 | `config.js` | réglages (adresse du code à installer, exemple) |
 | `telechargements/kmb-library.zip` | code de KMB Library, installé par `pip install <adresse de ce fichier>` |
 | `exemple/KMB-rapport_exemple.json` | rapport d'exemple anonymisé |
+| `sitemap.xml`, `llms.txt` | référencement : liste des pages pour les moteurs de recherche, résumé pour les assistants IA |
+| `og-image.png`, `icon-512.png`, `favicon.svg` | image d'aperçu de partage et icônes |
