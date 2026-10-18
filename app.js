@@ -32,6 +32,19 @@ function size(bytes) {
 }
 function scoreColor(v) { return v >= 80 ? cssVar("--ok") : v >= 60 ? cssVar("--moyen") : cssVar("--critique"); }
 function machineLabel(r) { return r.display_name || r.machine_name; }
+// Jauge circulaire (score sur 100), animée par animateRings()
+function ring(v, sz = 120, stroke = 11) {
+  const c = sz / 2, r = (sz - stroke) / 2, len = 2 * Math.PI * r;
+  return `<svg class="ring" viewBox="0 0 ${sz} ${sz}" width="${sz}" height="${sz}" role="img" aria-label="${v} sur 100">
+    <circle cx="${c}" cy="${c}" r="${r}" fill="none" stroke="var(--line)" stroke-width="${stroke}"/>
+    <circle cx="${c}" cy="${c}" r="${r}" fill="none" stroke="${scoreColor(v)}" stroke-width="${stroke}" stroke-linecap="round"
+      stroke-dasharray="${len}" stroke-dashoffset="${len}" data-off="${len * (1 - v / 100)}" transform="rotate(-90 ${c} ${c})"/>
+    <text x="50%" y="50%" text-anchor="middle" dominant-baseline="central" font-size="${sz * 0.3}">${v}</text></svg>`;
+}
+function animateRings(root) {
+  requestAnimationFrame(() => requestAnimationFrame(() =>
+    root.querySelectorAll("circle[data-off]").forEach((el) => (el.style.strokeDashoffset = el.dataset.off))));
+}
 function toast(msg) {
   const t = $("#toast"); t.textContent = msg; t.hidden = false;
   clearTimeout(toast._t); toast._t = setTimeout(() => (t.hidden = true), 6000);
@@ -225,9 +238,13 @@ async function renderOverview() {
   const order = ["global", "securite", "performance", "stockage", "logiciels"];
   $("#scores").innerHTML = order.map((k) => {
     const v = r.scores[k];
-    return `<div class="score ${k === "global" ? "global" : ""}"><div class="label">${DOMAIN_LABEL[k]}</div>
-      <div class="value">${v}<small>/100</small></div><div class="bar"><span style="width:${v}%;background:${scoreColor(v)}"></span></div></div>`;
+    if (k !== "global") return `<div class="score gauge">${ring(v, 84, 9)}<div class="label">${DOMAIN_LABEL[k]}</div></div>`;
+    const verdict = v >= 80 ? "Bon état" : v >= 60 ? "À améliorer" : "À corriger en priorité";
+    return `<div class="score gauge global">${ring(v, 136, 13)}<div><div class="label">Score global sur 100</div>
+      <div class="verdict" style="color:${scoreColor(v)}">${verdict}</div>
+      <div class="hint">Commencez par les problèmes les plus graves : onglet « Plan de correction ».</div></div></div>`;
   }).join("");
+  animateRings($("#scores"));
 
   const counts = SEV.map((s) => r.summary[s] || 0);
   const colors = SEV.map((s) => cssVar(`--${s}`));
@@ -554,6 +571,21 @@ function closeReports() {
 
 document.addEventListener("DOMContentLoaded", () => {
   document.body.dataset.mode = MODE;
+  if (window.Chart) Chart.defaults.font.family = getComputedStyle(document.body).fontFamily;
+  // Thème clair / sombre : suit l'ordinateur, sauf si le visiteur a choisi avec le bouton
+  const themeBtn = $("#theme-btn");
+  const dark = () => (document.documentElement.dataset.theme || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")) === "dark";
+  const syncThemeBtn = () => { themeBtn.textContent = dark() ? "☀️" : "🌙"; themeBtn.title = dark() ? "Passer en mode clair" : "Passer en mode sombre"; };
+  syncThemeBtn();
+  themeBtn.addEventListener("click", () => {
+    const t = dark() ? "light" : "dark";
+    document.documentElement.dataset.theme = t;
+    try { localStorage.setItem("kmb-theme", t); } catch { /* stockage indisponible : choix valable pour cette visite */ }
+    syncThemeBtn();
+    if (state.report) loadReport(state.report.scan_id).catch(() => {});  // graphiques redessinés avec les nouvelles couleurs
+  });
+  // Aperçu du rapport sur l'accueil
+  document.querySelectorAll("[data-ring]").forEach((el) => { el.innerHTML = ring(+el.dataset.ring, 104, 11); animateRings(el); });
   $("#mode-note").textContent = MODE === "serveur"
     ? "Mode serveur : rapports du dossier de données de l'API locale."
     : "Vos rapports sont lus dans votre navigateur et ne sont jamais envoyés.";
@@ -594,7 +626,13 @@ document.addEventListener("DOMContentLoaded", () => {
   zone.addEventListener("drop", (e) => { e.preventDefault(); zone.classList.remove("over"); addFiles([...e.dataTransfer.files]); });
   document.addEventListener("click", (e) => {
     const b = e.target.closest("[data-copy]");
-    if (b) navigator.clipboard?.writeText(b.dataset.copy).then(() => toast("Commande copiée"));
+    if (!b) return;
+    const done = () => {
+      b.textContent = "Copié ✓"; b.classList.add("done");
+      clearTimeout(b._t); b._t = setTimeout(() => { b.textContent = "Copier"; b.classList.remove("done"); }, 1800);
+    };
+    if (navigator.clipboard) navigator.clipboard.writeText(b.dataset.copy).then(done, () => toast("Copie impossible : sélectionnez la commande à la main."));
+    else toast("Copie impossible : sélectionnez la commande à la main.");
   });
   // Impression : toutes les sections et toutes les fiches dépliées
   window.addEventListener("beforeprint", () => document.querySelectorAll("#dashboard details").forEach((d) => { d.dataset.wasOpen = d.open; d.open = true; }));

@@ -5,19 +5,25 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>KMB Library</title>
   <meta name="description" content="Vérifiez gratuitement la sécurité, la performance et le stockage de votre ordinateur. Vos données restent sur votre machine.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cpath d='M20 2 35 8v11c0 9.5-6.4 16.4-15 19C11.4 35.4 5 28.5 5 19V8Z' fill='%230a7c87'/%3E%3Cpath d='m13 20 5 5 9-10' fill='none' stroke='%23fff' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
   <link rel="stylesheet" href="style.css">
+  <script>try { const t = localStorage.getItem("kmb-theme"); if (t) document.documentElement.dataset.theme = t; } catch (e) {}</script>
   <script src="config.js" defer></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js" defer></script>
   <script src="app.js" defer></script>
 </head>
 <body>
 <header class="topbar">
-  <a class="brand" href="#accueil"><span class="logo">KMB</span><div><strong>KMB Library</strong><small>Audit de votre ordinateur</small></div></a>
+  <a class="brand" href="#accueil"><svg class="logo" viewBox="0 0 40 40" aria-hidden="true"><defs><linearGradient id="kmb-grad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2dd4bf"/><stop offset="1" stop-color="#123a63"/></linearGradient></defs><path d="M20 2 35 8v11c0 9.5-6.4 16.4-15 19C11.4 35.4 5 28.5 5 19V8Z" fill="url(#kmb-grad)"/><text x="20" y="24.5" text-anchor="middle" font-family="Plus Jakarta Sans,Segoe UI,sans-serif" font-size="10.5" font-weight="800" fill="#fff">KMB</text></svg><div><strong>KMB Library</strong><small>Audit de votre ordinateur</small></div></a>
   <nav class="mainnav" aria-label="Navigation principale">
     <a href="#accueil" data-page="accueil">Accueil</a>
     <a href="#guide" data-page="guide">Guide d'installation</a>
     <a href="#analyser" data-page="analyser" class="cta">Analyser mon rapport</a>
     <a href="#questions" data-page="questions">Questions</a>
+    <button type="button" class="theme-btn" id="theme-btn" title="Mode sombre" aria-label="Changer le thème clair / sombre">🌙</button>
   </nav>
 </header>
 
@@ -26,32 +32,51 @@
 <!-- =============================================================== ACCUEIL -->
 <main id="page-accueil" class="page">
   <section class="hero">
-    <h1>Votre ordinateur est-il bien protégé&nbsp;?</h1>
-    <p class="lead">KMB Library vérifie gratuitement la <b>sécurité</b>, les <b>logiciels</b>, la <b>performance</b> et le <b>stockage</b>
-      de votre ordinateur, puis vous explique <b>simplement</b> quoi corriger, étape par étape.</p>
-    <div class="hero-actions">
-      <a class="btn big" href="#guide">Commencer le guide</a>
-      <a class="btn big ghost" href="#analyser">J'ai déjà mon rapport</a>
+    <div>
+      <span class="kicker">Audit gratuit de votre ordinateur</span>
+      <h1>Votre ordinateur est-il <em>bien protégé</em>&nbsp;?</h1>
+      <p class="lead">KMB Library vérifie la <b>sécurité</b>, les <b>logiciels</b>, la <b>performance</b> et le <b>stockage</b>
+        de votre ordinateur, puis vous explique <b>simplement</b> quoi corriger, étape par étape.</p>
+      <div class="hero-actions">
+        <a class="btn big" href="#guide">Commencer le guide</a>
+        <a class="btn big ghost" href="#analyser">J'ai déjà mon rapport</a>
+      </div>
+      <ul class="trust"><li>Gratuit</li><li>Rien n'est envoyé</li><li>Windows, Linux et macOS</li></ul>
     </div>
-    <p class="reassure">🔒 Vos données restent sur votre ordinateur : le rapport est lu par votre navigateur, rien n'est envoyé.</p>
+    <div class="preview" aria-label="Aperçu d'un rapport KMB">
+      <div class="pv-head"><b>Rapport KMB</b><span>Exemple</span></div>
+      <div class="pv-body">
+        <div data-ring="74"></div>
+        <div class="pv-bars"><div><span>Sécurité</span><i><span style="width:62%;background:#a77a00"></span></i><b>62</b></div><div><span>Performance</span><i><span style="width:91%;background:#2a7d4f"></span></i><b>91</b></div><div><span>Stockage</span><i><span style="width:78%;background:#a77a00"></span></i><b>78</b></div><div><span>Logiciels</span><i><span style="width:70%;background:#a77a00"></span></i><b>70</b></div></div>
+      </div>
+      <div class="pv-item"><b>Élevé</b> · Chiffrement du disque désactivé<br><span>Guide : 🔍 Vérifier · ⚙️ Ouvrir le réglage · 🛠️ Corriger</span></div>
+      <a href="?exemple=1#analyser">Voir un exemple de rapport →</a>
+    </div>
   </section>
 
+  <h2 class="section-title">Comment ça marche</h2>
+  <p class="section-sub">Trois étapes, sans rien modifier sur votre ordinateur.</p>
   <section class="steps3">
     <div class="step"><span class="stepnum">1</span><h3>Installer</h3><p>Une seule fois, environ 5 minutes : Python (logiciel officiel et gratuit), puis KMB en une commande.</p></div>
     <div class="step"><span class="stepnum">2</span><h3>Scanner</h3><p>Une seule commande à copier. KMB examine votre ordinateur pendant 3 à 5 minutes, sans rien modifier.</p></div>
     <div class="step"><span class="stepnum">3</span><h3>Voir le résultat</h3><p>Revenez ici, cliquez sur « Analyser mon rapport » et choisissez le fichier créé.</p></div>
   </section>
 
-  <section class="panel checks">
-    <h2>Ce que KMB vérifie</h2>
-    <ul class="checklist">
-      <li><b>Système</b> : votre Windows/macOS/Linux reçoit-il encore des mises à jour de sécurité&nbsp;?</li>
-      <li><b>Protection</b> : antivirus, pare-feu, chiffrement du disque, comptes</li>
-      <li><b>Réseau et Wi-Fi</b> : services exposés, réseau Wi-Fi non protégé</li>
-      <li><b>Logiciels</b> : programmes obsolètes ou plus mis à jour par leur éditeur</li>
-      <li><b>Performance</b> : mémoire, processeur, programmes au démarrage, batterie</li>
-      <li><b>Stockage</b> : où part l'espace, fichiers en double, gros fichiers, applications, espace récupérable sans risque</li>
-    </ul>
+  <h2 class="section-title">Ce que KMB vérifie</h2>
+  <p class="section-sub">Chaque problème trouvé est expliqué, avec les commandes pour le vérifier et le corriger vous-même.</p>
+  <section class="features">
+    <div class="feature"><span class="ico">🖥️</span><h3>Système</h3><p>Votre Windows, macOS ou Linux reçoit-il encore les mises à jour de sécurité&nbsp;?</p></div>
+    <div class="feature"><span class="ico">🛡️</span><h3>Protection</h3><p>Antivirus, pare-feu, chiffrement du disque et comptes d'utilisateur.</p></div>
+    <div class="feature"><span class="ico">📶</span><h3>Réseau et Wi-Fi</h3><p>Services exposés sur le réseau, Wi-Fi non protégé ou mal chiffré.</p></div>
+    <div class="feature"><span class="ico">📦</span><h3>Logiciels</h3><p>Programmes obsolètes ou qui ne sont plus mis à jour par leur éditeur.</p></div>
+    <div class="feature"><span class="ico">⚡</span><h3>Performance</h3><p>Mémoire, processeur, programmes au démarrage et batterie.</p></div>
+    <div class="feature"><span class="ico">💾</span><h3>Stockage</h3><p>Où part l'espace, doublons, gros fichiers, applications et espace récupérable sans risque.</p></div>
+  </section>
+
+  <section class="cta-band">
+    <h2>Prêt à vérifier votre ordinateur&nbsp;?</h2>
+    <p>🔒 Vos données restent chez vous : le rapport est lu par votre navigateur, rien n'est envoyé.</p>
+    <a class="btn big" href="#guide">Commencer le guide</a>
   </section>
 </main>
 
@@ -127,6 +152,8 @@
 <!-- =============================================================== ANALYSER -->
 <main id="page-analyser" class="page" hidden>
   <section id="upload-zone" class="dropzone">
+    <div class="drop-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M12 18v-6"/><path d="m9 15 3-3 3 3"/></svg></div>
     <h1>Analyser mon rapport</h1>
     <p>Glissez ici votre fichier <code>KMB-rapport_….json</code>, ou&nbsp;:</p>
     <label class="btn big">Choisir mon rapport<input type="file" id="upload" accept=".json,application/json" multiple hidden></label>
@@ -268,6 +295,11 @@
       Le dossier <code>donnees-brutes</code> (données de départ) et le dossier <code>.cache</code> servent uniquement au fonctionnement et à la vérification.</p></details>
 </main>
 
-<footer class="muted small">KMB Library · audit de poste de travail · <span id="mode-note"></span></footer>
+<footer class="site-footer"><div class="inner">
+  <a class="brand" href="#accueil"><svg class="logo" viewBox="0 0 40 40" aria-hidden="true"><path d="M20 2 35 8v11c0 9.5-6.4 16.4-15 19C11.4 35.4 5 28.5 5 19V8Z" fill="url(#kmb-grad)"/><text x="20" y="24.5" text-anchor="middle" font-family="Plus Jakarta Sans,Segoe UI,sans-serif" font-size="10.5" font-weight="800" fill="#fff">KMB</text></svg><div><strong>KMB Library</strong> <span>v2.1.0</span></div></a>
+  <nav><a href="#guide">Guide</a><a href="#analyser">Analyser mon rapport</a><a href="#questions">Questions</a>
+    <a href="https://github.com/kabangoura/detection-des-failles-de-securite" target="_blank" rel="noopener">Code sur GitHub</a></nav>
+  <div>Projet scolaire · <span id="mode-note"></span></div>
+</div></footer>
 </body>
 </html>
