@@ -38,7 +38,7 @@
 
   <section class="steps3">
     <div class="step"><span class="stepnum">1</span><h3>Installer</h3><p>Une seule fois, environ 5 minutes : Python (logiciel officiel et gratuit), puis KMB en une commande.</p></div>
-    <div class="step"><span class="stepnum">2</span><h3>Scanner</h3><p>Une seule commande à copier. KMB examine votre ordinateur pendant 1 à 3 minutes, sans rien modifier.</p></div>
+    <div class="step"><span class="stepnum">2</span><h3>Scanner</h3><p>Une seule commande à copier. KMB examine votre ordinateur pendant 3 à 5 minutes, sans rien modifier.</p></div>
     <div class="step"><span class="stepnum">3</span><h3>Voir le résultat</h3><p>Revenez ici, cliquez sur « Analyser mon rapport » et choisissez le fichier créé.</p></div>
   </section>
 
@@ -50,7 +50,7 @@
       <li><b>Réseau et Wi-Fi</b> : services exposés, réseau Wi-Fi non protégé</li>
       <li><b>Logiciels</b> : programmes obsolètes ou plus mis à jour par leur éditeur</li>
       <li><b>Performance</b> : mémoire, processeur, programmes au démarrage, batterie</li>
-      <li><b>Stockage</b> : espace libre, fichiers en double, gros fichiers</li>
+      <li><b>Stockage</b> : où part l'espace, fichiers en double, gros fichiers, applications, espace récupérable sans risque</li>
     </ul>
   </section>
 </main>
@@ -86,7 +86,7 @@
           Des messages jaunes <code>WARNING … is not on PATH</code> peuvent apparaître : ils sont sans importance.</p></li>
       <li><h3>Scannez votre ordinateur</h3>
         <pre>python -m kmb_library scan</pre>
-        <p>KMB trouve tout seul le nom de votre ordinateur et toutes les informations. Le scan dure 1 à 3 minutes et ne modifie rien.</p>
+        <p>KMB trouve tout seul le nom de votre ordinateur et toutes les informations. Le scan dure 3 à 5 minutes (il examine tout votre espace disque) et ne modifie rien.</p>
         <p class="muted small">Les fois suivantes : ouvrez l'invite de commandes (étape 2) et tapez seulement cette commande.</p>
         <p class="tip">Examen complet (facultatif) : dans le menu Démarrer, tapez <code>cmd</code>, faites un clic droit sur « Invite de commandes »,
           choisissez <b>Exécuter en tant qu'administrateur</b>, puis tapez la même commande.</p></li>
@@ -204,12 +204,17 @@
     </section>
 
     <section id="tab-storage" class="tab-panel" hidden>
+      <div class="panel legend-cat" id="legend-cat"></div>
       <div class="grid2">
         <div class="panel"><h3>Disques</h3><div id="partitions"></div></div>
-        <div class="panel"><h3>Dossiers personnels (espace utilisé)</h3><div class="chart-box"><canvas id="chart-folders"></canvas></div></div>
+        <div class="panel"><h3>Les plus gros dossiers</h3><div class="chart-box"><canvas id="chart-folders"></canvas></div></div>
       </div>
+      <div class="panel"><h3>Espace récupérable sans risque</h3><div id="recoverable"></div></div>
+      <div class="panel"><h3>Où part l'espace</h3><div class="table-wrap"><table id="space"></table></div></div>
+      <div class="panel"><h3>Gros fichiers (200 Mo et plus)</h3><div class="table-wrap"><table id="large"></table></div></div>
+      <div class="panel"><h3>Applications installées les plus volumineuses</h3><div class="table-wrap"><table id="apps"></table></div>
+        <p class="small muted">Pour libérer cet espace : désinstallez l'application (Paramètres > Applications), ne supprimez jamais son dossier à la main.</p></div>
       <div class="panel"><h3>Fichiers en double</h3><p id="dup-sum"></p><div id="dup-list"></div></div>
-      <div class="panel"><h3>Gros fichiers (500 Mo et plus)</h3><div class="table-wrap"><table id="large"></table></div></div>
     </section>
 
     <section id="tab-performance" class="tab-panel" hidden>

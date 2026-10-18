@@ -207,7 +207,11 @@ async function loadReport(id) {
   loadSoftware();
   renderStorage();
   renderPerformance();
-  showTab(document.querySelector(".tabs button.active").dataset.tab);
+  // ?onglet=storage (par exemple) ouvre directement un onglet du rapport
+  const wanted = new URLSearchParams(location.search).get("onglet");
+  const known = [...document.querySelectorAll(".tabs button")].some((b) => b.dataset.tab === wanted);
+  showTab(known && !state.tabChosen ? wanted : document.querySelector(".tabs button.active").dataset.tab);
+  state.tabChosen = true;
 }
 
 // ------------------------------------------------------------------ vue d'ensemble
@@ -263,13 +267,60 @@ async function renderOverview() {
 }
 
 // ------------------------------------------------------------------ problèmes
+// Où taper une commande, et comment ouvrir cet endroit
+const WHERE = {
+  cmd: { label: "Invite de commandes", how: "Démarrer → tapez cmd → Entrée" },
+  cmd_admin: { label: "Invite de commandes (administrateur)", how: "Démarrer → tapez cmd → clic droit sur « Invite de commandes » → Exécuter en tant qu'administrateur" },
+  ps: { label: "PowerShell", how: "Démarrer → tapez powershell → Entrée" },
+  ps_admin: { label: "PowerShell (administrateur)", how: "Démarrer → tapez powershell → clic droit → Exécuter en tant qu'administrateur" },
+  terminal: { label: "Terminal", how: "" },
+};
+const CMD_TYPE = {
+  verifier: { icon: "🔍", label: "Vérifier" },
+  ouvrir: { icon: "⚙️", label: "Ouvrir le réglage" },
+  corriger: { icon: "🛠️", label: "Corriger" },
+};
+function terminalHow() {
+  return state.report?.os_family === "macos" ? "Applications → Utilitaires → Terminal" : "Ctrl + Alt + T, ou menu des applications → Terminal";
+}
+function highlight(cmd, words) {
+  let html = esc(cmd);
+  for (const w of Object.keys(words || {})) html = html.split(esc(w)).join(`<mark>${esc(w)}</mark>`);
+  return html;
+}
+function commandCard(c) {
+  if (typeof c === "string") return `<div class="cmd"><pre>${esc(c)}</pre><button type="button" data-copy="${esc(c)}">Copier</button></div>`;
+  const t = CMD_TYPE[c.type] || CMD_TYPE.corriger;
+  const w = WHERE[c.ou] || WHERE.cmd;
+  const how = c.ou === "terminal" ? terminalHow() : w.how;
+  const sudo = c.ou === "terminal" && c.cmd.includes("sudo ") ? " · votre mot de passe sera demandé (rien ne s'affiche pendant la frappe)" : "";
+  const repl = c.remplacer ? `<div class="repl"><b>À remplacer avant de lancer :</b><ul>${Object.entries(c.remplacer).map(([k, v]) => `<li><mark>${esc(k)}</mark> : ${esc(v)}</li>`).join("")}</ul></div>` : "";
+  return `<div class="cmdcard cmd-${c.type}">
+    <div class="cmdhead"><span class="cmdtype">${t.icon} ${t.label}</span><span class="where" title="${esc(how)}">Où : <b>${esc(w.label)}</b>${how ? ` <span class="muted">(${esc(how)})</span>` : ""}${sudo}</span></div>
+    <div class="cmd"><pre>${highlight(c.cmd, c.remplacer)}</pre><button type="button" data-copy="${esc(c.cmd)}">Copier</button></div>
+    <p class="effet">${esc(c.effet)}</p>
+    ${c.attendu ? `<p class="attendu">✔ Résultat attendu si tout va bien : <b>${esc(c.attendu)}</b></p>` : ""}
+    ${repl}
+    ${c.attention ? `<p class="attention">⚠️ ${esc(c.attention)}</p>` : ""}
+  </div>`;
+}
 function findingHtml(f) {
-  const steps = (f.remediation.steps || []).map((s) => `<li>${esc(s)}</li>`).join("");
   const all = f.remediation.commands || {};
-  const own = all[state.report?.os_family || "windows"];
-  const cmds = own || Object.values(all).flat();
-  const cmdHtml = cmds.map((c) => `<div class="cmd"><pre>${esc(c)}</pre><button type="button" data-copy="${esc(c)}">Copier</button></div>`).join("");
-  return `<details class="finding sev-${f.status === "detecte" ? f.severity : "info"}">
+  const cmds = all[state.report?.os_family || "windows"] || Object.values(all).flat();
+  const verifier = cmds.filter((c) => typeof c !== "string" && c.type === "verifier");
+  const corriger = cmds.filter((c) => typeof c === "string" || c.type !== "verifier");
+  const steps = (f.remediation.steps || []).map((s) => `<li>${esc(s)}</li>`).join("");
+  const isProblem = f.status === "detecte";
+  const guide = `
+    <div class="phase"><h4>1. 🔍 Vérifier</h4>
+      ${verifier.length ? verifier.map(commandCard).join("") : `<p class="muted small">Le constat ci-dessus suffit : rien à vérifier de plus.</p>`}</div>
+    <div class="phase"><h4>2. 🛠️ Corriger${f.remediation.duration ? ` <span class="muted small">(${esc(f.remediation.duration)}${f.remediation.requires_admin ? " · droits administrateur requis" : ""})</span>` : ""}</h4>
+      ${steps ? `<p class="small"><b>À la souris :</b></p><ol>${steps}</ol>` : ""}
+      ${corriger.length ? `<p class="small"><b>Ou avec des commandes</b> (à lancer vous-même, une à une) :</p>${corriger.map(commandCard).join("")}` : ""}</div>
+    <div class="phase"><h4>3. ✅ Contrôler</h4>
+      <p>Relancez le scan (<code>python -m kmb_library scan</code>), puis ajoutez le nouveau rapport ici avec « + Ajouter un rapport » :
+        l'onglet <b>Comparaison</b> doit afficher ce problème dans « Corrigés ».</p></div>`;
+  return `<details class="finding sev-${isProblem ? f.severity : "info"}">
     <summary>${badge(f.severity)} <span>${esc(f.title)}</span> <span class="st st-${f.status}">${STATUS_LABEL[f.status]}</span><span class="key">${esc(f.key)}</span></summary>
     <div class="body">
       <p><b>Constat :</b> ${esc(f.evidence || "—")}</p>
@@ -278,9 +329,8 @@ function findingHtml(f) {
         ${f.danger ? `<dt>Pourquoi est-ce dangereux ?</dt><dd>${esc(f.danger)}</dd>` : ""}
         ${f.impact ? `<dt>Conséquences possibles</dt><dd>${esc(f.impact)}</dd>` : ""}
         ${f.location ? `<dt>Où se trouve-t-il ?</dt><dd>${esc(f.location)}</dd>` : ""}
-        <dt>Comment corriger${f.remediation.duration ? ` (${esc(f.remediation.duration)})` : ""}${f.remediation.requires_admin ? " · droits administrateur requis" : ""}</dt>
-        <dd><ol>${steps}</ol>${cmdHtml}</dd>
       </dl>
+      ${isProblem ? `<h3 class="guide-title">Guide de correction</h3><p class="small muted">KMB ne modifie rien sur votre ordinateur : c'est vous qui lancez chaque commande, dans l'ordre.</p>${guide}` : ""}
       ${f.references?.length ? `<p class="small">Références : ${f.references.map((u) => `<a href="${esc(u)}" target="_blank" rel="noopener">${esc(u)}</a>`).join(" · ")}</p>` : ""}
       <p class="small muted">Score de risque indicatif : ${f.risk_score}/10 · pénalité : ${f.penalty} points (${DOMAIN_LABEL[f.domain]})</p>
     </div></details>`;
@@ -354,30 +404,64 @@ async function loadSoftware() {
 }
 
 // ------------------------------------------------------------------ stockage
+const CAT = {
+  personnel: { icon: "🟢", label: "Personnel", tip: "vos fichiers : vous pouvez décider (supprimer, déplacer)" },
+  application: { icon: "🟡", label: "Application", tip: "passer par l'application ou la désinstaller ; ne pas supprimer à la main" },
+  systeme: { icon: "🔴", label: "Système", tip: "ne pas toucher" },
+  mixte: { icon: "⚪", label: "Mixte", tip: "contient des fichiers personnels et d'applications" },
+};
+function catBadge(c) { const x = CAT[c] || CAT.personnel; return `<span class="cat cat-${c || "personnel"}" title="${esc(x.tip)}">${x.icon} ${x.label}</span>`; }
+function shortPath(p) { return String(p || "").replace(/^[A-Z]:\\Users\\[^\\]+/i, "~").replace(/^\/(home|Users)\/[^/]+/, "~"); }
+
 function renderStorage() {
   const inv = state.report.inventory; const st = inv.storage || {}; const dup = inv.duplicates || {};
+  const deep = Array.isArray(st.space_by_folder);
   $("#partitions").innerHTML = (st.partitions || []).map((p) => {
     const free = (100 - p.percent_used).toFixed(1);
     return `<p><b>${esc(p.mount)}</b> (${esc(p.fstype)}) — ${p.free_gb} Go libres sur ${p.total_gb} Go (${free} %)</p>
       <div class="bar"><span style="width:${p.percent_used}%;background:${scoreColor(100 - p.percent_used * 0.9)}"></span></div>`;
-  }).join("") + (st.physical_disks || []).map((d) => `<p class="small muted">Disque : ${esc(d.name)} · ${esc(d.media_type)}${d.bus ? " · " + esc(d.bus) : ""} · état ${esc(d.health || "inconnu")}</p>`).join("");
-  const folders = st.folders || [];
+  }).join("") + (st.physical_disks || []).map((d) => `<p class="small muted">Disque : ${esc(d.name)} · ${esc(d.media_type)}${d.bus ? " · " + esc(d.bus) : ""} · état ${esc(d.health || "inconnu")}</p>`).join("")
+    + (st.system_estimate_gb != null ? `<p class="small">${catBadge("systeme")} ${OS_LABEL[state.report.os_family] || "Système"} et programmes installés : environ <b>${st.system_estimate_gb} Go</b> (non analysés : ne pas toucher).</p>` : "")
+    + (deep ? `<p class="small muted">${(st.files_scanned || 0).toLocaleString("fr-CA")} fichiers analysés (${st.measured_gb} Go)${st.truncated ? " — analyse interrompue (temps limité)" : ""}.</p>` : "");
+  $("#legend-cat").innerHTML = Object.entries(CAT).filter(([k]) => k !== "mixte").map(([k, x]) => `<span>${x.icon} <b>${x.label}</b> : ${x.tip}</span>`).join("");
+
+  const folders = deep ? st.space_by_folder.filter((f) => f.depth === 1).slice(0, 10) : (st.folders || []).map((f) => ({ name: f.name, size_gb: f.local_gb }));
   chart("chart-folders", {
     type: "bar",
-    data: { labels: folders.map((f) => f.name), datasets: [{ label: "Go (local)", data: folders.map((f) => f.local_gb), backgroundColor: cssVar("--accent"), borderRadius: 4 }] },
+    data: { labels: folders.map((f) => f.name), datasets: [{ label: "Go", data: folders.map((f) => f.size_gb), backgroundColor: cssVar("--accent"), borderRadius: 4 }] },
     options: { indexAxis: "y", maintainAspectRatio: false, plugins: { legend: { display: false } },
       scales: { x: { ticks: { color: cssVar("--muted") }, grid: { color: cssVar("--line") } }, y: { ticks: { color: cssVar("--muted") }, grid: { display: false } } } },
   });
+
+  $("#space").innerHTML = deep
+    ? "<tr><th>Dossier</th><th>Catégorie</th><th class='num'>Taille</th></tr>" + st.space_by_folder.map((f) =>
+        `<tr><td class="path" style="padding-left:${(f.depth - 1) * 18 + 8}px">${f.depth > 1 ? "└ " : ""}${esc(shortPath(f.path))}</td><td>${catBadge(f.category)}</td><td class="num">${f.size_gb} Go</td></tr>`).join("")
+    : "<tr><td>Non disponible pour ce rapport (version précédente de KMB).</td></tr>";
+
+  const rec = st.recoverable || [];
+  const recTotal = rec.reduce((s, r) => s + r.size_gb, 0);
+  $("#recoverable").innerHTML = rec.length
+    ? `<p><b>${recTotal.toFixed(1)} Go</b> peuvent être libérés sans aucun risque (voir aussi le problème « Espace récupérable sans risque »).</p>
+       <div class="table-wrap"><table><tr><th>Élément</th><th class='num'>Taille</th><th>Comment le libérer</th></tr>${rec.map((r) =>
+         `<tr><td>${esc(r.name)}</td><td class="num">${r.size_gb} Go</td><td class="small">${esc(r.how)}</td></tr>`).join("")}</table></div>`
+    : `<p class="muted">${deep ? "Rien d'important à récupérer." : "Non disponible pour ce rapport."}</p>`;
+
+  $("#apps").innerHTML = (st.apps || []).length
+    ? "<tr><th>Application</th><th class='num'>Taille</th><th>Mesure</th></tr>" + st.apps.map((a) =>
+        `<tr><td>${esc(a.name)}${a.version ? ` <span class="muted small">${esc(a.version)}</span>` : ""}</td><td class="num">${a.size_gb} Go</td><td class="small">${a.measured ? "taille réelle sur le disque" : "taille déclarée par l'application"}</td></tr>`).join("")
+    : "<tr><td class='muted'>Non disponible pour ce rapport.</td></tr>";
+
   if (dup.skipped) { $("#dup-sum").textContent = "Recherche de doublons désactivée pour ce scan."; $("#dup-list").innerHTML = ""; }
   else {
-    $("#dup-sum").innerHTML = `<b>${dup.duplicate_files || 0}</b> fichier(s) en double dans <b>${dup.group_count || 0}</b> groupe(s) — <b>${size(dup.wasted_bytes)}</b> récupérables.
-      <span class="small muted">${dup.files_scanned || 0} fichiers parcourus, ${dup.files_hashed || 0} empreintes calculées${dup.truncated ? ", analyse partielle (temps limité)" : ""}.</span>`;
+    $("#dup-sum").innerHTML = `${catBadge("personnel")} <b>${dup.duplicate_files || 0}</b> fichier(s) en double dans <b>${dup.group_count || 0}</b> groupe(s) — <b>${size(dup.wasted_bytes)}</b> récupérables.
+      <span class="small muted">${(dup.files_scanned || 0).toLocaleString("fr-CA")} fichiers parcourus, ${dup.files_hashed || 0} contenus comparés${dup.truncated ? ", analyse partielle (temps limité)" : ""}. Seuls vos fichiers personnels sont proposés : jamais ceux des applications ou du système.</span>`;
     $("#dup-list").innerHTML = (dup.groups || []).slice(0, 40).map((g) => `<details class="finding"><summary><b>${g.count} copies</b> · ${size(g.size_bytes)} chacune · ${esc(g.category)}
-      <span class="key">${size(g.wasted_bytes)} récupérables</span></summary><div class="body">${g.files.map((p, i) => `<div class="path">${i === 0 ? "✓ " : "✗ "}${esc(p)}</div>`).join("")}
-      <p class="small muted">✓ = le plus ancien (original présumé) · ✗ = copies identiques</p></div></details>`).join("");
+      <span class="key">${size(g.wasted_bytes)} récupérables</span></summary><div class="body">${g.files.map((p, i) => `<div class="path">${i === 0 ? "✓ " : "✗ "}${esc(shortPath(p))}</div>`).join("")}
+      <p class="small muted">✓ = le plus ancien (original présumé) · ✗ = copies identiques (comparaison du ${esc(g.method || "contenu complet")})</p></div></details>`).join("");
   }
-  $("#large").innerHTML = "<tr><th>Fichier</th><th class='num'>Taille</th></tr>" +
-    ((st.large_files || []).map((f) => `<tr><td class="path">${esc(f.path)}</td><td class="num">${f.size_gb} Go</td></tr>`).join("") || "<tr><td colspan='2'>Aucun.</td></tr>");
+  $("#large").innerHTML = "<tr><th>Fichier</th><th>Type</th><th>Catégorie</th><th class='num'>Taille</th></tr>" +
+    ((st.large_files || []).map((f) => `<tr><td class="path">${esc(shortPath(f.path))}</td><td class="small">${esc(f.kind || "")}</td><td>${f.category ? catBadge(f.category) : ""}</td><td class="num">${f.size_gb} Go</td></tr>`).join("")
+      || "<tr><td colspan='4'>Aucun.</td></tr>");
 }
 
 // ------------------------------------------------------------------ performance et matériel
