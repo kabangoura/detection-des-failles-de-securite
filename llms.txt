@@ -7,10 +7,10 @@ Projet scolaire en français. Version actuelle : 2.1.0. Code : https://github.co
 
 ## Utilisation
 1. Installer Python 3.10+ (python.org ; sous Windows, cocher « Add python.exe to PATH »).
-2. Installer KMB Library : `python -m pip install https://kabangoura.github.io/detection-des-failles-de-securite/telechargements/kmb-library.zip`
+2. Installer KMB Library depuis PyPI : `python -m pip install kmb-library` (https://pypi.org/project/kmb-library/)
 3. Scanner l'ordinateur (3 à 5 minutes, ne modifie rien) : `python -m kmb_library scan`
 4. Le rapport `KMB-rapport_<ordinateur>_<date>.json` est créé dans Documents/KMB Library ; l'ouvrir sur le site avec « Analyser mon rapport ».
-Linux / macOS : `python3 -m venv ~/.kmb` puis `~/.kmb/bin/python -m pip install …` et `~/.kmb/bin/python -m kmb_library scan`.
+Linux / macOS : `python3 -m venv ~/.kmb` puis `~/.kmb/bin/python -m pip install kmb-library` et `~/.kmb/bin/python -m kmb_library scan`.
 
 ## Ce que KMB vérifie
 - Système : fin de support et mises à jour de sécurité en attente

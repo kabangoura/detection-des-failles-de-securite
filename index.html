@@ -52,7 +52,7 @@
    "inLanguage": "fr",
    "isAccessibleForFree": true,
    "image": "https://kabangoura.github.io/detection-des-failles-de-securite/og-image.png",
-   "downloadUrl": "https://kabangoura.github.io/detection-des-failles-de-securite/telechargements/kmb-library.zip",
+   "downloadUrl": "https://pypi.org/project/kmb-library/",
    "installUrl": "https://kabangoura.github.io/detection-des-failles-de-securite/#guide",
    "softwareRequirements": "Python 3.10 ou plus récent",
    "offers": {
@@ -69,6 +69,7 @@
     "Guide de correction : vérifier, ouvrir le réglage, corriger"
    ],
    "sameAs": [
+    "https://pypi.org/project/kmb-library/",
     "https://github.com/kabangoura/detection-des-failles-de-securite"
    ]
   },
@@ -247,7 +248,7 @@
         <p>Cliquez sur le bouton <b>Démarrer</b> de Windows, tapez <code>cmd</code> puis appuyez sur <b>Entrée</b>. Une fenêtre noire s'ouvre.</p></li>
       <li><h3>Installez KMB (une seule fois)</h3>
         <p>Copiez cette commande (bouton « Copier »), collez-la dans la fenêtre noire (clic droit) et appuyez sur <b>Entrée</b> :</p>
-        <pre data-install>python -m pip install {URL_ZIP}</pre>
+        <pre>python -m pip install kmb-library</pre>
         <p class="muted small">L'installation prend 1 à 3 minutes. C'est terminé quand vous voyez <code>Successfully installed … kmb-library</code>.
           Des messages jaunes <code>WARNING … is not on PATH</code> peuvent apparaître : ils sont sans importance.</p></li>
       <li><h3>Scannez votre ordinateur</h3>
@@ -270,7 +271,7 @@
       <li><h3>Installez KMB (une seule fois)</h3>
         <p>KMB s'installe dans son propre dossier <code>~/.kmb</code>, sans toucher au Python du système. Copiez les deux lignes, une à la fois :</p>
         <pre>python3 -m venv ~/.kmb</pre>
-        <pre data-install>~/.kmb/bin/python -m pip install {URL_ZIP}</pre></li>
+        <pre>~/.kmb/bin/python -m pip install kmb-library</pre></li>
       <li><h3>Scannez</h3><pre>~/.kmb/bin/python -m kmb_library scan</pre>
         <p class="muted small">Examen complet : <code>sudo ~/.kmb/bin/python -m kmb_library scan</code></p></li>
       <li><h3>Voyez le résultat</h3><p>Votre rapport est dans <code>~/Documents/KMB Library</code> : <a href="#analyser">téléversez</a> le fichier <code>KMB-rapport_….json</code>.</p></li>
@@ -283,7 +284,7 @@
       <li><h3>Installez KMB (une seule fois)</h3>
         <p>Ouvrez le <b>Terminal</b> (Applications &gt; Utilitaires) et copiez les deux lignes, une à la fois :</p>
         <pre>python3 -m venv ~/.kmb</pre>
-        <pre data-install>~/.kmb/bin/python -m pip install {URL_ZIP}</pre></li>
+        <pre>~/.kmb/bin/python -m pip install kmb-library</pre></li>
       <li><h3>Scannez</h3><pre>~/.kmb/bin/python -m kmb_library scan</pre></li>
       <li><h3>Voyez le résultat</h3><p>Votre rapport est dans <code>Documents/KMB Library</code> : <a href="#analyser">téléversez</a> le fichier <code>KMB-rapport_….json</code>.</p></li>
     </ol>
@@ -418,12 +419,12 @@
     <p>Non. Il lit des informations, il ne modifie rien. Les corrections sont proposées : c'est vous qui décidez de les appliquer.</p></details>
   <details class="faq"><summary>Pourquoi faut-il installer Python&nbsp;?</summary>
     <p>KMB Library est une librairie Python, comme beaucoup d'outils informatiques. Python s'installe depuis son site officiel, puis une seule commande
-      installe KMB directement depuis ce site : pas de programme inconnu à ouvrir, et le code de KMB reste consultable.</p></details>
+      installe KMB depuis <a href="https://pypi.org/project/kmb-library/" target="_blank" rel="noopener">PyPI</a>, la bibliothèque officielle des logiciels Python : pas de programme inconnu à ouvrir, et le code de KMB reste consultable.</p></details>
   <details class="faq"><summary>« python » n'est pas reconnu, ou le Microsoft Store s'ouvre&nbsp;?</summary>
     <p>Python n'est pas installé, ou la case « Add python.exe to PATH » n'a pas été cochée. Relancez l'installateur de Python, choisissez « Modify »,
       cochez « Add Python to environment variables », puis fermez et rouvrez l'invite de commandes.</p></details>
   <details class="faq"><summary>Comment mettre KMB à jour ou le désinstaller&nbsp;?</summary>
-    <p>Mise à jour : reprenez la commande de l'étape 3 en ajoutant <code>--upgrade</code> après <code>install</code>.
+    <p>Mise à jour : <code>python -m pip install --upgrade kmb-library</code>.
       Désinstallation : <code>python -m pip uninstall kmb-library</code>.</p>
     <p class="muted small">Pour consulter le code : <a data-dl-zip href="#">télécharger KMB Library (ZIP)</a>.</p></details>
   <details class="faq"><summary>Que veut dire « non vérifiable »&nbsp;?</summary>
@@ -439,6 +440,7 @@
 <footer class="site-footer"><div class="inner">
   <a class="brand" href="#accueil"><svg class="logo" viewBox="0 0 40 40" aria-hidden="true"><path d="M20 2 35 8v11c0 9.5-6.4 16.4-15 19C11.4 35.4 5 28.5 5 19V8Z" fill="url(#kmb-grad)"/><text x="20" y="24.5" text-anchor="middle" font-family="Plus Jakarta Sans,Segoe UI,sans-serif" font-size="10.5" font-weight="800" fill="#fff">KMB</text></svg><div><strong>KMB Library</strong> <span>v2.1.0</span></div></a>
   <nav><a href="#guide">Guide</a><a href="#analyser">Analyser mon rapport</a><a href="#questions">Questions</a>
+    <a href="https://pypi.org/project/kmb-library/" target="_blank" rel="noopener">PyPI</a>
     <a href="https://github.com/kabangoura/detection-des-failles-de-securite" target="_blank" rel="noopener">Code sur GitHub</a></nav>
   <div>Projet scolaire · <span id="mode-note"></span></div>
 </div></footer>
