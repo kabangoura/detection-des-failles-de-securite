@@ -20,7 +20,7 @@
 | `tests/` | tests automatiques (`pytest`) |
 | `scripts/` | outils du projet : catalogue des commandes de correction, ZIP du site, simulations |
 | `pyproject.toml`, `README-pypi.md` | description du paquet publié sur PyPI |
-| `.github/workflows/` | automatisations GitHub : tests sur Windows, Linux et macOS (Python 3.10 et 3.13), publication du site |
+| `.github/workflows/` | automatisations GitHub : tests sur Windows, Linux et macOS (Python 3.10 et 3.13), publication du site, publication sur PyPI |
 
 ## Développement
 
