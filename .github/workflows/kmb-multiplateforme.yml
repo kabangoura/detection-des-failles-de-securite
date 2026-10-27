@@ -1,32 +1,57 @@
-# Valide KMB Library sur de vraies machines Windows, Linux et macOS (runners GitHub).
-# Chaque exécution produit un rapport anonymisé téléchargeable dans l'onglet « Actions ».
-name: KMB multiplateforme
+# Valide KMB Library sur de vraies machines Windows, Linux et macOS (machines gratuites de GitHub),
+# avec la plus ancienne et la plus récente version de Python prises en charge.
+# Chaque exécution : tests automatisés + vrai scan anonymisé + contrôle du rapport JSON.
+# Les rapports sont téléchargeables dans l'onglet « Actions » (rubrique « Artifacts »).
+name: Tests multiplateformes
 
 on:
-  workflow_dispatch:
   push:
     branches: [main]
+    paths-ignore: ["web/**", "*.md"]
+  pull_request:
+  workflow_dispatch:
+  workflow_call:   # réutilisé par la publication sur PyPI : pas de publication sans tests réussis
 
 jobs:
-  scan:
+  tester:
+    name: ${{ matrix.os }} · Python ${{ matrix.python }}
     strategy:
       fail-fast: false
       matrix:
         os: [windows-latest, ubuntu-latest, macos-latest]
+        python: ["3.10", "3.13"]
     runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: ${{ matrix.python }}
       - name: Installation
-        run: pip install -e ".[dev]"
+        run: python -m pip install -e ".[dev]"
       - name: Tests automatisés
-        run: pytest -q
-      - name: Scan réel du runner (anonymisé)
-        run: kmb scan --anonymiser --sans-doublons --budget 20 --sortie scan-ci
-      - name: Rapports
+        run: python -m pytest -q
+      - name: Vrai scan de la machine (anonymisé)
+        run: python -m kmb_library scan --anonymiser --sans-ouvrir --sans-doublons --budget 20 --sortie scan-ci
+      - name: Contrôle du rapport JSON
+        run: |
+          python - <<'EOF'
+          import glob, json
+          fichiers = glob.glob("scan-ci/KMB-rapport_*.json")
+          assert len(fichiers) == 1, f"un rapport attendu, trouvé : {fichiers}"
+          r = json.load(open(fichiers[0], encoding="utf-8"))
+          for cle in ("scan_id", "os_family", "scores", "findings", "inventory", "collectors"):
+              assert cle in r, f"clé absente : {cle}"
+          assert r["anonymized"] is True and 0 <= r["scores"]["global"] <= 100
+          erreurs = {k: c["status"] for k, c in r["collectors"].items() if c["status"] == "erreur"}
+          print(f"{r['os_family']} · score {r['scores']['global']}/100 · {len(r['findings'])} constats · collecteurs en erreur : {erreurs or 'aucun'}")
+          EOF
+      - name: Conserver le rapport
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: rapport-${{ matrix.os }}
-          path: scan-ci/processed/
+          name: rapport-${{ matrix.os }}-py${{ matrix.python }}
+          path: scan-ci/KMB-rapport_*.json
+          if-no-files-found: warn
