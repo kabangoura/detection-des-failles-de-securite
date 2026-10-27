@@ -62,6 +62,12 @@ def scan_and_save(sortie: str | None = None, nom: str | None = None, anonymiser:
         cache_dir=base / CACHE_DIR / "endoflife",
         display_name=nom,
     )
+    from kmb_library.enrich.pypi import newer_version
+
+    nouvelle = newer_version(__version__, base / CACHE_DIR / "pypi.json", offline=hors_ligne)
+    maj = f"Nouvelle version {nouvelle} disponible : python -m pip install --upgrade kmb-library" if nouvelle else ""
+    if maj:
+        print(maj + "\n")
     print(f"KMB Library {__version__} - scan du poste en cours (3 à 5 minutes : tout votre espace disque est examiné)...")
     raw, report = run_scan(ctx, anonymized=anonymiser, progress=lambda m: print("  - " + m))
     paths = save_scan(raw, report, base)
@@ -82,6 +88,8 @@ def scan_and_save(sortie: str | None = None, nom: str | None = None, anonymiser:
     print(f"\nDossier des rapports : {base}")
     print(f"  Votre rapport (à téléverser sur le site KMB Library) : {paths['rapport'].name}")
     print(f"  Données de départ (vérification seulement)           : {paths['brut'].relative_to(base)}")
+    if maj:
+        print("\n" + maj)
     return report, paths, base
 
 
