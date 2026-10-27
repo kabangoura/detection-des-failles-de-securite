@@ -1,20 +1,32 @@
-# Détection des failles de sécurité · KMB Library
+# KMB Library · détection des failles de sécurité
 
-Site public de **KMB Library** : vérifiez gratuitement la sécurité, les logiciels, la performance et le stockage de votre ordinateur (Windows, Linux, macOS).
+**KMB Library** vérifie gratuitement la sécurité, les logiciels, la performance et le stockage d'un ordinateur
+(Windows 10/11, Linux, macOS), puis explique quoi corriger, étape par étape.
 
-**Site :** https://kabangoura.github.io/detection-des-failles-de-securite/
+- **Site et guide :** https://kabangoura.github.io/detection-des-failles-de-securite/
+- **Installation :** `python -m pip install kmb-library` ([PyPI](https://pypi.org/project/kmb-library/))
+- **Scan :** `python -m kmb_library scan` ; le rapport `KMB-rapport_….json` s'ouvre sur le site avec « Analyser mon rapport »,
+  qui le lit dans le navigateur sans l'envoyer.
 
-1. Suivez le **Guide d'installation** du site : installez Python, puis KMB avec `python -m pip install kmb-library` ([PyPI](https://pypi.org/project/kmb-library/)).
-2. Lancez `python -m kmb_library scan`. Votre rapport `KMB-rapport_….json` est créé dans *Documents/KMB Library*.
-3. Sur le site, cliquez sur **Analyser mon rapport** et choisissez ce fichier.
+## Contenu du dépôt
 
-Le rapport est lu **dans votre navigateur** : il n'est ni envoyé ni conservé.
-
-| Fichier | Rôle |
+| Dossier / fichier | Rôle |
 |---|---|
-| `index.html`, `style.css`, `app.js` | le site (guide + analyse du rapport dans le navigateur) |
-| `config.js` | réglages (adresse du code à installer, exemple) |
-| `telechargements/kmb-library.zip` | code de KMB Library (l'installation se fait depuis PyPI : `python -m pip install kmb-library`) |
-| `exemple/KMB-rapport_exemple.json` | rapport d'exemple anonymisé |
-| `sitemap.xml`, `llms.txt` | référencement : liste des pages pour les moteurs de recherche, résumé pour les assistants IA |
-| `og-image.png`, `icon-512.png`, `favicon.svg` | image d'aperçu de partage et icônes |
+| `kmb_library/` | la librairie : collecte (Windows, Linux, macOS), règles, scores, rapport JSON |
+| `api/` | API FastAPI (mode serveur du site) |
+| `web/` | le site public, publié sur GitHub Pages |
+| `tests/` | tests automatiques (`pytest`) |
+| `scripts/` | outils du projet : catalogue des commandes de correction, ZIP du site, simulations |
+| `pyproject.toml`, `README-pypi.md` | description du paquet publié sur PyPI |
+| `.github/workflows/` | automatisations GitHub : publication du site |
+
+## Développement
+
+```
+python -m venv .venv
+.venv\Scripts\activate            (Linux / macOS : source .venv/bin/activate)
+python -m pip install -e ".[dev]"
+python -m pytest
+```
+
+Projet scolaire. Les rapports personnels, la clé de l'IA (`.env`) et les documents de cours ne sont pas dans ce dépôt.

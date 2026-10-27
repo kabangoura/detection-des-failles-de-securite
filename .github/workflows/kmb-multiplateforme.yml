@@ -1,0 +1,32 @@
+# Valide KMB Library sur de vraies machines Windows, Linux et macOS (runners GitHub).
+# Chaque exécution produit un rapport anonymisé téléchargeable dans l'onglet « Actions ».
+name: KMB multiplateforme
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+jobs:
+  scan:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Installation
+        run: pip install -e ".[dev]"
+      - name: Tests automatisés
+        run: pytest -q
+      - name: Scan réel du runner (anonymisé)
+        run: kmb scan --anonymiser --sans-doublons --budget 20 --sortie scan-ci
+      - name: Rapports
+        uses: actions/upload-artifact@v4
+        with:
+          name: rapport-${{ matrix.os }}
+          path: scan-ci/processed/

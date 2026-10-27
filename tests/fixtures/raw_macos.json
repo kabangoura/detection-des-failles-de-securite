@@ -1,0 +1,57 @@
+{
+  "scan_id": "20260301-110000-macos1",
+  "started_at": "2026-03-01T11:00:00-05:00",
+  "finished_at": "2026-03-01T11:01:30-05:00",
+  "kmb_version": "test",
+  "os_family": "macos",
+  "is_admin": false,
+  "collectors": {
+    "system": {"status": "ok", "duration_s": 25, "errors": {}, "data": {
+      "hostname": "MacBook-de-Alice", "user": "alice", "is_admin": false,
+      "os": {"family": "macos", "caption": "macOS 14.6.1", "version": "14.6.1", "build": "23G93", "kernel": "23.6.0", "architecture": "arm64"},
+      "firmware": "Apple", "pending_updates": [],
+      "auto_update": {"automatic_check": true, "automatic_download": true, "critical_updates": true, "install_macos": false},
+      "sip": true, "gatekeeper": false,
+      "hardware": {"manufacturer": "Apple", "model": "Mac14,2", "cpu": "Apple M2"},
+      "_errors": {}}},
+    "accounts": {"status": "ok", "duration_s": 0.2, "errors": {}, "data": {
+      "current_user": "alice",
+      "local_users": [{"name": "alice", "uid": 501, "enabled": true, "password_required": null}],
+      "administrators": [{"name": "alice", "is_current_user": true}],
+      "guest_enabled": true, "autologin_user": "alice", "_errors": {}}},
+    "network": {"status": "ok", "duration_s": 0.4, "errors": {}, "data": {
+      "listening": [{"ip": "0.0.0.0", "port": 22, "pid": 1, "process": "launchd", "exposed": true},
+                    {"ip": "0.0.0.0", "port": 49152, "pid": 512, "process": "rapportd", "exposed": true}],
+      "interfaces": [], "dns_servers": [{"interface": "scutil", "servers": ["192.168.1.1"]}],
+      "ssh": {"installed": true, "running": true, "permit_root_login": null, "password_authentication": null, "port": 22},
+      "sharing": {"screen_sharing": false, "file_sharing": false}, "smb_shares": null, "_errors": {}}},
+    "firewall": {"status": "ok", "duration_s": 0.3, "errors": {}, "data": {
+      "profiles": [{"name": "Pare-feu applicatif", "enabled": false, "default_inbound": null}],
+      "stealth_mode": false, "sensitive_inbound_rules": null, "_errors": {}}},
+    "antivirus": {"status": "ok", "duration_s": 0.1, "errors": {}, "data": {
+      "products": [{"name": "XProtect (intégré à macOS)", "enabled": true, "version": "5272", "signature_age_days": 10, "up_to_date": true}],
+      "defender": null, "_errors": {}}},
+    "encryption": {"status": "ok", "duration_s": 0.2, "errors": {}, "data": {
+      "volumes": [{"drive": "/", "state": "off", "label": "FileVault is Off.", "method": "fdesetup"}], "system_drive": "/", "_errors": {}}},
+    "software": {"status": "ok", "duration_s": 0.8, "errors": {}, "data": {
+      "installed": [{"name": "Google Chrome", "version": "128.0.6613.120", "publisher": "Google", "size_mb": null, "source": "app"}],
+      "cleaning": {"raw_entries": 42, "kept": 41, "duplicates": 1}, "_errors": {}}},
+    "performance": {"status": "ok", "duration_s": 3, "errors": {}, "data": {
+      "cpu": {"usage_percent": 9.0, "logical_cores": 8, "physical_cores": 8, "temperature_c": null},
+      "memory": {"total_gb": 16.0, "used_gb": 9.5, "percent": 59.0},
+      "top_memory": [], "top_cpu": [], "startup": [{"name": "com.google.keystone.agent", "enabled": true, "command": "...", "source": "~/Library/LaunchAgents"}],
+      "uptime_days": 5, "boot_time": "2026-02-24T09:00:00-05:00", "_errors": {}}},
+    "storage": {"status": "ok", "duration_s": 4, "errors": {}, "data": {
+      "partitions": [{"mount": "/System/Volumes/Data", "fstype": "apfs", "total_gb": 460.4, "used_gb": 300.0, "free_gb": 160.4, "percent_used": 65.2}],
+      "physical_disks": [{"name": "APPLE SSD AP0512Z", "media_type": "SSD", "health": "Healthy"}],
+      "folders": [], "large_files": [], "_errors": {}}},
+    "wifi": {"status": "ok", "duration_s": 2, "errors": {}, "data": {
+      "available": true, "current": {"ssid": "Maison", "auth": "WPA2 PERSONAL", "cipher": null, "security": "wpa2"},
+      "profiles": [{"name": "Maison", "auth": null, "security": "inconnu", "autoconnect": true}], "_errors": {}}},
+    "hardware": {"status": "ok", "duration_s": 0.2, "errors": {}, "data": {
+      "battery_present": true,
+      "battery": {"design_capacity": 4400, "full_capacity": 3960, "unit": "mAh", "cycles": 210, "health_percent": 90.0},
+      "temperatures": [], "max_temperature_c": null, "_errors": {}}},
+    "duplicates": {"status": "ignore", "duration_s": 0, "errors": {}, "data": {"skipped": true}}
+  }
+}

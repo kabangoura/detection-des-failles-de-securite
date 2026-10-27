@@ -1,0 +1,52 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "kmb-library"
+version = "2.1.0"
+description = "KMB Library - audit de sécurité, de performance et de stockage d'un poste de travail (Windows, Linux, macOS)"
+readme = "README-pypi.md"
+requires-python = ">=3.10"
+keywords = ["kmb", "kmb-library", "audit", "sécurité", "security", "scanner", "windows", "linux", "macos", "stockage", "doublons"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Console",
+    "Intended Audience :: End Users/Desktop",
+    "Natural Language :: French",
+    "Operating System :: Microsoft :: Windows :: Windows 10",
+    "Operating System :: Microsoft :: Windows :: Windows 11",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: MacOS",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Topic :: Security",
+    "Topic :: System :: Monitoring",
+]
+dependencies = [
+    "psutil>=5.9",
+    "pydantic>=2.5",
+    "httpx>=0.25",
+    "python-dotenv>=1.0",
+]
+
+[project.optional-dependencies]
+api = ["fastapi>=0.110", "uvicorn[standard]>=0.27"]
+dev = ["pytest>=8", "fastapi>=0.110", "uvicorn[standard]>=0.27"]
+
+[project.urls]
+"Site et guide" = "https://kabangoura.github.io/detection-des-failles-de-securite/"
+"Questions fréquentes" = "https://kabangoura.github.io/detection-des-failles-de-securite/#questions"
+"Code (dépôt)" = "https://github.com/kabangoura/detection-des-failles-de-securite"
+
+[project.scripts]
+kmb = "kmb_library.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["kmb_library*"]
+
+[tool.setuptools.package-data]
+kmb_library = ["rules/knowledge_base.json"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

@@ -1,0 +1,3604 @@
+{
+  "_meta": {
+    "version": "2.0",
+    "description": "Base de connaissances statique de KMB Library : explication et correction de chaque contrôle. Rédigée puis vérifiée manuellement (sources : documentation Microsoft, ANSSI, CIS Benchmarks). Version 2 : contrôles Linux, macOS, Wi-Fi et matériel ; champs *_linux / *_macos = variantes par système.",
+    "penalties": {
+      "critique": 15,
+      "eleve": 10,
+      "moyen": 5,
+      "faible": 1,
+      "info": 0
+    }
+  },
+  "SYS-001": {
+    "domain": "securite",
+    "category": "Système",
+    "severity": "critique",
+    "title": "Système d'exploitation en fin de support",
+    "description": "La version de Windows installée ne reçoit plus de correctifs de sécurité de Microsoft.",
+    "danger": "Chaque nouvelle faille découverte dans Windows restera ouverte pour toujours sur ce poste. Les attaquants ciblent précisément les systèmes qui ne sont plus corrigés.",
+    "impact": "Exposition permanente aux nouvelles vulnérabilités (rançongiciels, prise de contrôle à distance). Non-conformité pour un usage professionnel.",
+    "location": "Paramètres > Système > À propos (Spécifications de Windows)",
+    "remediation": {
+      "steps": [
+        "Vérifier la compatibilité du poste avec Windows 11 via l'application « Contrôle d'intégrité du PC ».",
+        "Sauvegarder les données importantes sur un support externe ou dans le nuage.",
+        "Si le poste est compatible : Paramètres > Windows Update > Mettre à niveau vers Windows 11.",
+        "Sinon : souscrire aux mises à jour de sécurité étendues (ESU) de Microsoft, ou remplacer le poste, ou installer un système supporté (ex. Linux)."
+      ],
+      "commands": {
+        "windows": [
+          {
+            "type": "verifier",
+            "cmd": "winver",
+            "ou": "cmd",
+            "effet": "Affiche la version de Windows installée.",
+            "attendu": "Windows 11 ; « Windows 10 version 22H2 » signifie : plus de mises à jour de sécurité."
+          },
+          {
+            "type": "ouvrir",
+            "cmd": "start ms-settings:windowsupdate",
+            "ou": "cmd",
+            "effet": "Ouvre Windows Update : si l'ordinateur est compatible, l'offre « Passer à Windows 11 » y apparaît."
+          }
+        ]
+      },
+      "duration": "1 à 3 heures",
+      "requires_admin": true
+    },
+    "references": [
+      "https://learn.microsoft.com/lifecycle/products/windows-10-home-and-pro",
+      "https://endoflife.date/windows"
+    ],
+    "remediation_linux": {
+      "steps": [
+        "Sauvegarder les données.",
+        "Mettre à niveau vers une version supportée de la distribution.",
+        "Ubuntu : do-release-upgrade ; Debian : modifier les sources APT vers la nouvelle version puis apt full-upgrade."
+      ],
+      "commands": {
+        "linux": [
+          {
+            "type": "verifier",
+            "cmd": "cat /etc/os-release",
+            "ou": "terminal",
+            "effet": "Affiche le nom et la version de la distribution.",
+            "attendu": "une version encore supportée (voir endoflife.date)"
+          },
+          {
+            "type": "corriger",
+            "cmd": "sudo do-release-upgrade",
+            "ou": "terminal",
+            "effet": "Lance la mise à niveau vers la version suivante d'Ubuntu.",
+            "attention": "Sauvegardez vos données avant. Comptez une heure ou plus, ordinateur branché."
+          }
+        ]
+      },
+      "duration": "1 à 2 heures",
+      "requires_admin": true
+    },
+    "location_linux": "/etc/os-release",
+    "remediation_macos": {
+      "steps": [
+        "Vérifier la compatibilité du Mac avec la dernière version de macOS (site d'Apple).",
+        "Sauvegarder avec Time Machine.",
+        "Réglages Système > Général > Mise à jour de logiciels > Mettre à niveau."
+      ],
+      "commands": {
+        "macos": [
+          {
+            "type": "verifier",
+            "cmd": "sw_vers",
+            "ou": "terminal",
+            "effet": "Affiche la version de macOS.",
+            "attendu": "une version encore supportée par Apple"
+          },
+          {
+            "type": "ouvrir",
+            "cmd": "open \"x-apple.systempreferences:com.apple.Software-Update-Settings.extension\"",
+            "ou": "terminal",
+            "effet": "Ouvre Réglages Système > Mise à jour de logiciels, où la mise à niveau est proposée."
+          }
+        ]
+      },
+      "duration": "1 heure",
+      "requires_admin": true
+    },
+    "location_macos": "Menu Pomme > À propos de ce Mac",
+    "description_linux": "La version du système installée ne reçoit plus de correctifs de sécurité de son éditeur.",
+    "description_macos": "La version du système installée ne reçoit plus de correctifs de sécurité de son éditeur.",
+    "danger_linux": "Chaque nouvelle faille découverte restera ouverte pour toujours sur ce poste. Les attaquants ciblent précisément les systèmes qui ne sont plus corrigés.",
+    "danger_macos": "Chaque nouvelle faille découverte restera ouverte pour toujours sur ce poste. Les attaquants ciblent précisément les systèmes qui ne sont plus corrigés."
+  },
+  "SYS-002": {
+    "domain": "securite",
+    "category": "Système",
+    "severity": "moyen",
+    "title": "Fin de support du système proche (moins de 6 mois)",
+    "description": "La version de Windows installée cessera bientôt de recevoir des correctifs.",
+    "danger": "Après la date de fin de support, le poste ne sera plus protégé contre les nouvelles failles.",
+    "impact": "Risque qui deviendra critique à court terme si rien n'est planifié.",
+    "location": "Paramètres > Système > À propos",
+    "remediation": {
+      "steps": [
+        "Planifier la mise à niveau vers la version suivante de Windows avant la date indiquée.",
+        "Installer la mise à jour de fonctionnalité proposée dans Windows Update."
+      ],
+      "commands": {
+        "windows": [
+          {
+            "type": "ouvrir",
+            "cmd": "start ms-settings:windowsupdate",
+            "ou": "cmd",
+            "effet": "Ouvre Windows Update pour installer la version suivante de Windows."
+          }
+        ]
+      },
+      "duration": "1 heure",
+      "requires_admin": true
+    },
+    "references": [
+      "https://endoflife.date/windows"
+    ],
+    "description_linux": "La version du système installée cessera bientôt de recevoir des correctifs.",
+    "description_macos": "La version du système installée cessera bientôt de recevoir des correctifs."
+  },
+  "SYS-003": {
+    "domain": "securite",
+    "category": "Système",
+    "severity": "eleve",
+    "title": "Correctifs Windows en attente d'installation",
+    "description": "Windows Update signale des mises à jour disponibles qui ne sont pas encore installées.",
+    "danger": "Les correctifs publiés révèlent publiquement les failles qu'ils corrigent : un poste non mis à jour devient une cible facile dans les jours qui suivent.",
+    "impact": "Vulnérabilités connues et exploitables sur le poste.",
+    "location": "Paramètres > Windows Update",
+    "remediation": {
+      "steps": [
+        "Ouvrir Paramètres > Windows Update.",
+        "Cliquer sur « Rechercher des mises à jour » puis « Installer ».",
+        "Redémarrer l'ordinateur lorsque Windows le demande."
+      ],
+      "commands": {
+        "windows": [
+          {
+            "type": "ouvrir",
+            "cmd": "start ms-settings:windowsupdate",
+            "ou": "cmd",
+            "effet": "Ouvre Windows Update : cliquez ensuite sur « Rechercher des mises à jour » puis « Installer »."
+          },
+          {
+            "type": "corriger",
+            "cmd": "UsoClient StartInteractiveScan",
+            "ou": "cmd",
+            "effet": "Lance la recherche et le téléchargement des mises à jour, comme le bouton « Rechercher des mises à jour ».",
+            "attention": "Redémarrez l'ordinateur quand Windows le demande."
+          }
+        ]
+      },
+      "duration": "15 à 60 minutes",
+      "requires_admin": false
+    },
+    "references": [
+      "https://support.microsoft.com/windows/windows-update-faq"
+    ],
+    "remediation_linux": {
+      "steps": [
+        "Mettre à jour la liste des paquets puis installer les mises à jour.",
+        "Redémarrer si le noyau a été mis à jour."
+      ],
+      "commands": {
+        "linux": [
+          {
+            "type": "corriger",
+            "cmd": "sudo apt update && sudo apt upgrade",
+            "ou": "terminal",
+            "effet": "Télécharge et installe toutes les mises à jour (répondez « O » ou « Y » pour confirmer).",
+            "attention": "Ubuntu / Debian. Fedora : sudo dnf upgrade --refresh"
+          }
+        ]
+      },
+      "duration": "10 à 30 minutes",
+      "requires_admin": true
+    },
+    "location_linux": "Gestionnaire de paquets (apt, dnf, pacman)",
+    "remediation_macos": {
+      "steps": [
+        "Ouvrir Réglages Système > Général > Mise à jour de logiciels.",
+        "Installer les mises à jour proposées et redémarrer."
+      ],
+      "commands": {
+        "macos": [
+          {
+            "type": "verifier",
+            "cmd": "softwareupdate -l",
+            "ou": "terminal",
+            "effet": "Liste les mises à jour disponibles.",
+            "attendu": "« No new software available »"
+          },
+          {
+            "type": "corriger",
+            "cmd": "sudo softwareupdate -ia --restart",
+            "ou": "terminal",
+            "effet": "Installe toutes les mises à jour disponibles.",
+            "attention": "Enregistrez votre travail : l'ordinateur redémarre immédiatement."
+          }
+        ]
+      },
+      "duration": "15 à 45 minutes",
+      "requires_admin": true
+    },
+    "location_macos": "Réglages Système > Général > Mise à jour de logiciels",
+    "title_linux": "Mises à jour en attente d'installation",
+    "title_macos": "Mises à jour en attente d'installation",
+    "description_linux": "Des mises à jour sont disponibles mais ne sont pas encore installées.",
+    "description_macos": "Des mises à jour sont disponibles mais ne sont pas encore installées."
+  },
+  "SYS-004": {
+    "domain": "securite",
+    "category": "Système",
+    "severity": "moyen",
+    "title": "Aucun correctif installé récemment",
+    "description": "Le dernier correctif Windows installé date de plus de 45 jours.",
+    "danger": "Microsoft publie des correctifs de sécurité chaque mois (« Patch Tuesday »). Un écart de plus d'un mois signale que les mises à jour ne s'installent plus.",
+    "impact": "Accumulation de vulnérabilités connues.",
+    "location": "Paramètres > Windows Update > Historique des mises à jour",
+    "remediation": {
+      "steps": [
+        "Ouvrir l'historique de Windows Update et vérifier les échecs éventuels.",
+        "Lancer une recherche de mises à jour et les installer.",
+        "Si les installations échouent, exécuter l'utilitaire de résolution des problèmes de Windows Update."
+      ],
+      "commands": {
+        "windows": [
+          {
+            "type": "verifier",
+            "cmd": "Get-HotFix | Sort-Object InstalledOn -Descending | Select-Object -First 5 HotFixID,InstalledOn",
+            "ou": "ps",
+            "effet": "Liste les 5 derniers correctifs installés avec leur date.",
+            "attendu": "une date de moins de 45 jours"
+          },
+          {
+            "type": "ouvrir",
+            "cmd": "start ms-settings:windowsupdate-history",
+            "ou": "cmd",
+            "effet": "Ouvre l'historique de Windows Update pour repérer les installations en échec."
+          },
+          {
+            "type": "corriger",
+            "cmd": "UsoClient StartInteractiveScan",
+            "ou": "cmd",
+            "effet": "Relance la recherche et l'installation des mises à jour."
+          }
+        ]
+      },
+      "duration": "30 minutes",
+      "requires_admin": false
+    },
+    "references": [],
+    "description_linux": "Aucune mise à jour de paquets n'a été installée depuis plus de 45 jours.",
+    "remediation_linux": {
+      "steps": [
+        "Lancer une mise à jour complète des paquets.",
+        "Activer les mises à jour de sécurité automatiques (unattended-upgrades sur Debian/Ubuntu, dnf-automatic sur Fedora/RHEL)."
+      ],
+      "commands": {
+        "linux": [
+          {
+            "type": "verifier",
+            "cmd": "grep \" upgrade \" /var/log/dpkg.log | tail -5",
+            "ou": "terminal",
+            "effet": "Affiche les dernières mises à jour de paquets installées.",
+            "attendu": "des dates récentes"
+          },
+          {
+            "type": "corriger",
+            "cmd": "sudo apt install unattended-upgrades && sudo dpkg-reconfigure -plow unattended-upgrades",
+            "ou": "terminal",
+            "effet": "Active l'installation automatique des mises à jour de sécurité (répondez « Oui »)."
+          }
+        ]
+      },
+      "duration": "20 minutes",
+      "requires_admin": true
+    },
+    "location_linux": "/var/log/apt/history.log, /var/log/dnf.log",
+    "danger_linux": "Les éditeurs publient des correctifs de sécurité en continu : un long délai sans installation signale que les mises à jour ne sont plus appliquées.",
+    "danger_macos": "Les éditeurs publient des correctifs de sécurité en continu : un long délai sans installation signale que les mises à jour ne sont plus appliquées.",
+    "description_macos": "Aucune mise à jour n'a été installée depuis plus de 45 jours.",
+    "location_macos": "Réglages Système > Général > Mise à jour de logiciels"
+  },
+  "SYS-005": {
+    "domain": "securite",
+    "category": "Système",
+    "severity": "eleve",
+    "title": "Contrôle de compte d'utilisateur (UAC) désactivé",
+    "description": "L'UAC demande une confirmation avant qu'un programme obtienne les droits administrateur. Il est désactivé sur ce poste.",
+    "danger": "Tout programme lancé, y compris un logiciel malveillant, obtient silencieusement les pleins pouvoirs sur la machine.",
+    "impact": "Installation invisible de logiciels malveillants, modification du système sans avertissement.",
+    "location": "Registre : HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System (EnableLUA)",
+    "remediation": {
+      "steps": [
+        "Ouvrir le Panneau de configuration > Comptes d'utilisateurs > Modifier les paramètres de contrôle de compte d'utilisateur.",
+        "Placer le curseur sur « M'avertir uniquement quand des applications tentent d'apporter des modifications » (niveau par défaut).",
+        "Valider puis redémarrer."
+      ],
+      "commands": {
+        "windows": [
+          {
+            "type": "verifier",
+            "cmd": "reg query \"HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System\" /v EnableLUA",
+            "ou": "cmd",
+            "effet": "Affiche l'état du contrôle de compte d'utilisateur (UAC).",
+            "attendu": "EnableLUA    REG_DWORD    0x1  (0x0 = désactivé)"
+          },
+          {
+            "type": "ouvrir",
+            "cmd": "UserAccountControlSettings",
+            "ou": "cmd",
+            "effet": "Ouvre le réglage de l'UAC : placez le curseur sur le niveau par défaut (2e cran en partant du haut)."
+          },
+          {
+            "type": "corriger",
+            "cmd": "Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System' -Name EnableLUA -Value 1",
+            "ou": "ps_admin",
+            "effet": "Réactive l'UAC.",
+            "attention": "Redémarrez ensuite l'ordinateur pour que le changement s'applique."
+          }
+        ]
+      },
+      "duration": "5 minutes",
+      "requires_admin": true
+    },
+    "references": [
+      "https://learn.microsoft.com/windows/security/application-security/application-control/user-account-control/"
+    ]
+  },
+  "SYS-006": {
+    "domain": "securite",
+    "category": "Système",
+    "severity": "moyen",
+    "title": "UAC configuré sans demande de confirmation",
+    "description": "L'UAC est actif mais élève automatiquement les programmes sans demander de confirmation aux administrateurs.",
+    "danger": "Un programme malveillant peut obtenir les droits administrateur sans aucune alerte visible.",
+    "impact": "Protection UAC pratiquement inefficace.",
+    "location": "Registre : ...\\Policies\\System (ConsentPromptBehaviorAdmin = 0)",
+    "remediation": {
+      "steps": [
+        "Ouvrir les paramètres UAC (rechercher « UAC » dans le menu Démarrer).",
+        "Remonter le curseur au niveau par défaut ou au niveau maximal.",
+        "Valider."
+      ],
+      "commands": {
+        "windows": [
+          {
+            "type": "verifier",
+            "cmd": "reg query \"HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System\" /v ConsentPromptBehaviorAdmin",
+            "ou": "cmd",
+            "effet": "Affiche le niveau de confirmation demandé aux administrateurs.",
+            "attendu": "0x5 (valeur par défaut) ; 0x0 = aucune confirmation"
+          },
+          {
+            "type": "ouvrir",
+            "cmd": "UserAccountControlSettings",
+            "ou": "cmd",
+            "effet": "Ouvre le réglage de l'UAC pour remonter le curseur au niveau par défaut."
+          },
+          {
+            "type": "corriger",
+            "cmd": "Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System' -Name ConsentPromptBehaviorAdmin -Value 5",
+            "ou": "ps_admin",
+            "effet": "Rétablit la demande de confirmation par défaut."
+          }
+        ]
+      },
+      "duration": "2 minutes",
+      "requires_admin": true
+    },
+    "references": []
+  },
+  "SYS-007": {
+    "domain": "securite",
+    "category": "Système",
+    "severity": "moyen",
+    "title": "Démarrage sécurisé (Secure Boot) désactivé",
+    "description": "Secure Boot vérifie que seuls des chargeurs de démarrage signés s'exécutent au démarrage du PC. Il est désactivé ou non disponible.",
+    "danger": "Un « bootkit » peut se charger avant Windows et se cacher de l'antivirus.",
+    "impact": "Compromission persistante très difficile à détecter.",
+    "location": "Micrologiciel UEFI (BIOS) du poste ; vérifiable dans msinfo32 > « État du démarrage sécurisé »",
+    "remediation": {
+      "steps": [
+        "Vérifier l'état : lancer msinfo32 et lire « État du démarrage sécurisé ».",
+        "Redémarrer et entrer dans l'UEFI (souvent F10, F2 ou Suppr au démarrage ; F10 sur les HP).",
+        "Dans l'onglet Sécurité ou Démarrage, activer « Secure Boot » (le mode doit être UEFI, pas « Legacy/CSM »).",
+        "Enregistrer et redémarrer. Si le disque est en MBR, le convertir d'abord en GPT avec mbr2gpt."
+      ],
+      "commands": {
+        "windows": [
+          {
+            "type": "verifier",
+            "cmd": "msinfo32",
+            "ou": "cmd",
+            "effet": "Ouvre « Informations système » : lisez la ligne « État du démarrage sécurisé ».",
+            "attendu": "Activé ; « Mode BIOS : Hérité » = Secure Boot impossible sans conversion"
+          },
+          {
+            "type": "ouvrir",
+            "cmd": "shutdown /r /fw /t 0",
+            "ou": "cmd_admin",
+            "effet": "Redémarre directement dans les réglages UEFI (BIOS) pour activer « Secure Boot ».",
+            "attention": "Enregistrez votre travail : l'ordinateur redémarre immédiatement. Fonctionne seulement sur les PC en mode UEFI."
+          }
+        ]
+      },
+      "duration": "15 minutes",
+      "requires_admin": true
+    },
+    "references": [
+      "https://learn.microsoft.com/windows-hardware/design/device-experiences/oem-secure-boot"
+    ],
+    "remediation_linux": {
+      "steps": [
+        "Entrer dans l'UEFI au démarrage et activer Secure Boot.",
+        "Les noyaux signés d'Ubuntu, Fedora et Debian démarrent avec Secure Boot ; les pilotes tiers (NVIDIA, VirtualBox) doivent être signés via MOK."
+      ],
+      "commands": {
+        "linux": [
+          {
+            "type": "verifier",
+            "cmd": "mokutil --sb-state",
+            "ou": "terminal",
+            "effet": "Affiche l'état de Secure Boot.",
+            "attendu": "SecureBoot enabled"
+          }
+        ]
+      },
+      "duration": "15 minutes",
+      "requires_admin": true
+    },
+    "location_linux": "Micrologiciel UEFI ; état : mokutil --sb-state",
+    "danger_linux": "Un « bootkit » peut se charger avant le système d'exploitation et se cacher des outils de sécurité.",
+    "danger_macos": "Un « bootkit » peut se charger avant le système d'exploitation et se cacher des outils de sécurité."
+  },
+  "ACC-001": {
+    "domain": "securite",
+    "category": "Comptes",
+    "severity": "moyen",
+    "title": "Trop de comptes administrateurs actifs",
+    "description": "Plus de deux comptes actifs font partie du groupe Administrateurs.",
+    "danger": "Chaque compte administrateur est une porte d'entrée vers le contrôle total du poste. Plus ils sont nombreux, plus le risque de vol de mot de passe augmente.",
+    "impact": "Surface d'attaque élargie.",
+    "location": "Gestion de l'ordinateur > Utilisateurs et groupes locaux > Groupes > Administrateurs",
+    "remediation": {
+      "steps": [
+        "Lister les membres : lusrmgr.msc > Groupes > Administrateurs.",
+        "Retirer du groupe les comptes qui n'ont pas besoin de droits administrateur.",
+        "Garder un seul compte administrateur pour la maintenance."
+      ],
+      "commands": {
+        "windows": [
+          {
+            "type": "verifier",
+            "cmd": "Get-LocalGroupMember -SID S-1-5-32-544",
+            "ou": "ps",
+            "effet": "Liste les comptes membres du groupe Administrateurs.",
+            "attendu": "au plus 2 comptes actifs"
+          },
+          {
+            "type": "ouvrir",
+            "cmd": "lusrmgr.msc",
+            "ou": "cmd",
+            "effet": "Ouvre « Utilisateurs et groupes locaux » (Windows Pro) : Groupes > Administrateurs."
+          },
+          {
+            "type": "corriger",
+            "cmd": "Remove-LocalGroupMember -SID S-1-5-32-544 -Member 'NOM_DU_COMPTE'",
+            "ou": "ps_admin",
+            "effet": "Retire ce compte du groupe Administrateurs.",
+            "remplacer": {
+              "NOM_DU_COMPTE": "le nom exact du compte à retirer, lu avec la commande de vérification (sans le nom du PC devant)"
+            },
+            "attention": "Ne retirez jamais le dernier compte administrateur, ni le vôtre avant d'avoir un autre compte administrateur qui fonctionne."
+          }
+        ]
+      },
+      "duration": "10 minutes",
+      "requires_admin": true
+    },
+    "references": [],
+    "location_linux": "/etc/group (groupes sudo, wheel, admin)",
+    "remediation_linux": {
+      "steps": [
+        "Lister les membres des groupes d'administration.",
+        "Retirer les comptes qui n'ont pas besoin de sudo."
+      ],
+      "commands": {
+        "linux": [
+          {
+            "type": "verifier",
+            "cmd": "getent group sudo wheel",
+            "ou": "terminal",
+            "effet": "Liste les comptes autorisés à utiliser sudo.",
+            "attendu": "au plus 2 comptes"
+          },
+          {
+            "type": "corriger",
+            "cmd": "sudo gpasswd -d NOM sudo",
+            "ou": "terminal",
+            "effet": "Retire ce compte du groupe sudo.",
+            "remplacer": {
+              "NOM": "le nom du compte à retirer"
+            },
+            "attention": "Gardez au moins un compte qui peut utiliser sudo."
+          }
+        ]
+      },
+      "duration": "10 minutes",
+      "requires_admin": true
+    },
+    "location_macos": "Réglages Système > Utilisateurs et groupes",
+    "remediation_macos": {
+      "steps": [
+        "Ouvrir Réglages Système > Utilisateurs et groupes.",
+        "Pour chaque compte qui n'en a pas besoin, désactiver « Autoriser l'utilisateur à administrer cet ordinateur »."
+      ],
+      "commands": {
+        "macos": [
+          {
+            "type": "verifier",
+            "cmd": "dscl . -read /Groups/admin GroupMembership",
+            "ou": "terminal",
+            "effet": "Liste les comptes administrateurs.",
+            "attendu": "au plus 2 comptes (root compris)"
+          },
+          {
+            "type": "corriger",
+            "cmd": "sudo dseditgroup -o edit -d NOM -t user admin",
+            "ou": "terminal",
+            "effet": "Retire les droits d'administration de ce compte.",
+            "remplacer": {
+              "NOM": "le nom court du compte"
+            },
+            "attention": "Gardez au moins un compte administrateur."
+          }
+        ]
+      },
+      "duration": "10 minutes",
+      "requires_admin": true
+    }
+  },
+  "ACC-002": {
+    "domain": "securite",
+    "category": "Comptes",
+    "severity": "eleve",
+    "title": "Compte Invité activé",
+    "description": "Le compte Invité intégré de Windows est activé.",
+    "danger": "Le compte Invité permet à n'importe qui d'ouvrir une session sans mot de passe personnel.",
+    "impact": "Accès non contrôlé au poste et aux partages réseau.",
+    "location": "lusrmgr.msc > Utilisateurs > Invité",
+    "remediation": {
+      "steps": [
+        "Ouvrir lusrmgr.msc > Utilisateurs.",
+        "Clic droit sur « Invité » > Propriétés > cocher « Le compte est désactivé »."
+      ],
+      "commands": {
+        "windows": [
+          {
+            "type": "verifier",
+            "cmd": "Get-LocalUser | Where-Object { $_.SID -like '*-501' } | Select-Object Name,Enabled",
+            "ou": "ps",
+            "effet": "Affiche l'état du compte Invité.",
+            "attendu": "Enabled : False"
+          },
+          {
+            "type": "corriger",
+            "cmd": "Get-LocalUser | Where-Object { $_.SID -like '*-501' } | Disable-LocalUser",
+            "ou": "ps_admin",
+            "effet": "Désactive le compte Invité."
+          }
+        ]
+      },
+      "duration": "2 minutes",
+      "requires_admin": true
+    },
+    "references": [],
+    "location_macos": "Réglages Système > Utilisateurs et groupes > Utilisateur invité",
+    "remediation_macos": {
+      "steps": [
+        "Ouvrir Réglages Système > Utilisateurs et groupes.",
+        "Cliquer sur « Utilisateur invité » et désactiver « Autoriser les invités à se connecter »."
+      ],
+      "commands": {
+        "macos": [
+          {
+            "type": "verifier",
+            "cmd": "defaults read /Library/Preferences/com.apple.loginwindow GuestEnabled",
+            "ou": "terminal",
+            "effet": "Affiche l'état du compte invité.",
+            "attendu": "0"
+          },
+          {
+            "type": "corriger",
+            "cmd": "sudo defaults write /Library/Preferences/com.apple.loginwindow GuestEnabled -bool false",
+            "ou": "terminal",
+            "effet": "Désactive le compte invité."
+          }
+        ]
+      },
+      "duration": "1 minute",
+      "requires_admin": true
+    },
+    "description_macos": "Le compte « Utilisateur invité » de macOS est activé."
+  },
+  "ACC-003": {
+    "domain": "securite",
+    "category": "Comptes",
+    "severity": "moyen",
+    "title": "Compte Administrateur intégré activé",
+    "description": "Le compte Administrateur intégré (RID 500) est activé. Il est connu de tous les attaquants et n'est pas soumis au verrouillage.",
+    "danger": "Cible privilégiée des attaques par force brute sur le mot de passe.",
+    "impact": "Prise de contrôle totale si le mot de passe est deviné.",
+    "location": "lusrmgr.msc > Utilisateurs > Administrateur",
+    "remediation": {
+      "steps": [
+        "S'assurer qu'un autre compte administrateur fonctionne.",
+        "Désactiver le compte Administrateur intégré."
+      ],
+      "commands": {
+        "windows": [
+          {
+            "type": "verifier",
+            "cmd": "Get-LocalUser | Where-Object { $_.SID -like '*-500' } | Select-Object Name,Enabled",
+            "ou": "ps",
+            "effet": "Affiche l'état du compte Administrateur intégré.",
+            "attendu": "Enabled : False"
+          },
+          {
+            "type": "corriger",
+            "cmd": "Get-LocalUser | Where-Object { $_.SID -like '*-500' } | Disable-LocalUser",
+            "ou": "ps_admin",
+            "effet": "Désactive le compte Administrateur intégré.",
+            "attention": "Vérifiez d'abord qu'un autre compte administrateur fonctionne."
+          }
+        ]
+      },
+      "duration": "2 minutes",
+      "requires_admin": true
+    },
+    "references": []
+  },
+  "ACC-004": {
+    "domain": "securite",
+    "category": "Comptes",
+    "severity": "eleve",
+    "title": "Compte actif sans mot de passe obligatoire",
+    "description": "Un compte local actif n'est pas obligé d'avoir un mot de passe.",
+    "danger": "Une session peut être ouverte sur ce compte sans mot de passe, localement ou parfois à distance.",
+    "impact": "Accès direct aux données de l'utilisateur.",
+    "location": "lusrmgr.msc > Utilisateurs",
+    "remediation": {
+      "steps": [
+        "Définir un mot de passe robuste pour le compte (12 caractères ou plus).",
+        "Rendre le mot de passe obligatoire."
+      ],
+      "commands": {
+        "windows": [
+          {
+            "type": "verifier",
+            "cmd": "Get-LocalUser | Select-Object Name,Enabled,PasswordRequired",
+            "ou": "ps",
+            "effet": "Liste les comptes et indique s'ils exigent un mot de passe.",
+            "attendu": "PasswordRequired : True pour chaque compte activé"
+          },
+          {
+            "type": "corriger",
+            "cmd": "net user NOM_DU_COMPTE *",
+            "ou": "cmd_admin",
+            "effet": "Demande de saisir un nouveau mot de passe pour ce compte (rien ne s'affiche pendant la frappe : c'est normal).",
+            "remplacer": {
+              "NOM_DU_COMPTE": "le nom du compte indiqué dans le constat"
+            }
+          },
+          {
+            "type": "corriger",
+            "cmd": "net user NOM_DU_COMPTE /passwordreq:yes",
+            "ou": "cmd_admin",
+            "effet": "Rend le mot de passe obligatoire pour ce compte.",
+            "remplacer": {
+              "NOM_DU_COMPTE": "le nom du compte indiqué dans le constat"
+            }
+          }
+        ]
+      },
+      "duration": "5 minutes",
+      "requires_admin": true
+    },
+    "references": [],
+    "location_linux": "/etc/shadow (2e champ vide)",
+    "remediation_linux": {
+      "steps": [
+        "Définir un mot de passe pour le compte, ou le verrouiller s'il n'est pas utilisé."
+      ],
+      "commands": {
+        "linux": [
+          {
+            "type": "verifier",
+            "cmd": "sudo awk -F: '($2 == \"\") {print $1}' /etc/shadow",
+            "ou": "terminal",
+            "effet": "Liste les comptes sans mot de passe.",
+            "attendu": "aucune ligne"
+          },
+          {
+            "type": "corriger",
+            "cmd": "sudo passwd NOM",
+            "ou": "terminal",
+            "effet": "Définit un mot de passe pour ce compte.",
+            "remplacer": {
+              "NOM": "le nom du compte indiqué dans le constat"
+            }
+          },
+          {
+            "type": "corriger",
+            "cmd": "sudo passwd -l NOM",
+            "ou": "terminal",
+            "effet": "Verrouille ce compte s'il n'est pas utilisé.",
+            "remplacer": {
+              "NOM": "le nom du compte indiqué dans le constat"
+            }
+          }
+        ]
+      },
+      "duration": "2 minutes",
+      "requires_admin": true
+    }
+  },
+  "ACC-005": {
+    "domain": "securite",
+    "category": "Comptes",
+    "severity": "faible",
+    "title": "Utilisation quotidienne d'un compte administrateur",
+    "description": "Le compte utilisé au quotidien est membre du groupe Administrateurs.",
+    "danger": "Un logiciel malveillant ouvert par erreur n'est séparé des pleins pouvoirs que par une boîte de dialogue UAC.",
+    "impact": "Une erreur de clic peut compromettre tout le système.",
+    "location": "Paramètres > Comptes > Famille et autres utilisateurs",
+    "remediation": {
+      "steps": [
+        "Créer un compte administrateur distinct réservé à la maintenance.",
+        "Changer le type du compte quotidien en « Utilisateur standard ».",
+        "Saisir les identifiants administrateur seulement lorsque Windows le demande."
+      ],
+      "commands": {
+        "windows": [
+          {
+            "type": "verifier",
+            "cmd": "Get-LocalGroupMember -SID S-1-5-32-544",
+            "ou": "ps",
+            "effet": "Vérifie si votre compte fait partie des administrateurs.",
+            "attendu": "votre compte absent de la liste"
+          },
+          {
+            "type": "ouvrir",
+            "cmd": "start ms-settings:otherusers",
+            "ou": "cmd",
+            "effet": "Ouvre la page des comptes pour créer un compte administrateur de maintenance, puis changer le type du vôtre."
+          },
+          {
+            "type": "corriger",
+            "cmd": "net user admin-maintenance * /add",
+            "ou": "cmd_admin",
+            "effet": "Crée le compte « admin-maintenance » et demande son mot de passe."
+          },
+          {
+            "type": "corriger",
+            "cmd": "Add-LocalGroupMember -SID S-1-5-32-544 -Member 'admin-maintenance'",
+            "ou": "ps_admin",
+            "effet": "Donne les droits d'administration au compte de maintenance.",
+            "attention": "Testez le compte de maintenance AVANT de retirer les droits de votre compte quotidien."
+          }
+        ]
+      },
+      "duration": "10 minutes",
+      "requires_admin": true
+    },
+    "references": [],
+    "location_macos": "Réglages Système > Utilisateurs et groupes",
+    "remediation_macos": {
+      "steps": [
+        "Créer un compte administrateur dédié à la maintenance.",
+        "Retirer les droits d'administration du compte utilisé au quotidien."
+      ],
+      "commands": {
+        "macos": [
+          {
+            "type": "ouvrir",
+            "cmd": "open \"x-apple.systempreferences:com.apple.Users-Groups-Settings.extension\"",
+            "ou": "terminal",
+            "effet": "Ouvre Utilisateurs et groupes pour créer un compte administrateur de maintenance."
+          },
+          {
+            "type": "corriger",
+            "cmd": "sudo dseditgroup -o edit -d NOM -t user admin",
+            "ou": "terminal",
+            "effet": "Retire les droits d'administration de votre compte quotidien.",
+            "remplacer": {
+              "NOM": "le nom court de votre compte"
+            },
+            "attention": "Créez et testez d'abord un autre compte administrateur."
+          }
+        ]
+      },
+      "duration": "10 minutes",
+      "requires_admin": true
+    }
+  },
+  "NET-001": {
+    "domain": "securite",
+    "category": "Réseau",
+    "severity": "critique",
+    "title": "Protocole SMBv1 activé",
+    "description": "SMBv1 est la première version (1983) du protocole de partage de fichiers de Windows. Il est obsolète et désactivé par défaut depuis Windows 10 1709.",
+    "danger": "SMBv1 a été exploité par les rançongiciels WannaCry et NotPetya (faille EternalBlue) pour se propager automatiquement de poste en poste.",
+    "impact": "Exécution de code à distance sans authentification, propagation de rançongiciels sur le réseau.",
+    "location": "Panneau de configuration > Programmes > Activer ou désactiver des fonctionnalités Windows > Support de partage de fichiers SMB 1.0/CIFS",
+    "remediation": {
+      "steps": [
+        "Ouvrir « Activer ou désactiver des fonctionnalités Windows ».",
+        "Décocher « Support de partage de fichiers SMB 1.0/CIFS ».",
+        "Valider et redémarrer."
+      ],
+      "commands": {
+        "windows": [
+          {
+            "type": "verifier",
+            "cmd": "Get-SmbServerConfiguration | Select-Object EnableSMB1Protocol",
+            "ou": "ps_admin",
+            "effet": "Indique si le protocole SMBv1 est activé.",
+            "attendu": "False"
+          },
+          {
+            "type": "ouvrir",
+            "cmd": "optionalfeatures",
+            "ou": "cmd",
+            "effet": "Ouvre « Fonctionnalités Windows » : décochez « Support de partage de fichiers SMB 1.0/CIFS »."
+          },
+          {
+            "type": "corriger",
+            "cmd": "Set-SmbServerConfiguration -EnableSMB1Protocol $false -Force",
+            "ou": "ps_admin",
+            "effet": "Désactive SMBv1 immédiatement."
+          },
+          {
+            "type": "corriger",
+            "cmd": "Disable-WindowsOptionalFeature -Online -FeatureName SMB1Protocol",
+            "ou": "ps_admin",
+            "effet": "Retire complètement la fonctionnalité SMBv1.",
+            "attention": "Windows demande ensuite de redémarrer."
+          }
+        ]
+      },
+      "duration": "5 minutes",
+      "requires_admin": true
+    },
+    "references": [
+      "https://learn.microsoft.com/windows-server/storage/file-server/troubleshoot/detect-enable-and-disable-smbv1-v2-v3"
+    ]
+  },
+  "NET-002": {
+    "domain": "securite",
+    "category": "Réseau",
+    "severity": "moyen",
+    "title": "Bureau à distance (RDP) activé",
+    "description": "Le poste accepte les connexions Bureau à distance.",
+    "danger": "RDP est l'une des portes d'entrée les plus attaquées (force brute sur les mots de passe, failles comme BlueKeep).",
+    "impact": "Prise de contrôle à distance si un mot de passe est faible ou si une faille existe.",
+    "location": "Paramètres > Système > Bureau à distance",
+    "remediation": {
+      "steps": [
+        "Si le Bureau à distance n'est pas utilisé : Paramètres > Système > Bureau à distance > Désactiver.",
+        "S'il est nécessaire : l'exposer seulement via un VPN, activer l'authentification NLA et utiliser des mots de passe robustes."
+      ],
+      "commands": {
+        "windows": [
+          {
+            "type": "verifier",
+            "cmd": "reg query \"HKLM\\System\\CurrentControlSet\\Control\\Terminal Server\" /v fDenyTSConnections",
+            "ou": "cmd",
+            "effet": "Indique si le Bureau à distance est activé.",
+            "attendu": "0x1 = désactivé (0x0 = activé)"
+          },
+          {
+            "type": "ouvrir",
+            "cmd": "start ms-settings:remotedesktop",
+            "ou": "cmd",
+            "effet": "Ouvre le réglage « Bureau à distance » pour le désactiver."
+          },
+          {
+            "type": "corriger",
+            "cmd": "Set-ItemProperty -Path 'HKLM:\\System\\CurrentControlSet\\Control\\Terminal Server' -Name fDenyTSConnections -Value 1",
+            "ou": "ps_admin",
+            "effet": "Désactive le Bureau à distance.",
+            "attention": "Si vous êtes connecté à ce PC à distance, la connexion sera coupée."
+          }
+        ]
+      },
+      "duration": "2 minutes",
+      "requires_admin": true
+    },
+    "references": []
+  },
+  "NET-003": {
+    "domain": "securite",
+    "category": "Réseau",
+    "severity": "eleve",
+    "title": "Bureau à distance sans authentification réseau (NLA)",
+    "description": "RDP est activé sans l'authentification au niveau du réseau (NLA), qui vérifie l'identité avant d'ouvrir une session.",
+    "danger": "Un attaquant atteint l'écran de connexion et le code RDP sans s'être authentifié, ce qui facilite l'exploitation de failles.",
+    "impact": "Exposition accrue aux failles RDP et aux attaques par déni de service.",
+    "location": "Paramètres > Système > Bureau à distance > Paramètres avancés",
+    "remediation": {
+      "steps": [
+        "Ouvrir les paramètres avancés du Bureau à distance.",
+        "Cocher « Exiger des ordinateurs qu'ils utilisent l'authentification au niveau du réseau »."
+      ],
+      "commands": {
+        "windows": [
+          {
+            "type": "verifier",
+            "cmd": "reg query \"HKLM\\System\\CurrentControlSet\\Control\\Terminal Server\\WinStations\\RDP-Tcp\" /v UserAuthentication",
+            "ou": "cmd",
+            "effet": "Indique si l'authentification réseau (NLA) est exigée.",
+            "attendu": "0x1"
+          },
+          {
+            "type": "ouvrir",
+            "cmd": "SystemPropertiesRemote",
+            "ou": "cmd",
+            "effet": "Ouvre les propriétés « Utilisation à distance » : cochez « …authentification au niveau du réseau »."
+          },
+          {
+            "type": "corriger",
+            "cmd": "Set-ItemProperty -Path 'HKLM:\\System\\CurrentControlSet\\Control\\Terminal Server\\WinStations\\RDP-Tcp' -Name UserAuthentication -Value 1",
+            "ou": "ps_admin",
+            "effet": "Exige l'authentification réseau (NLA) pour le Bureau à distance."
+          }
+        ]
+      },
+      "duration": "2 minutes",
+      "requires_admin": true
+    },
+    "references": []
+  },
+  "NET-004": {
+    "domain": "securite",
+    "category": "Réseau",
+    "severity": "eleve",
+    "title": "Service sensible en écoute sur toutes les interfaces réseau",
+    "description": "Un service sensible (base de données, accès à distance, transfert de fichiers) accepte des connexions depuis n'importe quelle adresse réseau.",
+    "danger": "Sur un réseau public (café, école), d'autres appareils peuvent tenter de se connecter au service et d'exploiter une faille ou un mot de passe faible.",
+    "impact": "Fuite de données ou prise de contrôle du service.",
+    "location": "Configuration du service concerné (voir le processus indiqué)",
+    "remediation": {
+      "steps": [
+        "Identifier le programme indiqué (colonne processus).",
+        "S'il n'est pas utilisé, arrêter le service et désactiver son démarrage automatique.",
+        "S'il est utilisé seulement en local, configurer son adresse d'écoute sur 127.0.0.1 (ex. PostgreSQL : listen_addresses = 'localhost' dans postgresql.conf).",
+        "Vérifier qu'une règle du pare-feu bloque ce port sur le profil Public."
+      ],
+      "commands": {
+        "windows": [
+          {
+            "type": "verifier",
+            "cmd": "netstat -ano | findstr :PORT",
+            "ou": "cmd",
+            "effet": "Montre si le port est ouvert et le numéro du programme (PID, dernière colonne).",
+            "attendu": "aucune ligne LISTENING avec 0.0.0.0",
+            "remplacer": {
+              "PORT": "le numéro de port indiqué dans le constat (ex. 5432)"
+            }
+          },
+          {
+            "type": "verifier",
+            "cmd": "tasklist /FI \"PID eq PID\"",
+            "ou": "cmd",
+            "effet": "Affiche le nom du programme qui utilise ce port.",
+            "remplacer": {
+              "PID": "le numéro de programme (PID) indiqué dans le constat"
+            }
+          },
+          {
+            "type": "ouvrir",
+            "cmd": "services.msc",
+            "ou": "cmd",
+            "effet": "Ouvre la liste des services : arrêtez le service s'il n'est pas utilisé et passez son démarrage en « Manuel »."
+          },
+          {
+            "type": "corriger",
+            "cmd": "New-NetFirewallRule -DisplayName 'KMB - bloquer PORT' -Direction Inbound -LocalPort PORT -Protocol TCP -Action Block -Profile Public",
+            "ou": "ps_admin",
+            "effet": "Bloque ce port sur les réseaux publics (Wi-Fi d'un café, d'une école…).",
+            "remplacer": {
+              "PORT": "le numéro de port indiqué dans le constat (ex. 5432), aux deux endroits"
+            }
+          }
+        ]
+      },
+      "duration": "10 minutes",
+      "requires_admin": true
+    },
+    "references": [],
+    "remediation_linux": {
+      "steps": [
+        "Identifier le service (colonne processus).",
+        "S'il n'est pas utilisé : l'arrêter et le désactiver.",
+        "S'il est utilisé localement : le configurer pour écouter sur 127.0.0.1.",
+        "Bloquer le port dans le pare-feu."
+      ],
+      "commands": {
+        "linux": [
+          {
+            "type": "verifier",
+            "cmd": "sudo ss -tlnp | grep :PORT",
+            "ou": "terminal",
+            "effet": "Montre si le port est ouvert et par quel programme.",
+            "attendu": "aucune ligne avec 0.0.0.0 ou *",
+            "remplacer": {
+              "PORT": "le numéro de port indiqué dans le constat"
+            }
+          },
+          {
+            "type": "corriger",
+            "cmd": "sudo systemctl disable --now SERVICE",
+            "ou": "terminal",
+            "effet": "Arrête le service et l'empêche de redémarrer.",
+            "remplacer": {
+              "SERVICE": "le nom du service (ex. postgresql, vsftpd)"
+            }
+          },
+          {
+            "type": "corriger",
+            "cmd": "sudo ufw deny PORT/tcp",
+            "ou": "terminal",
+            "effet": "Bloque ce port dans le pare-feu.",
+            "remplacer": {
+              "PORT": "le numéro de port indiqué dans le constat"
+            }
+          }
+        ]
+      },
+      "duration": "10 minutes",
+      "requires_admin": true
+    },
+    "remediation_macos": {
+      "steps": [
+        "Identifier l'application (colonne processus).",
+        "La quitter ou désactiver son partage réseau dans ses préférences.",
+        "Activer le pare-feu de macOS."
+      ],
+      "commands": {
+        "macos": [
+          {
+            "type": "verifier",
+            "cmd": "sudo lsof -nP -iTCP:PORT -sTCP:LISTEN",
+            "ou": "terminal",
+            "effet": "Montre quel programme écoute sur ce port.",
+            "attendu": "aucune ligne",
+            "remplacer": {
+              "PORT": "le numéro de port indiqué dans le constat"
+            }
+          },
+          {
+            "type": "corriger",
+            "cmd": "sudo /usr/libexec/ApplicationFirewall/socketfilterfw --setglobalstate on",
+            "ou": "terminal",
+            "effet": "Active le pare-feu de macOS."
+          }
+        ]
+      },
+      "duration": "10 minutes",
+      "requires_admin": true
+    }
+  },
+  "NET-005": {
+    "domain": "securite",
+    "category": "Réseau",
+    "severity": "moyen",
+    "title": "Dossier partagé sur le réseau",
+    "description": "Un dossier non administratif est partagé sur le réseau.",
+    "danger": "Selon les permissions, d'autres utilisateurs du réseau peuvent lire, modifier ou chiffrer (rançongiciel) son contenu.",
+    "impact": "Fuite ou destruction de données.",
+    "location": "Gestion de l'ordinateur > Dossiers partagés > Partages",
+    "remediation": {
+      "steps": [
+        "Ouvrir fsmgmt.msc > Partages.",
+        "Supprimer le partage s'il n'est plus utile.",
+        "Sinon, restreindre les autorisations aux seuls utilisateurs nécessaires (retirer « Tout le monde »)."
+      ],
+      "commands": {
+        "windows": [
+          {
+            "type": "verifier",
+            "cmd": "Get-SmbShare",
+            "ou": "ps",
+            "effet": "Liste les dossiers partagés.",
+            "attendu": "seulement ADMIN$, C$ et IPC$ (partages par défaut)"
+          },
+          {
+            "type": "verifier",
+            "cmd": "Get-SmbShareAccess -Name NOM_DU_PARTAGE",
+            "ou": "ps",
+            "effet": "Montre qui a accès au partage.",
+            "attendu": "pas de « Tout le monde » (Everyone)",
+            "remplacer": {
+              "NOM_DU_PARTAGE": "le nom du partage indiqué dans le constat"
+            }
+          },
+          {
+            "type": "ouvrir",
+            "cmd": "fsmgmt.msc",
+            "ou": "cmd",
+            "effet": "Ouvre « Dossiers partagés » pour arrêter le partage ou réduire les accès."
+          },
+          {
+            "type": "corriger",
+            "cmd": "Remove-SmbShare -Name NOM_DU_PARTAGE -Force",
+            "ou": "ps_admin",
+            "effet": "Arrête le partage (le dossier et ses fichiers ne sont pas supprimés).",
+            "remplacer": {
+              "NOM_DU_PARTAGE": "le nom du partage indiqué dans le constat"
+            }
+          }
+        ]
+      },
+      "duration": "5 minutes",
+      "requires_admin": true
+    },
+    "references": [],
+    "location_linux": "/etc/exports (NFS) ou /etc/samba/smb.conf (Samba)",
+    "remediation_linux": {
+      "steps": [
+        "Supprimer les partages inutiles du fichier de configuration.",
+        "Restreindre les clients autorisés (NFS) ou désactiver l'accès invité (Samba : guest ok = no).",
+        "Recharger le service."
+      ],
+      "commands": {
+        "linux": [
+          {
+            "type": "verifier",
+            "cmd": "sudo exportfs -v",
+            "ou": "terminal",
+            "effet": "Liste les dossiers partagés en NFS.",
+            "attendu": "aucune ligne, ou des clients précis (pas *)"
+          },
+          {
+            "type": "verifier",
+            "cmd": "testparm -s",
+            "ou": "terminal",
+            "effet": "Affiche les partages Samba.",
+            "attendu": "pas de « guest ok = yes »"
+          },
+          {
+            "type": "corriger",
+            "cmd": "sudo nano /etc/exports",
+            "ou": "terminal",
+            "effet": "Ouvre le fichier des partages NFS : supprimez ou restreignez la ligne, puis Ctrl+O, Entrée, Ctrl+X."
+          },
+          {
+            "type": "corriger",
+            "cmd": "sudo exportfs -ra",
+            "ou": "terminal",
+            "effet": "Applique les modifications des partages NFS."
+          },
+          {
+            "type": "corriger",
+            "cmd": "sudo systemctl reload smbd",
+            "ou": "terminal",
+            "effet": "Applique les modifications des partages Samba (après modification de /etc/samba/smb.conf)."
+          }
+        ]
+      },
+      "duration": "10 minutes",
+      "requires_admin": true
+    }
+  },
+  "FW-001": {
+    "domain": "securite",
+    "category": "Pare-feu",
+    "severity": "eleve",
+    "title": "Profil du pare-feu Windows désactivé",
+    "description": "Le pare-feu Windows filtre les connexions entrantes. Un de ses profils (Domaine, Privé ou Public) est désactivé.",
+    "danger": "Sur ce type de réseau, tous les services du poste sont directement joignables par les autres appareils.",
+    "impact": "Les connexions non autorisées atteignent directement la machine.",
+    "location": "Sécurité Windows > Pare-feu et protection du réseau",
+    "remediation": {
+      "steps": [
+        "Ouvrir Paramètres Windows.",
+        "Aller dans Sécurité Windows.",
+        "Ouvrir « Pare-feu et protection du réseau ».",
+        "Activer le pare-feu pour les trois profils réseau (Domaine, Privé, Public)."
+      ],
+      "commands": {
+        "windows": [
+          {
+            "type": "verifier",
+            "cmd": "netsh advfirewall show allprofiles state",
+            "ou": "cmd",
+            "effet": "Affiche l'état du pare-feu pour chaque profil réseau.",
+            "attendu": "État  ACTIVÉ (ON) pour les 3 profils"
+          },
+          {
+            "type": "ouvrir",
+            "cmd": "start windowsdefender://network",
+            "ou": "cmd",
+            "effet": "Ouvre « Pare-feu et protection du réseau » de Sécurité Windows."
+          },
+          {
+            "type": "corriger",
+            "cmd": "netsh advfirewall set allprofiles state on",
+            "ou": "cmd_admin",
+            "effet": "Active le pare-feu pour les 3 profils (domaine, privé, public)."
+          }
+        ]
+      },
+      "duration": "2 minutes",
+      "requires_admin": true
+    },
+    "references": [],
+    "title_linux": "Pare-feu inactif",
+    "description_linux": "Aucun pare-feu (ufw, firewalld, nftables) n'est actif : toutes les connexions entrantes atteignent les services.",
+    "location_linux": "ufw status / firewall-cmd --state",
+    "remediation_linux": {
+      "steps": [
+        "Ubuntu/Debian : activer ufw en autorisant d'abord SSH si vous l'utilisez.",
+        "Fedora/RHEL : activer firewalld."
+      ],
+      "commands": {
+        "linux": [
+          {
+            "type": "verifier",
+            "cmd": "sudo ufw status",
+            "ou": "terminal",
+            "effet": "Affiche l'état du pare-feu.",
+            "attendu": "Status: active"
+          },
+          {
+            "type": "corriger",
+            "cmd": "sudo ufw allow OpenSSH",
+            "ou": "terminal",
+            "effet": "Garde l'accès SSH autorisé.",
+            "attention": "Seulement si vous vous connectez à ce PC à distance en SSH."
+          },
+          {
+            "type": "corriger",
+            "cmd": "sudo ufw enable",
+            "ou": "terminal",
+            "effet": "Active le pare-feu (répondez « y »). Fedora : sudo systemctl enable --now firewalld"
+          }
+        ]
+      },
+      "duration": "5 minutes",
+      "requires_admin": true
+    },
+    "title_macos": "Pare-feu de macOS désactivé",
+    "location_macos": "Réglages Système > Réseau > Coupe-feu",
+    "remediation_macos": {
+      "steps": [
+        "Ouvrir Réglages Système > Réseau > Coupe-feu.",
+        "Activer le coupe-feu."
+      ],
+      "commands": {
+        "macos": [
+          {
+            "type": "verifier",
+            "cmd": "/usr/libexec/ApplicationFirewall/socketfilterfw --getglobalstate",
+            "ou": "terminal",
+            "effet": "Affiche l'état du pare-feu.",
+            "attendu": "Firewall is enabled"
+          },
+          {
+            "type": "corriger",
+            "cmd": "sudo /usr/libexec/ApplicationFirewall/socketfilterfw --setglobalstate on",
+            "ou": "terminal",
+            "effet": "Active le pare-feu de macOS."
+          }
+        ]
+      },
+      "duration": "1 minute",
+      "requires_admin": true
+    },
+    "description_macos": "Le pare-feu applicatif de macOS est désactivé : les applications peuvent recevoir des connexions entrantes sans contrôle."
+  },
+  "FW-002": {
+    "domain": "securite",
+    "category": "Pare-feu",
+    "severity": "eleve",
+    "title": "Connexions entrantes autorisées par défaut",
+    "description": "Le pare-feu laisse passer par défaut les connexions entrantes qui ne correspondent à aucune règle.",
+    "danger": "Le pare-feu ne bloque plus que ce qui est explicitement interdit : tout nouveau service est exposé.",
+    "impact": "Pare-feu largement inefficace.",
+    "location": "wf.msc > Propriétés du pare-feu Windows Defender",
+    "remediation": {
+      "steps": [
+        "Ouvrir wf.msc.",
+        "Cliquer « Propriétés du Pare-feu Windows Defender ».",
+        "Pour chaque profil, régler « Connexions entrantes » sur « Bloquer (par défaut) »."
+      ],
+      "commands": {
+        "windows": [
+          {
+            "type": "verifier",
+            "cmd": "Get-NetFirewallProfile | Select-Object Name,DefaultInboundAction",
+            "ou": "ps",
+            "effet": "Affiche l'action par défaut pour les connexions entrantes.",
+            "attendu": "Block ou NotConfigured pour chaque profil"
+          },
+          {
+            "type": "ouvrir",
+            "cmd": "wf.msc",
+            "ou": "cmd",
+            "effet": "Ouvre le pare-feu avancé : Propriétés > « Connexions entrantes : Bloquer »."
+          },
+          {
+            "type": "corriger",
+            "cmd": "Set-NetFirewallProfile -Profile Domain,Private,Public -DefaultInboundAction Block",
+            "ou": "ps_admin",
+            "effet": "Bloque par défaut les connexions entrantes."
+          }
+        ]
+      },
+      "duration": "3 minutes",
+      "requires_admin": true
+    },
+    "references": [],
+    "location_linux": "/etc/default/ufw (DEFAULT_INPUT_POLICY)",
+    "remediation_linux": {
+      "steps": [
+        "Définir la politique entrante par défaut sur « deny »."
+      ],
+      "commands": {
+        "linux": [
+          {
+            "type": "verifier",
+            "cmd": "sudo ufw status verbose",
+            "ou": "terminal",
+            "effet": "Affiche la politique par défaut.",
+            "attendu": "Default: deny (incoming)"
+          },
+          {
+            "type": "corriger",
+            "cmd": "sudo ufw default deny incoming",
+            "ou": "terminal",
+            "effet": "Bloque par défaut les connexions entrantes."
+          },
+          {
+            "type": "corriger",
+            "cmd": "sudo ufw reload",
+            "ou": "terminal",
+            "effet": "Applique le changement."
+          }
+        ]
+      },
+      "duration": "2 minutes",
+      "requires_admin": true
+    },
+    "location_macos": "Réglages Système > Réseau > Coupe-feu > Options (Bloquer toutes les connexions entrantes)"
+  },
+  "FW-003": {
+    "domain": "securite",
+    "category": "Pare-feu",
+    "severity": "moyen",
+    "title": "Règle entrante autorise un port sensible sur le profil Public",
+    "description": "Une règle du pare-feu autorise des connexions entrantes vers un port sensible (partage de fichiers, bureau à distance, base de données) sur les réseaux publics.",
+    "danger": "Sur un Wi-Fi public, n'importe quel appareil peut joindre ce service.",
+    "impact": "Exposition d'un service à des inconnus.",
+    "location": "wf.msc > Règles de trafic entrant",
+    "remediation": {
+      "steps": [
+        "Ouvrir wf.msc > Règles de trafic entrant.",
+        "Repérer la règle indiquée.",
+        "La désactiver, ou limiter son profil à « Privé » et son étendue au sous-réseau local."
+      ],
+      "commands": {
+        "windows": [
+          {
+            "type": "verifier",
+            "cmd": "Get-NetFirewallRule -DisplayName 'NOM_DE_LA_REGLE' | Select-Object DisplayName,Enabled,Profile",
+            "ou": "ps_admin",
+            "effet": "Affiche la règle signalée.",
+            "attendu": "Enabled : False, ou un profil autre que Public",
+            "remplacer": {
+              "NOM_DE_LA_REGLE": "le nom de la règle indiqué dans le constat"
+            }
+          },
+          {
+            "type": "ouvrir",
+            "cmd": "wf.msc",
+            "ou": "cmd",
+            "effet": "Ouvre le pare-feu avancé : Règles de trafic entrant."
+          },
+          {
+            "type": "corriger",
+            "cmd": "Disable-NetFirewallRule -DisplayName 'NOM_DE_LA_REGLE'",
+            "ou": "ps_admin",
+            "effet": "Désactive cette règle.",
+            "remplacer": {
+              "NOM_DE_LA_REGLE": "le nom de la règle indiqué dans le constat"
+            }
+          }
+        ]
+      },
+      "duration": "5 minutes",
+      "requires_admin": true
+    },
+    "references": []
+  },
+  "AV-001": {
+    "domain": "securite",
+    "category": "Antivirus",
+    "severity": "critique",
+    "title": "Aucun antivirus actif",
+    "description": "Aucun antivirus actif n'a été détecté sur le poste.",
+    "danger": "Les logiciels malveillants (virus, rançongiciels, voleurs de mots de passe) peuvent s'exécuter sans aucune détection.",
+    "impact": "Infection non détectée, perte ou vol de données.",
+    "location": "Sécurité Windows > Protection contre les virus et menaces",
+    "remediation": {
+      "steps": [
+        "Ouvrir Sécurité Windows > Protection contre les virus et menaces.",
+        "Activer Microsoft Defender Antivirus, ou installer un antivirus reconnu.",
+        "Lancer une analyse rapide."
+      ],
+      "commands": {
+        "windows": [
+          {
+            "type": "verifier",
+            "cmd": "Get-MpComputerStatus | Select-Object AntivirusEnabled,RealTimeProtectionEnabled",
+            "ou": "ps",
+            "effet": "Affiche l'état de Microsoft Defender.",
+            "attendu": "True et True"
+          },
+          {
+            "type": "ouvrir",
+            "cmd": "start windowsdefender://threat",
+            "ou": "cmd",
+            "effet": "Ouvre « Protection contre les virus et menaces »."
+          },
+          {
+            "type": "corriger",
+            "cmd": "Set-MpPreference -DisableRealtimeMonitoring $false",
+            "ou": "ps_admin",
+            "effet": "Active la protection en temps réel de Defender."
+          },
+          {
+            "type": "corriger",
+            "cmd": "Start-MpScan -ScanType QuickScan",
+            "ou": "ps_admin",
+            "effet": "Lance une analyse rapide (quelques minutes)."
+          }
+        ]
+      },
+      "duration": "10 minutes",
+      "requires_admin": true
+    },
+    "references": [],
+    "description_linux": "Aucun antivirus n'a été détecté. Sur un poste Linux, le risque est plus faible que sous Windows mais reste réel (fichiers partagés avec des postes Windows, scripts téléchargés).",
+    "remediation_linux": {
+      "steps": [
+        "Installer ClamAV et activer la mise à jour automatique des signatures.",
+        "Analyser régulièrement les dossiers de téléchargement."
+      ],
+      "commands": {
+        "linux": [
+          {
+            "type": "corriger",
+            "cmd": "sudo apt install clamav clamav-daemon",
+            "ou": "terminal",
+            "effet": "Installe l'antivirus ClamAV.",
+            "attention": "Ubuntu / Debian. Fedora : sudo dnf install clamav"
+          },
+          {
+            "type": "corriger",
+            "cmd": "sudo systemctl enable --now clamav-freshclam",
+            "ou": "terminal",
+            "effet": "Active la mise à jour automatique des signatures."
+          },
+          {
+            "type": "verifier",
+            "cmd": "clamscan -r ~/Téléchargements",
+            "ou": "terminal",
+            "effet": "Analyse le dossier Téléchargements.",
+            "attendu": "Infected files: 0"
+          }
+        ]
+      },
+      "duration": "10 minutes",
+      "requires_admin": true
+    },
+    "location_linux": "Gestionnaire de paquets",
+    "location_macos": "XProtect (intégré à macOS)"
+  },
+  "AV-002": {
+    "domain": "securite",
+    "category": "Antivirus",
+    "severity": "eleve",
+    "title": "Protection en temps réel désactivée",
+    "description": "L'antivirus est installé mais n'analyse pas les fichiers au moment où ils sont ouverts ou téléchargés.",
+    "danger": "Un fichier malveillant peut s'exécuter avant toute analyse.",
+    "impact": "Infection possible malgré la présence d'un antivirus.",
+    "location": "Sécurité Windows > Protection contre les virus et menaces > Gérer les paramètres",
+    "remediation": {
+      "steps": [
+        "Ouvrir Sécurité Windows > Protection contre les virus et menaces.",
+        "Cliquer sur « Gérer les paramètres ».",
+        "Activer « Protection en temps réel »."
+      ],
+      "commands": {
+        "windows": [
+          {
+            "type": "verifier",
+            "cmd": "Get-MpComputerStatus | Select-Object RealTimeProtectionEnabled",
+            "ou": "ps",
+            "effet": "Indique si la protection en temps réel est active.",
+            "attendu": "True"
+          },
+          {
+            "type": "ouvrir",
+            "cmd": "start windowsdefender://threat",
+            "ou": "cmd",
+            "effet": "Ouvre « Protection contre les virus et menaces » > Gérer les paramètres."
+          },
+          {
+            "type": "corriger",
+            "cmd": "Set-MpPreference -DisableRealtimeMonitoring $false",
+            "ou": "ps_admin",
+            "effet": "Active la protection en temps réel."
+          }
+        ]
+      },
+      "duration": "1 minute",
+      "requires_admin": true
+    },
+    "references": []
+  },
+  "AV-003": {
+    "domain": "securite",
+    "category": "Antivirus",
+    "severity": "moyen",
+    "title": "Signatures antivirus obsolètes",
+    "description": "Les définitions de virus n'ont pas été mises à jour depuis plus de 7 jours.",
+    "danger": "Les menaces apparues récemment ne sont pas reconnues.",
+    "impact": "Détection réduite des nouveaux logiciels malveillants.",
+    "location": "Sécurité Windows > Protection contre les virus et menaces > Mises à jour",
+    "remediation": {
+      "steps": [
+        "Ouvrir Sécurité Windows > Protection contre les virus et menaces.",
+        "Cliquer « Mises à jour de la protection » > « Rechercher des mises à jour »."
+      ],
+      "commands": {
+        "windows": [
+          {
+            "type": "verifier",
+            "cmd": "Get-MpComputerStatus | Select-Object AntivirusSignatureLastUpdated,AntivirusSignatureAge",
+            "ou": "ps",
+            "effet": "Affiche la date et l'âge (en jours) des signatures.",
+            "attendu": "âge de 0 ou 1 jour"
+          },
+          {
+            "type": "corriger",
+            "cmd": "Update-MpSignature",
+            "ou": "ps_admin",
+            "effet": "Télécharge les dernières signatures antivirus."
+          }
+        ]
+      },
+      "duration": "2 minutes",
+      "requires_admin": false
+    },
+    "references": [],
+    "remediation_linux": {
+      "steps": [
+        "Mettre à jour les signatures ClamAV."
+      ],
+      "commands": {
+        "linux": [
+          {
+            "type": "corriger",
+            "cmd": "sudo systemctl restart clamav-freshclam",
+            "ou": "terminal",
+            "effet": "Relance la mise à jour des signatures ClamAV."
+          }
+        ]
+      },
+      "duration": "2 minutes",
+      "requires_admin": true
+    },
+    "remediation_macos": {
+      "steps": [
+        "Les signatures XProtect sont livrées par les mises à jour automatiques de macOS : activer « Installer les réponses de sécurité et les fichiers système »."
+      ],
+      "commands": {
+        "macos": [
+          {
+            "type": "ouvrir",
+            "cmd": "open \"x-apple.systempreferences:com.apple.Software-Update-Settings.extension\"",
+            "ou": "terminal",
+            "effet": "Ouvre Mise à jour de logiciels : activez « Installer les réponses de sécurité et les fichiers système »."
+          }
+        ]
+      },
+      "duration": "2 minutes",
+      "requires_admin": true
+    },
+    "location_linux": "/var/lib/clamav (signatures ClamAV)",
+    "location_macos": "XProtect (mis à jour par Apple)"
+  },
+  "ENC-001": {
+    "domain": "securite",
+    "category": "Chiffrement",
+    "severity": "eleve",
+    "title": "Disque système non chiffré (BitLocker désactivé)",
+    "description": "Le disque contenant Windows et les données n'est pas chiffré.",
+    "danger": "En cas de perte ou de vol de l'ordinateur, n'importe qui peut lire tout le contenu du disque en le branchant sur une autre machine, sans connaître le mot de passe Windows.",
+    "impact": "Fuite de toutes les données personnelles et professionnelles en cas de vol.",
+    "location": "Panneau de configuration > Système et sécurité > Chiffrement de lecteur BitLocker",
+    "remediation": {
+      "steps": [
+        "Ouvrir « Gérer BitLocker » depuis le menu Démarrer.",
+        "Cliquer « Activer BitLocker » sur le lecteur C:.",
+        "Sauvegarder la clé de récupération (compte Microsoft, fichier sur clé USB ou impression), JAMAIS seulement sur le disque chiffré.",
+        "Choisir « Chiffrer uniquement l'espace disque utilisé » et le mode « Nouveau chiffrement ».",
+        "Redémarrer pour lancer le chiffrement (le PC reste utilisable pendant l'opération)."
+      ],
+      "commands": {
+        "windows": [
+          {
+            "type": "verifier",
+            "cmd": "manage-bde -status C:",
+            "ou": "cmd_admin",
+            "effet": "Affiche l'état de BitLocker sur le disque C:.",
+            "attendu": "Statut de la protection : Protection activée"
+          },
+          {
+            "type": "ouvrir",
+            "cmd": "control /name Microsoft.BitLockerDriveEncryption",
+            "ou": "cmd",
+            "effet": "Ouvre « Gérer BitLocker » (méthode recommandée : l'assistant guide chaque étape)."
+          },
+          {
+            "type": "corriger",
+            "cmd": "manage-bde -on C: -RecoveryPassword",
+            "ou": "cmd_admin",
+            "effet": "Crée une clé de récupération et lance le chiffrement de C: (l'ordinateur reste utilisable).",
+            "attention": "AVANT : notez la clé de récupération affichée (48 chiffres) et gardez-la hors de ce PC (papier, photo, compte Microsoft). Sans elle, vos données peuvent être perdues. Windows Famille : BitLocker n'existe pas, utilisez « Chiffrement de l'appareil » dans Paramètres."
+          }
+        ]
+      },
+      "duration": "10 minutes (+ chiffrement en arrière-plan)",
+      "requires_admin": true
+    },
+    "references": [
+      "https://learn.microsoft.com/windows/security/operating-system-security/data-protection/bitlocker/"
+    ],
+    "title_linux": "Disque système non chiffré (LUKS absent)",
+    "location_linux": "lsblk -f (type crypt / crypto_LUKS)",
+    "remediation_linux": {
+      "steps": [
+        "Le chiffrement LUKS se choisit normalement à l'installation : sauvegarder les données.",
+        "Réinstaller la distribution en cochant « Chiffrer l'installation » (LVM + LUKS).",
+        "Restaurer les données."
+      ],
+      "commands": {
+        "linux": [
+          {
+            "type": "verifier",
+            "cmd": "lsblk -f",
+            "ou": "terminal",
+            "effet": "Affiche les disques et leur chiffrement.",
+            "attendu": "« crypto_LUKS » sous le disque qui contient « / »"
+          }
+        ]
+      },
+      "duration": "2 à 3 heures",
+      "requires_admin": true
+    },
+    "title_macos": "Disque non chiffré (FileVault désactivé)",
+    "location_macos": "Réglages Système > Confidentialité et sécurité > FileVault",
+    "remediation_macos": {
+      "steps": [
+        "Ouvrir Réglages Système > Confidentialité et sécurité.",
+        "Cliquer « Activer » dans la section FileVault.",
+        "Conserver la clé de secours en lieu sûr (ou la lier au compte iCloud)."
+      ],
+      "commands": {
+        "macos": [
+          {
+            "type": "verifier",
+            "cmd": "fdesetup status",
+            "ou": "terminal",
+            "effet": "Affiche l'état de FileVault.",
+            "attendu": "FileVault is On."
+          },
+          {
+            "type": "ouvrir",
+            "cmd": "open \"x-apple.systempreferences:com.apple.settings.PrivacySecurity.extension\"",
+            "ou": "terminal",
+            "effet": "Ouvre Confidentialité et sécurité, section FileVault (méthode recommandée)."
+          },
+          {
+            "type": "corriger",
+            "cmd": "sudo fdesetup enable",
+            "ou": "terminal",
+            "effet": "Active FileVault et affiche la clé de secours.",
+            "attention": "Notez la clé de secours affichée et gardez-la hors de ce Mac."
+          }
+        ]
+      },
+      "duration": "5 minutes (+ chiffrement en arrière-plan)",
+      "requires_admin": true
+    },
+    "description_linux": "Le disque contenant le système et les données n'est pas chiffré.",
+    "description_macos": "Le disque contenant le système et les données n'est pas chiffré.",
+    "danger_linux": "En cas de perte ou de vol de l'ordinateur, n'importe qui peut lire tout le contenu du disque en le branchant sur une autre machine, sans connaître le mot de passe de session.",
+    "danger_macos": "En cas de perte ou de vol de l'ordinateur, n'importe qui peut lire tout le contenu du disque en le branchant sur une autre machine, sans connaître le mot de passe de session."
+  },
+  "ENC-002": {
+    "domain": "securite",
+    "category": "Chiffrement",
+    "severity": "faible",
+    "title": "Volume de données non chiffré",
+    "description": "Un disque ou une partition de données secondaire n'est pas chiffré.",
+    "danger": "Les fichiers de ce volume sont lisibles en cas de vol du matériel.",
+    "impact": "Fuite des données stockées sur ce volume.",
+    "location": "Gérer BitLocker",
+    "remediation": {
+      "steps": [
+        "Ouvrir « Gérer BitLocker ».",
+        "Activer BitLocker sur le volume indiqué et sauvegarder la clé de récupération."
+      ],
+      "commands": {
+        "windows": [
+          {
+            "type": "verifier",
+            "cmd": "manage-bde -status",
+            "ou": "cmd_admin",
+            "effet": "Affiche l'état de BitLocker pour chaque disque.",
+            "attendu": "Protection activée pour chaque disque"
+          },
+          {
+            "type": "corriger",
+            "cmd": "manage-bde -on LETTRE: -RecoveryPassword",
+            "ou": "cmd_admin",
+            "effet": "Lance le chiffrement de ce disque.",
+            "remplacer": {
+              "LETTRE": "la lettre du disque indiquée dans le constat (ex. D)"
+            },
+            "attention": "Notez la clé de récupération affichée et gardez-la hors de ce PC."
+          }
+        ]
+      },
+      "duration": "10 minutes",
+      "requires_admin": true
+    },
+    "references": []
+  },
+  "APP-001": {
+    "domain": "logiciels",
+    "category": "Logiciels",
+    "severity": "eleve",
+    "title": "Logiciel en fin de support",
+    "description": "Ce logiciel (ou cette branche de version) ne reçoit plus de correctifs de sécurité de son éditeur.",
+    "danger": "Les failles découvertes ne seront plus corrigées ; les logiciels obsolètes sont une porte d'entrée classique.",
+    "impact": "Vulnérabilités permanentes, incompatibilités futures.",
+    "location": "Paramètres > Applications > Applications installées",
+    "remediation": {
+      "steps": [
+        "Vérifier si le logiciel est encore utilisé.",
+        "S'il ne l'est pas : le désinstaller (Paramètres > Applications).",
+        "S'il l'est : installer la version supportée la plus récente depuis le site officiel de l'éditeur, puis désinstaller l'ancienne."
+      ],
+      "commands": {
+        "windows": [
+          {
+            "type": "verifier",
+            "cmd": "winget list --name \"NOM_DU_LOGICIEL\"",
+            "ou": "cmd",
+            "effet": "Vérifie que le logiciel est installé et affiche sa version.",
+            "attendu": "la version actuelle, ou rien s'il est désinstallé",
+            "remplacer": {
+              "NOM_DU_LOGICIEL": "le nom du logiciel indiqué dans le constat (ex. Visual C++ 2010)"
+            }
+          },
+          {
+            "type": "ouvrir",
+            "cmd": "start ms-settings:appsfeatures",
+            "ou": "cmd",
+            "effet": "Ouvre la liste des applications installées (Désinstaller ou Modifier)."
+          },
+          {
+            "type": "corriger",
+            "cmd": "winget upgrade --name \"NOM_DU_LOGICIEL\"",
+            "ou": "cmd",
+            "effet": "Installe la dernière version du logiciel.",
+            "remplacer": {
+              "NOM_DU_LOGICIEL": "le nom du logiciel indiqué dans le constat"
+            }
+          },
+          {
+            "type": "corriger",
+            "cmd": "winget uninstall --name \"NOM_DU_LOGICIEL\"",
+            "ou": "cmd",
+            "effet": "Désinstalle le logiciel, si vous ne l'utilisez plus.",
+            "remplacer": {
+              "NOM_DU_LOGICIEL": "le nom du logiciel indiqué dans le constat"
+            },
+            "attention": "Vérifiez avant qu'aucun programme n'en a besoin (les composants Visual C++ servent parfois à d'autres logiciels)."
+          }
+        ]
+      },
+      "duration": "10 à 20 minutes",
+      "requires_admin": true
+    },
+    "references": [
+      "https://endoflife.date"
+    ],
+    "remediation_linux": {
+      "steps": [
+        "Mettre à jour vers une branche supportée (paquet plus récent de la distribution, ou mise à niveau de la distribution).",
+        "Désinstaller le paquet s'il n'est plus utilisé."
+      ],
+      "commands": {
+        "linux": [
+          {
+            "type": "verifier",
+            "cmd": "apt list --installed 2>/dev/null | grep NOM",
+            "ou": "terminal",
+            "effet": "Affiche le paquet et sa version.",
+            "remplacer": {
+              "NOM": "le nom du paquet indiqué dans le constat"
+            }
+          },
+          {
+            "type": "corriger",
+            "cmd": "sudo apt update && sudo apt upgrade",
+            "ou": "terminal",
+            "effet": "Met à jour les paquets vers la dernière version fournie par la distribution."
+          },
+          {
+            "type": "corriger",
+            "cmd": "sudo apt remove NOM",
+            "ou": "terminal",
+            "effet": "Désinstalle le paquet s'il n'est plus utilisé.",
+            "remplacer": {
+              "NOM": "le nom du paquet indiqué dans le constat"
+            }
+          }
+        ]
+      },
+      "duration": "10 minutes",
+      "requires_admin": true
+    },
+    "remediation_macos": {
+      "steps": [
+        "Mettre à jour l'application depuis l'App Store, son menu « Rechercher les mises à jour » ou Homebrew.",
+        "La supprimer si elle n'est plus utilisée."
+      ],
+      "commands": {
+        "macos": [
+          {
+            "type": "ouvrir",
+            "cmd": "open -a \"App Store\"",
+            "ou": "terminal",
+            "effet": "Ouvre l'App Store, onglet Mises à jour."
+          },
+          {
+            "type": "corriger",
+            "cmd": "brew upgrade",
+            "ou": "terminal",
+            "effet": "Met à jour les logiciels installés avec Homebrew."
+          }
+        ]
+      },
+      "duration": "10 minutes",
+      "requires_admin": false
+    }
+  },
+  "APP-002": {
+    "domain": "logiciels",
+    "category": "Logiciels",
+    "severity": "faible",
+    "title": "Mise à jour disponible",
+    "description": "Une version plus récente de ce logiciel est disponible dans la même branche supportée.",
+    "danger": "Les mises à jour mineures corrigent souvent des failles de sécurité.",
+    "impact": "Vulnérabilités déjà corrigées par l'éditeur mais encore présentes sur le poste.",
+    "location": "Paramètres > Applications > Applications installées",
+    "remediation": {
+      "steps": [
+        "Ouvrir le logiciel et utiliser sa fonction « Rechercher les mises à jour », ou utiliser winget.",
+        "Activer la mise à jour automatique si elle existe."
+      ],
+      "commands": {
+        "windows": [
+          {
+            "type": "verifier",
+            "cmd": "winget upgrade",
+            "ou": "cmd",
+            "effet": "Liste les logiciels qui ont une mise à jour disponible.",
+            "attendu": "« Aucune mise à jour disponible »"
+          },
+          {
+            "type": "corriger",
+            "cmd": "winget upgrade --name \"NOM_DU_LOGICIEL\"",
+            "ou": "cmd",
+            "effet": "Met à jour ce logiciel.",
+            "remplacer": {
+              "NOM_DU_LOGICIEL": "le nom du logiciel indiqué dans le constat"
+            }
+          },
+          {
+            "type": "corriger",
+            "cmd": "winget upgrade --all",
+            "ou": "cmd",
+            "effet": "Met à jour tous les logiciels de la liste.",
+            "attention": "Fermez les logiciels concernés avant."
+          }
+        ]
+      },
+      "duration": "5 minutes",
+      "requires_admin": false
+    },
+    "references": [
+      "https://endoflife.date"
+    ],
+    "remediation_linux": {
+      "steps": [
+        "Mettre à jour les paquets."
+      ],
+      "commands": {
+        "linux": [
+          {
+            "type": "corriger",
+            "cmd": "sudo apt update && sudo apt upgrade",
+            "ou": "terminal",
+            "effet": "Met à jour les paquets."
+          },
+          {
+            "type": "corriger",
+            "cmd": "flatpak update",
+            "ou": "terminal",
+            "effet": "Met à jour les applications Flatpak."
+          },
+          {
+            "type": "corriger",
+            "cmd": "sudo snap refresh",
+            "ou": "terminal",
+            "effet": "Met à jour les applications Snap."
+          }
+        ]
+      },
+      "duration": "5 minutes",
+      "requires_admin": true
+    },
+    "remediation_macos": {
+      "steps": [
+        "Mettre à jour l'application (App Store, menu de l'application ou Homebrew)."
+      ],
+      "commands": {
+        "macos": [
+          {
+            "type": "corriger",
+            "cmd": "brew upgrade",
+            "ou": "terminal",
+            "effet": "Met à jour les logiciels Homebrew ; pour les autres : App Store > Mises à jour."
+          }
+        ]
+      },
+      "duration": "5 minutes",
+      "requires_admin": false
+    }
+  },
+  "APP-003": {
+    "domain": "logiciels",
+    "category": "Logiciels",
+    "severity": "faible",
+    "title": "Plusieurs versions du même logiciel installées",
+    "description": "Plusieurs versions d'un même logiciel coexistent (ex. Java 8, 11 et 17).",
+    "danger": "Les anciennes versions restent exploitables même si on ne les utilise plus, et occupent de l'espace disque.",
+    "impact": "Surface d'attaque inutile, espace disque gaspillé, confusion entre versions.",
+    "location": "Paramètres > Applications > Applications installées",
+    "remediation": {
+      "steps": [
+        "Identifier la version réellement utilisée par vos projets.",
+        "Désinstaller les autres versions."
+      ],
+      "commands": {
+        "windows": [
+          {
+            "type": "verifier",
+            "cmd": "winget list --name \"NOM\"",
+            "ou": "cmd",
+            "effet": "Liste toutes les versions installées avec leur identifiant (colonne ID).",
+            "remplacer": {
+              "NOM": "le nom commun (ex. Python, Java)"
+            }
+          },
+          {
+            "type": "ouvrir",
+            "cmd": "start ms-settings:appsfeatures",
+            "ou": "cmd",
+            "effet": "Ouvre la liste des applications pour désinstaller l'ancienne version."
+          },
+          {
+            "type": "corriger",
+            "cmd": "winget uninstall --id IDENTIFIANT",
+            "ou": "cmd",
+            "effet": "Désinstalle la version choisie.",
+            "remplacer": {
+              "IDENTIFIANT": "le contenu de la colonne ID de la version à retirer"
+            },
+            "attention": "Gardez la version qu'utilisent vos projets."
+          }
+        ]
+      },
+      "duration": "10 minutes",
+      "requires_admin": true
+    },
+    "references": [],
+    "remediation_linux": {
+      "steps": [
+        "Identifier la version utilisée par vos projets.",
+        "Supprimer les autres paquets."
+      ],
+      "commands": {
+        "linux": [
+          {
+            "type": "verifier",
+            "cmd": "apt list --installed 2>/dev/null | grep NOM",
+            "ou": "terminal",
+            "effet": "Liste les versions installées.",
+            "remplacer": {
+              "NOM": "le nom commun (ex. python3, openjdk)"
+            }
+          },
+          {
+            "type": "corriger",
+            "cmd": "sudo apt remove PAQUET",
+            "ou": "terminal",
+            "effet": "Désinstalle la version choisie.",
+            "remplacer": {
+              "PAQUET": "le nom exact du paquet à retirer"
+            }
+          },
+          {
+            "type": "corriger",
+            "cmd": "sudo apt autoremove",
+            "ou": "terminal",
+            "effet": "Supprime les dépendances devenues inutiles."
+          }
+        ]
+      },
+      "duration": "10 minutes",
+      "requires_admin": true
+    },
+    "remediation_macos": {
+      "steps": [
+        "Supprimer les versions inutilisées (glisser l'application dans la corbeille ou brew uninstall)."
+      ],
+      "commands": {
+        "macos": [
+          {
+            "type": "verifier",
+            "cmd": "brew list --versions",
+            "ou": "terminal",
+            "effet": "Liste les logiciels Homebrew et leurs versions."
+          },
+          {
+            "type": "corriger",
+            "cmd": "brew cleanup",
+            "ou": "terminal",
+            "effet": "Supprime les anciennes versions gardées par Homebrew."
+          }
+        ]
+      },
+      "duration": "10 minutes",
+      "requires_admin": false
+    }
+  },
+  "APP-004": {
+    "domain": "logiciels",
+    "category": "Logiciels",
+    "severity": "info",
+    "title": "Applications volumineuses",
+    "description": "Applications installées occupant plus de 2 Go d'après leur déclaration au registre.",
+    "danger": "Aucun danger de sécurité, mais un gain d'espace possible si elles ne servent plus.",
+    "impact": "Espace disque.",
+    "location": "Paramètres > Applications > Applications installées (trier par taille)",
+    "remediation": {
+      "steps": [
+        "Trier les applications par taille.",
+        "Désinstaller celles qui ne sont plus utilisées."
+      ],
+      "commands": {
+        "windows": [
+          {
+            "type": "ouvrir",
+            "cmd": "start ms-settings:appsfeatures",
+            "ou": "cmd",
+            "effet": "Ouvre la liste des applications : triez par taille et désinstallez celles qui ne servent plus."
+          }
+        ],
+        "macos": [
+          {
+            "type": "ouvrir",
+            "cmd": "open /Applications",
+            "ou": "terminal",
+            "effet": "Ouvre le dossier Applications (glisser une application dans la Corbeille la désinstalle)."
+          }
+        ]
+      },
+      "duration": "10 minutes",
+      "requires_admin": false
+    },
+    "references": []
+  },
+  "PERF-001": {
+    "domain": "performance",
+    "category": "Processeur",
+    "severity": "moyen",
+    "title": "Processeur saturé",
+    "description": "L'utilisation moyenne du processeur dépasse 85 % pendant la mesure.",
+    "danger": "Pas de danger de sécurité direct ; une saturation inexpliquée peut toutefois signaler un logiciel malveillant (ex. minage de cryptomonnaie).",
+    "impact": "Lenteurs, surchauffe, autonomie réduite.",
+    "location": "Gestionnaire des tâches > Processus (trier par Processeur)",
+    "remediation": {
+      "steps": [
+        "Ouvrir le Gestionnaire des tâches (Ctrl+Maj+Échap).",
+        "Trier par « Processeur » et identifier le programme responsable (voir la liste des processus gourmands).",
+        "Fermer ou désinstaller le programme s'il n'est pas nécessaire ; lancer une analyse antivirus si le processus est inconnu."
+      ],
+      "commands": {
+        "windows": [
+          {
+            "type": "ouvrir",
+            "cmd": "taskmgr",
+            "ou": "cmd",
+            "effet": "Ouvre le Gestionnaire des tâches : cliquez sur la colonne « Processeur » pour trier."
+          },
+          {
+            "type": "verifier",
+            "cmd": "Get-Process | Sort-Object CPU -Descending | Select-Object -First 10 Name,CPU",
+            "ou": "ps",
+            "effet": "Liste les 10 programmes qui ont le plus utilisé le processeur."
+          }
+        ]
+      },
+      "duration": "5 minutes",
+      "requires_admin": false
+    },
+    "references": []
+  },
+  "PERF-002": {
+    "domain": "performance",
+    "category": "Mémoire",
+    "severity": "moyen",
+    "title": "Mémoire vive insuffisante",
+    "description": "Le poste dispose de moins de 8 Go de mémoire vive, en dessous de la recommandation pour un usage courant actuel.",
+    "danger": "Aucun danger de sécurité.",
+    "impact": "Utilisation du fichier d'échange sur disque, lenteurs importantes.",
+    "location": "Paramètres > Système > À propos",
+    "remediation": {
+      "steps": [
+        "Vérifier le nombre d'emplacements mémoire libres (application CPU-Z ou fiche du fabricant).",
+        "Ajouter une barrette compatible pour atteindre au moins 8 Go (idéalement 16 Go).",
+        "En attendant, limiter le nombre d'applications ouvertes simultanément."
+      ],
+      "commands": {
+        "windows": [
+          {
+            "type": "verifier",
+            "cmd": "Get-CimInstance Win32_PhysicalMemory | Select-Object Capacity,Speed,DeviceLocator",
+            "ou": "ps",
+            "effet": "Affiche chaque barrette de mémoire (taille en octets, vitesse, emplacement).",
+            "attendu": "au moins 8 Go au total"
+          }
+        ]
+      },
+      "duration": "30 minutes",
+      "requires_admin": false
+    },
+    "references": []
+  },
+  "PERF-003": {
+    "domain": "performance",
+    "category": "Mémoire",
+    "severity": "moyen",
+    "title": "Mémoire vive presque saturée",
+    "description": "Plus de 85 % de la mémoire vive est utilisée au moment du scan.",
+    "danger": "Aucun danger de sécurité.",
+    "impact": "Ralentissements, fermetures d'applications.",
+    "location": "Gestionnaire des tâches > Performance > Mémoire",
+    "remediation": {
+      "steps": [
+        "Fermer les applications et onglets de navigateur inutilisés.",
+        "Identifier les programmes les plus gourmands (voir la liste).",
+        "Désactiver les programmes inutiles au démarrage."
+      ],
+      "commands": {
+        "windows": [
+          {
+            "type": "ouvrir",
+            "cmd": "taskmgr",
+            "ou": "cmd",
+            "effet": "Ouvre le Gestionnaire des tâches : triez par « Mémoire » et fermez ce qui ne sert pas."
+          },
+          {
+            "type": "verifier",
+            "cmd": "Get-Process | Sort-Object WorkingSet64 -Descending | Select-Object -First 10 Name,@{n='Mo';e={[int]($_.WorkingSet64/1MB)}}",
+            "ou": "ps",
+            "effet": "Liste les 10 programmes qui utilisent le plus de mémoire."
+          }
+        ]
+      },
+      "duration": "5 minutes",
+      "requires_admin": false
+    },
+    "references": []
+  },
+  "PERF-004": {
+    "domain": "performance",
+    "category": "Démarrage",
+    "severity": "faible",
+    "title": "Nombreux programmes lancés au démarrage",
+    "description": "Plusieurs programmes se lancent automatiquement à l'ouverture de session.",
+    "danger": "Les programmes de démarrage sont aussi un mécanisme de persistance des logiciels malveillants : chaque entrée inconnue doit être vérifiée.",
+    "impact": "Démarrage plus lent et mémoire occupée en permanence.",
+    "location": "Gestionnaire des tâches > Démarrage",
+    "remediation": {
+      "steps": [
+        "Ouvrir le Gestionnaire des tâches > onglet « Démarrage ».",
+        "Désactiver les programmes non indispensables (garder l'antivirus et les pilotes).",
+        "Rechercher sur Internet toute entrée inconnue avant de la désactiver."
+      ],
+      "commands": {
+        "windows": [
+          {
+            "type": "ouvrir",
+            "cmd": "start ms-settings:startupapps",
+            "ou": "cmd",
+            "effet": "Ouvre Paramètres > Applications > Démarrage : un interrupteur par programme."
+          },
+          {
+            "type": "ouvrir",
+            "cmd": "taskmgr /0 /startup",
+            "ou": "cmd",
+            "effet": "Ouvre directement l'onglet « Démarrage » du Gestionnaire des tâches."
+          },
+          {
+            "type": "verifier",
+            "cmd": "Get-CimInstance Win32_StartupCommand | Select-Object Name,Command",
+            "ou": "ps",
+            "effet": "Liste les programmes lancés au démarrage."
+          }
+        ]
+      },
+      "duration": "5 minutes",
+      "requires_admin": false
+    },
+    "references": [],
+    "location_linux": "~/.config/autostart et /etc/xdg/autostart",
+    "remediation_linux": {
+      "steps": [
+        "Ouvrir « Applications au démarrage » (GNOME Tweaks ou paramètres de l'environnement).",
+        "Désactiver les applications non indispensables."
+      ],
+      "commands": {
+        "linux": [
+          {
+            "type": "verifier",
+            "cmd": "ls ~/.config/autostart",
+            "ou": "terminal",
+            "effet": "Liste les applications lancées à l'ouverture de session."
+          }
+        ]
+      },
+      "duration": "5 minutes",
+      "requires_admin": false
+    },
+    "location_macos": "Réglages Système > Général > Ouverture et éléments de connexion",
+    "remediation_macos": {
+      "steps": [
+        "Ouvrir Réglages Système > Général > Ouverture et éléments de connexion.",
+        "Retirer les éléments inutiles et désactiver « Autoriser en arrière-plan » pour les applications superflues."
+      ],
+      "commands": {
+        "macos": [
+          {
+            "type": "ouvrir",
+            "cmd": "open \"x-apple.systempreferences:com.apple.LoginItems-Settings.extension\"",
+            "ou": "terminal",
+            "effet": "Ouvre Ouverture et éléments de connexion."
+          }
+        ]
+      },
+      "duration": "5 minutes",
+      "requires_admin": false
+    }
+  },
+  "PERF-005": {
+    "domain": "performance",
+    "category": "Processus",
+    "severity": "faible",
+    "title": "Application très gourmande en mémoire",
+    "description": "Une application (tous ses processus confondus) utilise plus de 20 % de la mémoire vive.",
+    "danger": "Aucun danger de sécurité.",
+    "impact": "Ralentit l'ensemble du système.",
+    "location": "Gestionnaire des tâches > Processus",
+    "remediation": {
+      "steps": [
+        "Vérifier si l'application est nécessaire en permanence.",
+        "Réduire son usage (moins d'onglets, d'extensions ou de projets ouverts) ou la redémarrer."
+      ],
+      "commands": {
+        "windows": [
+          {
+            "type": "verifier",
+            "cmd": "Get-Process -Name NOM | Measure-Object WorkingSet64 -Sum",
+            "ou": "ps",
+            "effet": "Affiche la mémoire totale utilisée par cette application (Sum, en octets).",
+            "remplacer": {
+              "NOM": "le nom de l'application sans « .exe » (ex. Code, chrome)"
+            }
+          },
+          {
+            "type": "ouvrir",
+            "cmd": "taskmgr",
+            "ou": "cmd",
+            "effet": "Ouvre le Gestionnaire des tâches pour fermer l'application ou la redémarrer."
+          }
+        ]
+      },
+      "duration": "2 minutes",
+      "requires_admin": false
+    },
+    "references": []
+  },
+  "PERF-006": {
+    "domain": "performance",
+    "category": "Système",
+    "severity": "faible",
+    "title": "Ordinateur non redémarré depuis longtemps",
+    "description": "Le poste n'a pas été redémarré depuis plus de 14 jours.",
+    "danger": "Certains correctifs de sécurité ne s'appliquent qu'après un redémarrage.",
+    "impact": "Correctifs en attente, fuites de mémoire accumulées.",
+    "location": "Gestionnaire des tâches > Performance > Processeur (Temps d'activité)",
+    "remediation": {
+      "steps": [
+        "Enregistrer son travail et redémarrer le poste (Redémarrer, pas Arrêter : le démarrage rapide ne réinitialise pas tout)."
+      ],
+      "commands": {
+        "windows": [
+          {
+            "type": "corriger",
+            "cmd": "shutdown /r /t 0",
+            "ou": "cmd",
+            "effet": "Redémarre l'ordinateur.",
+            "attention": "Enregistrez votre travail : l'ordinateur redémarre immédiatement."
+          }
+        ]
+      },
+      "duration": "3 minutes",
+      "requires_admin": false
+    },
+    "references": [],
+    "remediation_linux": {
+      "steps": [
+        "Redémarrer pour appliquer les mises à jour du noyau."
+      ],
+      "commands": {
+        "linux": [
+          {
+            "type": "verifier",
+            "cmd": "cat /var/run/reboot-required",
+            "ou": "terminal",
+            "effet": "Indique si un redémarrage est demandé par les mises à jour.",
+            "attendu": "« No such file » = pas de redémarrage en attente"
+          },
+          {
+            "type": "corriger",
+            "cmd": "sudo reboot",
+            "ou": "terminal",
+            "effet": "Redémarre l'ordinateur.",
+            "attention": "Enregistrez votre travail : l'ordinateur redémarre immédiatement."
+          }
+        ]
+      },
+      "duration": "3 minutes",
+      "requires_admin": false
+    },
+    "remediation_macos": {
+      "steps": [
+        "Menu Pomme > Redémarrer."
+      ],
+      "commands": {
+        "macos": [
+          {
+            "type": "corriger",
+            "cmd": "sudo shutdown -r now",
+            "ou": "terminal",
+            "effet": "Redémarre le Mac.",
+            "attention": "Enregistrez votre travail : l'ordinateur redémarre immédiatement."
+          }
+        ]
+      },
+      "duration": "3 minutes",
+      "requires_admin": false
+    }
+  },
+  "PERF-007": {
+    "domain": "performance",
+    "category": "Disque",
+    "severity": "moyen",
+    "title": "Système installé sur un disque mécanique (HDD)",
+    "description": "Le disque principal est un disque dur mécanique, beaucoup plus lent qu'un SSD.",
+    "danger": "Aucun danger de sécurité.",
+    "impact": "Démarrage et ouverture des applications lents.",
+    "location": "Gestionnaire des tâches > Performance > Disque",
+    "remediation": {
+      "steps": [
+        "Remplacer le disque par un SSD et cloner le système (Macrium Reflect, Clonezilla, outil du fabricant)."
+      ],
+      "commands": {
+        "windows": [
+          {
+            "type": "verifier",
+            "cmd": "Get-PhysicalDisk | Select-Object FriendlyName,MediaType",
+            "ou": "ps",
+            "effet": "Indique si chaque disque est un SSD ou un HDD.",
+            "attendu": "SSD"
+          }
+        ]
+      },
+      "duration": "1 à 2 heures",
+      "requires_admin": true
+    },
+    "references": []
+  },
+  "STO-001": {
+    "domain": "stockage",
+    "category": "Disque",
+    "severity": "moyen",
+    "title": "Espace disque faible",
+    "description": "La partition dispose de moins de 20 % d'espace libre.",
+    "danger": "Les mises à jour de Windows peuvent échouer faute d'espace, ce qui crée indirectement un risque de sécurité.",
+    "impact": "Ralentissements, échec des mises à jour et des sauvegardes.",
+    "location": "Paramètres > Système > Stockage",
+    "remediation": {
+      "steps": [
+        "Ouvrir Paramètres > Système > Stockage et lancer « Recommandations de nettoyage ».",
+        "Supprimer les fichiers en double et les gros fichiers inutiles listés par KMB.",
+        "Vider la Corbeille et le dossier Téléchargements.",
+        "Activer l'Assistant Stockage."
+      ],
+      "commands": {
+        "windows": [
+          {
+            "type": "ouvrir",
+            "cmd": "start ms-settings:storagesense",
+            "ou": "cmd",
+            "effet": "Ouvre Paramètres > Stockage : « Recommandations de nettoyage » et Assistant Stockage."
+          },
+          {
+            "type": "corriger",
+            "cmd": "cleanmgr /d C:",
+            "ou": "cmd",
+            "effet": "Ouvre le Nettoyage de disque : cochez ce que vous voulez supprimer (fichiers temporaires, Corbeille…).",
+            "attention": "Cliquez aussi sur « Nettoyer les fichiers système » pour libérer davantage."
+          }
+        ]
+      },
+      "duration": "15 minutes",
+      "requires_admin": false
+    },
+    "references": [],
+    "location_linux": "df -h",
+    "remediation_linux": {
+      "steps": [
+        "Nettoyer le cache des paquets et les anciens noyaux.",
+        "Supprimer doublons et gros fichiers listés par KMB.",
+        "Vider la corbeille et réduire les journaux."
+      ],
+      "commands": {
+        "linux": [
+          {
+            "type": "verifier",
+            "cmd": "df -h /",
+            "ou": "terminal",
+            "effet": "Affiche l'espace libre du disque.",
+            "attendu": "plus de 20 % libres"
+          },
+          {
+            "type": "corriger",
+            "cmd": "sudo apt autoremove && sudo apt clean",
+            "ou": "terminal",
+            "effet": "Supprime les paquets inutiles et ceux déjà installés gardés en cache."
+          },
+          {
+            "type": "corriger",
+            "cmd": "sudo journalctl --vacuum-size=200M",
+            "ou": "terminal",
+            "effet": "Réduit les journaux système à 200 Mo."
+          }
+        ]
+      },
+      "duration": "15 minutes",
+      "requires_admin": false
+    },
+    "location_macos": "Réglages Système > Général > Stockage",
+    "remediation_macos": {
+      "steps": [
+        "Ouvrir Réglages Système > Général > Stockage et suivre les recommandations.",
+        "Supprimer doublons et gros fichiers listés par KMB.",
+        "Vider la corbeille."
+      ],
+      "commands": {
+        "macos": [
+          {
+            "type": "verifier",
+            "cmd": "df -h /",
+            "ou": "terminal",
+            "effet": "Affiche l'espace libre du disque.",
+            "attendu": "plus de 20 % libres"
+          },
+          {
+            "type": "ouvrir",
+            "cmd": "open \"x-apple.systempreferences:com.apple.settings.Storage\"",
+            "ou": "terminal",
+            "effet": "Ouvre Réglages > Général > Stockage et ses recommandations."
+          }
+        ]
+      },
+      "duration": "15 minutes",
+      "requires_admin": false
+    },
+    "danger_linux": "Les mises à jour du système peuvent échouer faute d'espace, ce qui crée indirectement un risque de sécurité.",
+    "danger_macos": "Les mises à jour du système peuvent échouer faute d'espace, ce qui crée indirectement un risque de sécurité."
+  },
+  "STO-002": {
+    "domain": "stockage",
+    "category": "Doublons",
+    "severity": "faible",
+    "title": "Fichiers en double",
+    "description": "Des fichiers au contenu strictement identique (même empreinte SHA-256) existent à plusieurs endroits.",
+    "danger": "Aucun danger de sécurité.",
+    "impact": "Espace disque gaspillé et confusion entre versions d'un même fichier.",
+    "location": "Voir la liste des groupes de doublons dans l'onglet Stockage",
+    "remediation": {
+      "steps": [
+        "Consulter la liste des doublons (le fichier le plus ancien est présenté en premier).",
+        "Garder une seule copie, à l'emplacement le plus logique.",
+        "Supprimer les autres copies, puis vider la Corbeille."
+      ],
+      "commands": {
+        "windows": [
+          {
+            "type": "verifier",
+            "cmd": "Get-FileHash -Algorithm SHA256 'CHEMIN1','CHEMIN2'",
+            "ou": "ps",
+            "effet": "Calcule l'empreinte de deux fichiers pour confirmer qu'ils sont identiques.",
+            "attendu": "deux « Hash » identiques = même contenu",
+            "remplacer": {
+              "CHEMIN1": "le chemin complet du 1er fichier (clic droit sur le fichier > Copier en tant que chemin d'accès)",
+              "CHEMIN2": "le chemin complet du 2e fichier"
+            }
+          },
+          {
+            "type": "ouvrir",
+            "cmd": "explorer",
+            "ou": "cmd",
+            "effet": "Ouvre l'Explorateur : supprimez les copies (✗ dans la liste du site) et gardez l'original (✓)."
+          }
+        ],
+        "linux": [
+          {
+            "type": "verifier",
+            "cmd": "sha256sum \"CHEMIN1\" \"CHEMIN2\"",
+            "ou": "terminal",
+            "effet": "Calcule l'empreinte de deux fichiers.",
+            "attendu": "deux empreintes identiques",
+            "remplacer": {
+              "CHEMIN1": "le chemin du 1er fichier",
+              "CHEMIN2": "le chemin du 2e fichier"
+            }
+          }
+        ],
+        "macos": [
+          {
+            "type": "verifier",
+            "cmd": "shasum -a 256 \"CHEMIN1\" \"CHEMIN2\"",
+            "ou": "terminal",
+            "effet": "Calcule l'empreinte de deux fichiers.",
+            "attendu": "deux empreintes identiques",
+            "remplacer": {
+              "CHEMIN1": "le chemin du 1er fichier",
+              "CHEMIN2": "le chemin du 2e fichier"
+            }
+          }
+        ]
+      },
+      "duration": "10 à 30 minutes",
+      "requires_admin": false
+    },
+    "references": []
+  },
+  "STO-003": {
+    "domain": "stockage",
+    "category": "Fichiers",
+    "severity": "info",
+    "title": "Fichiers volumineux",
+    "description": "Fichiers de plus de 500 Mo stockés localement dans les dossiers personnels.",
+    "danger": "Aucun danger de sécurité.",
+    "impact": "Gain d'espace possible (installateurs déjà utilisés, vidéos, archives).",
+    "location": "Voir la liste dans l'onglet Stockage",
+    "remediation": {
+      "steps": [
+        "Supprimer les installateurs (.exe, .msi) déjà utilisés.",
+        "Déplacer les vidéos et archives vers un disque externe ou un stockage en ligne."
+      ],
+      "commands": {
+        "windows": [
+          {
+            "type": "verifier",
+            "cmd": "Get-ChildItem $env:USERPROFILE -File -Recurse -ErrorAction SilentlyContinue | Where-Object Length -gt 1GB | Select-Object FullName,@{n='Go';e={[math]::Round($_.Length/1GB,1)}}",
+            "ou": "ps",
+            "effet": "Liste les fichiers de plus de 1 Go de votre profil (peut prendre une minute)."
+          },
+          {
+            "type": "ouvrir",
+            "cmd": "explorer",
+            "ou": "cmd",
+            "effet": "Ouvre l'Explorateur pour déplacer ces fichiers vers un disque externe ou les supprimer."
+          }
+        ],
+        "linux": [
+          {
+            "type": "verifier",
+            "cmd": "find ~ -type f -size +1G -exec ls -lh {} \\; 2>/dev/null",
+            "ou": "terminal",
+            "effet": "Liste les fichiers de plus de 1 Go de votre dossier personnel."
+          }
+        ],
+        "macos": [
+          {
+            "type": "verifier",
+            "cmd": "find ~ -type f -size +1G -exec ls -lh {} \\; 2>/dev/null",
+            "ou": "terminal",
+            "effet": "Liste les fichiers de plus de 1 Go de votre dossier personnel."
+          }
+        ]
+      },
+      "duration": "10 minutes",
+      "requires_admin": false
+    },
+    "references": []
+  },
+  "STO-004": {
+    "domain": "stockage",
+    "category": "Fichiers",
+    "severity": "faible",
+    "title": "Dossier Téléchargements volumineux",
+    "description": "Le dossier Téléchargements occupe plus de 5 Go.",
+    "danger": "Des installateurs anciens peuvent être relancés par erreur.",
+    "impact": "Espace disque gaspillé.",
+    "location": "Explorateur de fichiers > Téléchargements",
+    "remediation": {
+      "steps": [
+        "Trier le dossier Téléchargements par taille.",
+        "Supprimer les installateurs et archives déjà utilisés.",
+        "Activer le nettoyage automatique des Téléchargements dans l'Assistant Stockage."
+      ],
+      "commands": {
+        "windows": [
+          {
+            "type": "ouvrir",
+            "cmd": "explorer shell:Downloads",
+            "ou": "cmd",
+            "effet": "Ouvre le dossier Téléchargements : triez par taille et supprimez les installateurs déjà utilisés."
+          }
+        ]
+      },
+      "duration": "10 minutes",
+      "requires_admin": false
+    },
+    "references": []
+  },
+  "STO-005": {
+    "domain": "stockage",
+    "category": "Disque",
+    "severity": "eleve",
+    "title": "Disque physique en mauvaise santé",
+    "description": "Windows signale un état de santé dégradé (SMART) pour un disque physique.",
+    "danger": "Risque de perte de données imminente.",
+    "impact": "Perte de données, pannes.",
+    "location": "Paramètres > Système > Stockage > Disques et volumes",
+    "remediation": {
+      "steps": [
+        "Sauvegarder immédiatement les données importantes.",
+        "Vérifier l'état avec CrystalDiskInfo.",
+        "Remplacer le disque."
+      ],
+      "commands": {
+        "windows": [
+          {
+            "type": "verifier",
+            "cmd": "Get-PhysicalDisk | Select-Object FriendlyName,HealthStatus,OperationalStatus",
+            "ou": "ps",
+            "effet": "Affiche l'état de santé de chaque disque.",
+            "attendu": "Healthy et OK"
+          }
+        ]
+      },
+      "duration": "1 heure",
+      "requires_admin": false
+    },
+    "references": [],
+    "remediation_linux": {
+      "steps": [
+        "Sauvegarder immédiatement.",
+        "Lire le rapport SMART détaillé.",
+        "Remplacer le disque."
+      ],
+      "commands": {
+        "linux": [
+          {
+            "type": "verifier",
+            "cmd": "sudo smartctl -H /dev/sda",
+            "ou": "terminal",
+            "effet": "Affiche le bilan de santé SMART du disque.",
+            "attendu": "PASSED",
+            "remplacer": {
+              "sda": "le nom du disque (voir la commande lsblk)"
+            }
+          }
+        ]
+      },
+      "duration": "1 heure",
+      "requires_admin": true
+    },
+    "remediation_macos": {
+      "steps": [
+        "Sauvegarder immédiatement (Time Machine).",
+        "Vérifier le disque avec Utilitaire de disque > S.O.S.",
+        "Faire remplacer le disque."
+      ],
+      "commands": {
+        "macos": [
+          {
+            "type": "verifier",
+            "cmd": "diskutil info / | grep SMART",
+            "ou": "terminal",
+            "effet": "Affiche l'état SMART du disque de démarrage.",
+            "attendu": "Verified"
+          }
+        ]
+      },
+      "duration": "1 heure",
+      "requires_admin": true
+    },
+    "description_linux": "Le système signale un état de santé dégradé (SMART) pour un disque physique.",
+    "description_macos": "Le système signale un état de santé dégradé (SMART) pour un disque physique."
+  },
+  "LNX-001": {
+    "domain": "securite",
+    "category": "Comptes",
+    "severity": "critique",
+    "title": "Compte autre que root avec l'UID 0",
+    "description": "Un compte autre que root possède l'identifiant 0, c'est-à-dire les pleins pouvoirs sur le système.",
+    "danger": "C'est une technique classique de porte dérobée : un compte discret aux pouvoirs de root.",
+    "impact": "Contrôle total du système par un compte non surveillé.",
+    "location": "/etc/passwd (3e champ = UID)",
+    "remediation": {
+      "steps": [
+        "Vérifier qui a créé ce compte et pourquoi.",
+        "Si le compte n'est pas légitime : le verrouiller immédiatement, puis analyser le système.",
+        "Sinon : lui attribuer un UID normal et utiliser sudo."
+      ],
+      "commands": {
+        "linux": [
+          {
+            "type": "verifier",
+            "cmd": "awk -F: '$3 == 0 {print $1}' /etc/passwd",
+            "ou": "terminal",
+            "effet": "Liste les comptes qui ont les pleins pouvoirs (UID 0).",
+            "attendu": "seulement « root »"
+          },
+          {
+            "type": "corriger",
+            "cmd": "sudo usermod -L NOM",
+            "ou": "terminal",
+            "effet": "Verrouille ce compte immédiatement.",
+            "remplacer": {
+              "NOM": "le nom du compte indiqué dans le constat"
+            },
+            "attention": "Analysez ensuite le système : ce compte peut être une porte dérobée."
+          }
+        ]
+      },
+      "duration": "15 minutes",
+      "requires_admin": true
+    },
+    "references": []
+  },
+  "LNX-002": {
+    "domain": "securite",
+    "category": "Réseau",
+    "severity": "eleve",
+    "title": "Connexion SSH directe en root autorisée",
+    "description": "Le serveur SSH accepte les connexions directes au compte root avec un mot de passe.",
+    "danger": "Le compte root existe sur toutes les machines Linux : c'est la première cible des robots qui testent des mots de passe.",
+    "impact": "Prise de contrôle totale si le mot de passe root est deviné.",
+    "location": "/etc/ssh/sshd_config (PermitRootLogin)",
+    "remediation": {
+      "steps": [
+        "Ouvrir /etc/ssh/sshd_config.",
+        "Définir « PermitRootLogin no » (ou « prohibit-password »).",
+        "Redémarrer le service SSH et vérifier qu'un autre compte avec sudo peut se connecter."
+      ],
+      "commands": {
+        "linux": [
+          {
+            "type": "verifier",
+            "cmd": "sudo sshd -T | grep -i permitrootlogin",
+            "ou": "terminal",
+            "effet": "Affiche si root peut se connecter en SSH.",
+            "attendu": "permitrootlogin no (ou prohibit-password)"
+          },
+          {
+            "type": "corriger",
+            "cmd": "sudo sed -i 's/^#\\?PermitRootLogin.*/PermitRootLogin no/' /etc/ssh/sshd_config",
+            "ou": "terminal",
+            "effet": "Interdit la connexion directe de root en SSH."
+          },
+          {
+            "type": "corriger",
+            "cmd": "sudo systemctl restart ssh || sudo systemctl restart sshd",
+            "ou": "terminal",
+            "effet": "Redémarre SSH pour appliquer le changement.",
+            "attention": "Vérifiez qu'un autre compte avec sudo peut se connecter avant de fermer votre session."
+          }
+        ]
+      },
+      "duration": "5 minutes",
+      "requires_admin": true
+    },
+    "references": [
+      "https://man.openbsd.org/sshd_config"
+    ]
+  },
+  "LNX-003": {
+    "domain": "securite",
+    "category": "Réseau",
+    "severity": "moyen",
+    "title": "Authentification SSH par mot de passe activée",
+    "description": "Le serveur SSH en fonctionnement accepte les mots de passe au lieu d'exiger des clés.",
+    "danger": "Les mots de passe peuvent être devinés par force brute ; les clés SSH sont pratiquement impossibles à deviner.",
+    "impact": "Accès à distance au poste si un mot de passe est faible.",
+    "location": "/etc/ssh/sshd_config (PasswordAuthentication)",
+    "remediation": {
+      "steps": [
+        "Créer une paire de clés sur votre poste client (ssh-keygen) et la copier (ssh-copy-id).",
+        "Vérifier la connexion par clé.",
+        "Mettre « PasswordAuthentication no » puis redémarrer SSH."
+      ],
+      "commands": {
+        "linux": [
+          {
+            "type": "verifier",
+            "cmd": "sudo sshd -T | grep -i passwordauthentication",
+            "ou": "terminal",
+            "effet": "Indique si les mots de passe sont acceptés en SSH.",
+            "attendu": "passwordauthentication no"
+          },
+          {
+            "type": "corriger",
+            "cmd": "ssh-keygen -t ed25519",
+            "ou": "terminal",
+            "effet": "À lancer sur l'ordinateur qui se connecte : crée une paire de clés (appuyez sur Entrée pour les valeurs par défaut)."
+          },
+          {
+            "type": "corriger",
+            "cmd": "ssh-copy-id utilisateur@serveur",
+            "ou": "terminal",
+            "effet": "Copie votre clé sur ce PC.",
+            "remplacer": {
+              "utilisateur@serveur": "votre compte et l'adresse de ce PC"
+            }
+          },
+          {
+            "type": "corriger",
+            "cmd": "sudo sed -i 's/^#\\?PasswordAuthentication.*/PasswordAuthentication no/' /etc/ssh/sshd_config",
+            "ou": "terminal",
+            "effet": "Désactive la connexion SSH par mot de passe.",
+            "attention": "Testez la connexion par clé AVANT, sinon vous pourriez perdre l'accès à distance."
+          },
+          {
+            "type": "corriger",
+            "cmd": "sudo systemctl restart ssh || sudo systemctl restart sshd",
+            "ou": "terminal",
+            "effet": "Redémarre SSH pour appliquer le changement."
+          }
+        ]
+      },
+      "duration": "10 minutes",
+      "requires_admin": true
+    },
+    "references": []
+  },
+  "LNX-004": {
+    "domain": "securite",
+    "category": "Système",
+    "severity": "moyen",
+    "title": "Aucun module de confinement actif (SELinux / AppArmor)",
+    "description": "Ni SELinux en mode « enforcing » ni AppArmor ne sont actifs. Ces modules limitent ce que chaque programme a le droit de faire.",
+    "danger": "Un programme compromis (navigateur, serveur web) peut accéder à tout ce que son utilisateur peut atteindre.",
+    "impact": "Propagation facilitée d'une compromission.",
+    "location": "getenforce / aa-status",
+    "remediation": {
+      "steps": [
+        "Ubuntu/Debian : vérifier qu'AppArmor est installé et activé.",
+        "Fedora/RHEL : passer SELinux en mode enforcing dans /etc/selinux/config.",
+        "Redémarrer et vérifier."
+      ],
+      "commands": {
+        "linux": [
+          {
+            "type": "verifier",
+            "cmd": "sudo aa-status",
+            "ou": "terminal",
+            "effet": "Affiche l'état d'AppArmor (Ubuntu, Debian).",
+            "attendu": "apparmor module is loaded"
+          },
+          {
+            "type": "verifier",
+            "cmd": "getenforce",
+            "ou": "terminal",
+            "effet": "Affiche l'état de SELinux (Fedora, RHEL).",
+            "attendu": "Enforcing"
+          },
+          {
+            "type": "corriger",
+            "cmd": "sudo systemctl enable --now apparmor",
+            "ou": "terminal",
+            "effet": "Active AppArmor."
+          },
+          {
+            "type": "corriger",
+            "cmd": "sudo setenforce 1",
+            "ou": "terminal",
+            "effet": "Passe SELinux en mode « Enforcing » jusqu'au prochain redémarrage (pour le rendre permanent : /etc/selinux/config)."
+          }
+        ]
+      },
+      "duration": "15 minutes",
+      "requires_admin": true
+    },
+    "references": []
+  },
+  "MAC-001": {
+    "domain": "securite",
+    "category": "Système",
+    "severity": "eleve",
+    "title": "Gatekeeper désactivé",
+    "description": "Gatekeeper vérifie que les applications téléchargées sont signées et contrôlées par Apple. Il est désactivé.",
+    "danger": "N'importe quelle application, y compris malveillante, peut s'ouvrir sans avertissement.",
+    "impact": "Installation de logiciels malveillants facilitée.",
+    "location": "Réglages Système > Confidentialité et sécurité",
+    "remediation": {
+      "steps": [
+        "Ouvrir Réglages Système > Confidentialité et sécurité.",
+        "Dans « Autoriser les applications téléchargées de », choisir « App Store et développeurs identifiés »."
+      ],
+      "commands": {
+        "macos": [
+          {
+            "type": "verifier",
+            "cmd": "spctl --status",
+            "ou": "terminal",
+            "effet": "Indique si Gatekeeper est actif.",
+            "attendu": "assessments enabled"
+          },
+          {
+            "type": "corriger",
+            "cmd": "sudo spctl --master-enable",
+            "ou": "terminal",
+            "effet": "Réactive Gatekeeper."
+          }
+        ]
+      },
+      "duration": "2 minutes",
+      "requires_admin": true
+    },
+    "references": [
+      "https://support.apple.com/guide/security/gatekeeper-and-runtime-protection-sec5599b66df/web"
+    ]
+  },
+  "MAC-002": {
+    "domain": "securite",
+    "category": "Système",
+    "severity": "eleve",
+    "title": "Protection de l'intégrité du système (SIP) désactivée",
+    "description": "SIP empêche toute modification des fichiers système de macOS, même par l'administrateur. Elle est désactivée.",
+    "danger": "Un logiciel malveillant ayant obtenu les droits administrateur peut modifier macOS en profondeur et s'y cacher.",
+    "impact": "Compromission persistante du système.",
+    "location": "Mode de récupération macOS > Terminal > csrutil",
+    "remediation": {
+      "steps": [
+        "Redémarrer en mode de récupération (maintenir le bouton d'alimentation sur Apple Silicon, Cmd+R sur Intel).",
+        "Ouvrir Utilitaires > Terminal.",
+        "Taper « csrutil enable » puis redémarrer."
+      ],
+      "commands": {
+        "macos": [
+          {
+            "type": "verifier",
+            "cmd": "csrutil status",
+            "ou": "terminal",
+            "effet": "Indique si la protection de l'intégrité du système (SIP) est active.",
+            "attendu": "System Integrity Protection status: enabled."
+          },
+          {
+            "type": "corriger",
+            "cmd": "csrutil enable",
+            "ou": "terminal",
+            "effet": "Réactive SIP : à taper dans le Terminal du MODE DE RÉCUPÉRATION, puis redémarrer.",
+            "attention": "Ne fonctionne pas dans une session normale : démarrez d'abord en mode de récupération."
+          }
+        ]
+      },
+      "duration": "10 minutes",
+      "requires_admin": true
+    },
+    "references": []
+  },
+  "MAC-003": {
+    "domain": "securite",
+    "category": "Système",
+    "severity": "moyen",
+    "title": "Mises à jour automatiques de sécurité désactivées",
+    "description": "macOS ne recherche pas automatiquement les mises à jour ou n'installe pas automatiquement les correctifs de sécurité.",
+    "danger": "Les correctifs de failles activement exploitées tardent à être installés.",
+    "impact": "Fenêtre d'exposition prolongée aux failles connues.",
+    "location": "Réglages Système > Général > Mise à jour de logiciels > Mises à jour automatiques",
+    "remediation": {
+      "steps": [
+        "Ouvrir Réglages Système > Général > Mise à jour de logiciels.",
+        "Cliquer sur l'icône (i) à côté de « Mises à jour automatiques ».",
+        "Activer toutes les options, en particulier « Installer les réponses de sécurité et les fichiers système »."
+      ],
+      "commands": {
+        "macos": [
+          {
+            "type": "verifier",
+            "cmd": "defaults read /Library/Preferences/com.apple.SoftwareUpdate AutomaticCheckEnabled",
+            "ou": "terminal",
+            "effet": "Indique si la recherche automatique est active.",
+            "attendu": "1"
+          },
+          {
+            "type": "ouvrir",
+            "cmd": "open \"x-apple.systempreferences:com.apple.Software-Update-Settings.extension\"",
+            "ou": "terminal",
+            "effet": "Ouvre Mise à jour de logiciels > Mises à jour automatiques."
+          },
+          {
+            "type": "corriger",
+            "cmd": "sudo defaults write /Library/Preferences/com.apple.SoftwareUpdate AutomaticCheckEnabled -bool true",
+            "ou": "terminal",
+            "effet": "Active la recherche automatique des mises à jour."
+          },
+          {
+            "type": "corriger",
+            "cmd": "sudo defaults write /Library/Preferences/com.apple.SoftwareUpdate CriticalUpdateInstall -bool true",
+            "ou": "terminal",
+            "effet": "Active l'installation automatique des correctifs de sécurité."
+          }
+        ]
+      },
+      "duration": "2 minutes",
+      "requires_admin": true
+    },
+    "references": []
+  },
+  "MAC-004": {
+    "domain": "securite",
+    "category": "Comptes",
+    "severity": "moyen",
+    "title": "Ouverture de session automatique activée",
+    "description": "Le Mac ouvre une session sans demander de mot de passe au démarrage.",
+    "danger": "Toute personne qui allume le Mac accède directement à la session et à ses données.",
+    "impact": "Accès aux données en cas de vol ou d'accès physique ; incompatible avec FileVault.",
+    "location": "Réglages Système > Utilisateurs et groupes > Ouvrir la session automatiquement",
+    "remediation": {
+      "steps": [
+        "Ouvrir Réglages Système > Utilisateurs et groupes.",
+        "Régler « Ouvrir la session automatiquement » sur « Désactivé »."
+      ],
+      "commands": {
+        "macos": [
+          {
+            "type": "verifier",
+            "cmd": "defaults read /Library/Preferences/com.apple.loginwindow autoLoginUser",
+            "ou": "terminal",
+            "effet": "Indique le compte ouvert automatiquement.",
+            "attendu": "« does not exist » = désactivé"
+          },
+          {
+            "type": "corriger",
+            "cmd": "sudo defaults delete /Library/Preferences/com.apple.loginwindow autoLoginUser",
+            "ou": "terminal",
+            "effet": "Désactive l'ouverture de session automatique."
+          }
+        ]
+      },
+      "duration": "1 minute",
+      "requires_admin": true
+    },
+    "references": []
+  },
+  "MAC-005": {
+    "domain": "securite",
+    "category": "Pare-feu",
+    "severity": "faible",
+    "title": "Mode furtif du pare-feu désactivé",
+    "description": "En mode furtif, le Mac ne répond pas aux sondages réseau (ping, balayage de ports).",
+    "danger": "Le Mac est plus facilement repérable sur un réseau public.",
+    "impact": "Exposition légèrement accrue sur les réseaux publics.",
+    "location": "Réglages Système > Réseau > Coupe-feu > Options",
+    "remediation": {
+      "steps": [
+        "Ouvrir Réglages Système > Réseau > Coupe-feu > Options.",
+        "Activer « Activer le mode furtif »."
+      ],
+      "commands": {
+        "macos": [
+          {
+            "type": "verifier",
+            "cmd": "/usr/libexec/ApplicationFirewall/socketfilterfw --getstealthmode",
+            "ou": "terminal",
+            "effet": "Indique si le mode furtif est actif.",
+            "attendu": "Stealth mode enabled"
+          },
+          {
+            "type": "corriger",
+            "cmd": "sudo /usr/libexec/ApplicationFirewall/socketfilterfw --setstealthmode on",
+            "ou": "terminal",
+            "effet": "Active le mode furtif."
+          }
+        ]
+      },
+      "duration": "1 minute",
+      "requires_admin": true
+    },
+    "references": []
+  },
+  "NET-006": {
+    "domain": "securite",
+    "category": "Réseau",
+    "severity": "moyen",
+    "title": "Accès à distance activé (SSH ou partage d'écran)",
+    "description": "Le poste accepte les connexions à distance (session SSH ou partage d'écran).",
+    "danger": "Toute personne du réseau peut tenter de se connecter et de deviner un mot de passe.",
+    "impact": "Prise de contrôle à distance en cas de mot de passe faible.",
+    "location": "Réglages Système > Général > Partage",
+    "remediation": {
+      "steps": [
+        "Ouvrir Réglages Système > Général > Partage.",
+        "Désactiver « Session à distance » et « Partage d'écran » s'ils ne sont pas utilisés.",
+        "Sinon, limiter l'accès à des utilisateurs précis."
+      ],
+      "commands": {
+        "macos": [
+          {
+            "type": "verifier",
+            "cmd": "sudo systemsetup -getremotelogin",
+            "ou": "terminal",
+            "effet": "Indique si la session à distance (SSH) est activée.",
+            "attendu": "Remote Login: Off"
+          },
+          {
+            "type": "ouvrir",
+            "cmd": "open \"x-apple.systempreferences:com.apple.Sharing-Settings.extension\"",
+            "ou": "terminal",
+            "effet": "Ouvre Réglages > Général > Partage pour désactiver ce qui n'est pas utilisé."
+          },
+          {
+            "type": "corriger",
+            "cmd": "sudo systemsetup -setremotelogin off",
+            "ou": "terminal",
+            "effet": "Désactive la session à distance (SSH)."
+          }
+        ]
+      },
+      "duration": "2 minutes",
+      "requires_admin": true
+    },
+    "references": []
+  },
+  "WIFI-001": {
+    "domain": "securite",
+    "category": "Wi-Fi",
+    "severity": "eleve",
+    "title": "Connecté à un réseau Wi-Fi ouvert (non chiffré)",
+    "description": "Le réseau Wi-Fi utilisé ne chiffre pas les communications.",
+    "danger": "Toute personne à proximité peut intercepter le trafic non chiffré ; un faux point d'accès portant le même nom est facile à créer.",
+    "impact": "Vol de données et de sessions, attaques de l'intercepteur (« man-in-the-middle »).",
+    "location": "Paramètres réseau / Wi-Fi",
+    "remediation": {
+      "steps": [
+        "Se déconnecter de ce réseau dès que possible.",
+        "Utiliser un réseau protégé (WPA2 ou WPA3) ou le partage de connexion de votre téléphone.",
+        "À défaut, utiliser un VPN et uniquement des sites en HTTPS."
+      ],
+      "commands": {
+        "windows": [
+          {
+            "type": "verifier",
+            "cmd": "netsh wlan show interfaces",
+            "ou": "cmd",
+            "effet": "Affiche le réseau Wi-Fi connecté et sa protection (ligne « Authentification »).",
+            "attendu": "WPA2 ou WPA3"
+          },
+          {
+            "type": "corriger",
+            "cmd": "netsh wlan disconnect",
+            "ou": "cmd",
+            "effet": "Se déconnecte du réseau Wi-Fi actuel."
+          }
+        ],
+        "linux": [
+          {
+            "type": "verifier",
+            "cmd": "nmcli -f IN-USE,SSID,SECURITY dev wifi",
+            "ou": "terminal",
+            "effet": "Affiche le réseau connecté (*) et sa protection.",
+            "attendu": "WPA2 ou WPA3"
+          },
+          {
+            "type": "corriger",
+            "cmd": "nmcli dev disconnect wlan0",
+            "ou": "terminal",
+            "effet": "Se déconnecte du Wi-Fi.",
+            "remplacer": {
+              "wlan0": "le nom de l'interface Wi-Fi (voir « nmcli dev »)"
+            }
+          }
+        ],
+        "macos": [
+          {
+            "type": "verifier",
+            "cmd": "networksetup -getairportnetwork en0",
+            "ou": "terminal",
+            "effet": "Affiche le réseau Wi-Fi connecté."
+          },
+          {
+            "type": "corriger",
+            "cmd": "networksetup -setairportpower en0 off",
+            "ou": "terminal",
+            "effet": "Coupe le Wi-Fi."
+          }
+        ]
+      },
+      "duration": "1 minute",
+      "requires_admin": false
+    },
+    "references": []
+  },
+  "WIFI-002": {
+    "domain": "securite",
+    "category": "Wi-Fi",
+    "severity": "eleve",
+    "title": "Réseau Wi-Fi protégé par un chiffrement obsolète (WEP / WPA)",
+    "description": "Le réseau Wi-Fi connecté utilise WEP ou WPA (TKIP), des protections cassées depuis des années.",
+    "danger": "Le mot de passe WEP se récupère en quelques minutes ; WPA/TKIP est également vulnérable.",
+    "impact": "Interception du trafic et accès au réseau local par des tiers.",
+    "location": "Interface d'administration du routeur Wi-Fi",
+    "remediation": {
+      "steps": [
+        "Se connecter à l'interface du routeur (souvent http://192.168.0.1 ou http://192.168.1.1).",
+        "Dans la section Wi-Fi / Sécurité, choisir WPA2-AES ou, mieux, WPA3.",
+        "Définir un mot de passe Wi-Fi long (au moins 12 caractères).",
+        "Reconnecter les appareils."
+      ],
+      "commands": {
+        "windows": [
+          {
+            "type": "verifier",
+            "cmd": "netsh wlan show interfaces",
+            "ou": "cmd",
+            "effet": "Affiche la protection du réseau connecté (lignes « Authentification » et « Chiffrement »).",
+            "attendu": "WPA2-Personnel et CCMP, ou WPA3"
+          }
+        ],
+        "linux": [
+          {
+            "type": "verifier",
+            "cmd": "nmcli -f IN-USE,SSID,SECURITY dev wifi",
+            "ou": "terminal",
+            "effet": "Affiche la protection du réseau connecté.",
+            "attendu": "WPA2 ou WPA3"
+          }
+        ]
+      },
+      "duration": "15 minutes",
+      "requires_admin": false
+    },
+    "references": []
+  },
+  "WIFI-003": {
+    "domain": "securite",
+    "category": "Wi-Fi",
+    "severity": "faible",
+    "title": "Réseau ouvert mémorisé avec connexion automatique",
+    "description": "Un réseau Wi-Fi ouvert est mémorisé et le poste s'y reconnecte automatiquement.",
+    "danger": "Un attaquant peut créer un point d'accès portant le même nom : le poste s'y connectera seul.",
+    "impact": "Interception du trafic sans que l'utilisateur s'en rende compte.",
+    "location": "Paramètres Wi-Fi > Réseaux connus",
+    "remediation": {
+      "steps": [
+        "Ouvrir la liste des réseaux connus.",
+        "Supprimer (« Oublier ») le réseau indiqué ou désactiver la connexion automatique."
+      ],
+      "commands": {
+        "windows": [
+          {
+            "type": "verifier",
+            "cmd": "netsh wlan show profiles",
+            "ou": "cmd",
+            "effet": "Liste les réseaux Wi-Fi mémorisés."
+          },
+          {
+            "type": "corriger",
+            "cmd": "netsh wlan delete profile name=\"NOM\"",
+            "ou": "cmd",
+            "effet": "Oublie ce réseau Wi-Fi.",
+            "remplacer": {
+              "NOM": "le nom du réseau indiqué dans le constat"
+            }
+          }
+        ],
+        "linux": [
+          {
+            "type": "corriger",
+            "cmd": "nmcli con delete \"NOM\"",
+            "ou": "terminal",
+            "effet": "Oublie ce réseau Wi-Fi.",
+            "remplacer": {
+              "NOM": "le nom du réseau indiqué dans le constat"
+            }
+          }
+        ],
+        "macos": [
+          {
+            "type": "corriger",
+            "cmd": "sudo networksetup -removepreferredwirelessnetwork en0 \"NOM\"",
+            "ou": "terminal",
+            "effet": "Oublie ce réseau Wi-Fi.",
+            "remplacer": {
+              "NOM": "le nom du réseau indiqué dans le constat"
+            }
+          }
+        ]
+      },
+      "duration": "1 minute",
+      "requires_admin": false
+    },
+    "references": []
+  },
+  "HW-001": {
+    "domain": "performance",
+    "category": "Batterie",
+    "severity": "faible",
+    "title": "Batterie usée",
+    "description": "La capacité maximale actuelle de la batterie est nettement inférieure à sa capacité d'origine.",
+    "danger": "Aucun danger de sécurité ; une batterie très usée peut toutefois gonfler.",
+    "impact": "Autonomie réduite, arrêts inattendus.",
+    "location": "Rapport de batterie du système",
+    "remediation": {
+      "steps": [
+        "Consulter le rapport de batterie pour confirmer l'usure.",
+        "Prévoir le remplacement de la batterie en dessous de 60 % de la capacité d'origine.",
+        "Éviter de laisser la batterie à 100 % en permanence (option de recharge optimisée)."
+      ],
+      "commands": {
+        "windows": [
+          {
+            "type": "verifier",
+            "cmd": "powercfg /batteryreport",
+            "ou": "cmd",
+            "effet": "Crée le fichier battery-report.html dans le dossier affiché : ouvrez-le et comparez DESIGN CAPACITY (origine) et FULL CHARGE CAPACITY (actuelle).",
+            "attendu": "une capacité actuelle supérieure à 80 % de l'origine"
+          }
+        ],
+        "linux": [
+          {
+            "type": "verifier",
+            "cmd": "upower -i $(upower -e | grep BAT)",
+            "ou": "terminal",
+            "effet": "Affiche l'état de la batterie (ligne « capacity »).",
+            "attendu": "capacity supérieure à 80 %"
+          }
+        ],
+        "macos": [
+          {
+            "type": "verifier",
+            "cmd": "system_profiler SPPowerDataType | grep -E 'Cycle Count|Condition|Maximum Capacity'",
+            "ou": "terminal",
+            "effet": "Affiche l'état de la batterie.",
+            "attendu": "Condition: Normal"
+          }
+        ]
+      },
+      "duration": "5 minutes",
+      "requires_admin": false
+    },
+    "references": []
+  },
+  "HW-002": {
+    "domain": "performance",
+    "category": "Température",
+    "severity": "moyen",
+    "title": "Température du processeur élevée",
+    "description": "Un capteur de température dépasse 90 °C au moment du scan.",
+    "danger": "Aucun danger de sécurité direct.",
+    "impact": "Ralentissements (le processeur réduit sa fréquence), usure accélérée, arrêts.",
+    "location": "Capteurs matériels",
+    "remediation": {
+      "steps": [
+        "Nettoyer les grilles d'aération et le ventilateur (air comprimé).",
+        "Utiliser le portable sur une surface dure.",
+        "Identifier les processus qui saturent le processeur."
+      ],
+      "commands": {
+        "linux": [
+          {
+            "type": "verifier",
+            "cmd": "sensors",
+            "ou": "terminal",
+            "effet": "Affiche les températures (paquet lm-sensors).",
+            "attendu": "moins de 80 °C au repos"
+          },
+          {
+            "type": "ouvrir",
+            "cmd": "top",
+            "ou": "terminal",
+            "effet": "Affiche les programmes qui utilisent le plus le processeur (touche q pour quitter)."
+          }
+        ]
+      },
+      "duration": "20 minutes",
+      "requires_admin": false
+    },
+    "references": []
+  },
+  "STO-006": {
+    "domain": "stockage",
+    "category": "Disque",
+    "severity": "faible",
+    "title": "Espace récupérable sans risque",
+    "description": "Fichiers temporaires, caches des navigateurs, Corbeille, anciens installateurs et mises à jour déjà installées occupent de l'espace inutilement.",
+    "danger": "Aucun danger de sécurité. Ces fichiers sont recréés au besoin par le système ou les applications : les supprimer ne fait rien perdre d'important.",
+    "impact": "Espace disque gaspillé ; un disque trop plein ralentit l'ordinateur et peut bloquer les mises à jour.",
+    "location": "Paramètres > Système > Stockage > Fichiers temporaires",
+    "remediation": {
+      "steps": [
+        "Ouvrez Paramètres > Système > Stockage > Fichiers temporaires.",
+        "Cochez « Fichiers temporaires », « Corbeille », « Miniatures » et « Nettoyage de Windows Update ».",
+        "Cliquez sur « Supprimer les fichiers ».",
+        "Dans votre navigateur : Paramètres > Confidentialité > Effacer les données de navigation > Images et fichiers en cache."
+      ],
+      "commands": {
+        "windows": [
+          {
+            "type": "ouvrir",
+            "cmd": "start ms-settings:storagesense",
+            "ou": "cmd",
+            "effet": "Ouvre Paramètres > Stockage > Fichiers temporaires : cochez les éléments puis « Supprimer les fichiers »."
+          },
+          {
+            "type": "corriger",
+            "cmd": "cleanmgr /d C:",
+            "ou": "cmd",
+            "effet": "Ouvre le Nettoyage de disque (fichiers temporaires, miniatures, rapports d'erreurs, anciennes mises à jour).",
+            "attention": "Cliquez sur « Nettoyer les fichiers système » pour inclure les anciennes mises à jour de Windows."
+          },
+          {
+            "type": "corriger",
+            "cmd": "Remove-Item \"$env:TEMP\\*\" -Recurse -Force -ErrorAction SilentlyContinue",
+            "ou": "ps",
+            "effet": "Vide le dossier des fichiers temporaires de votre compte (les fichiers en cours d'utilisation sont ignorés).",
+            "attention": "Fermez vos programmes avant."
+          },
+          {
+            "type": "corriger",
+            "cmd": "Clear-RecycleBin -Force",
+            "ou": "ps",
+            "effet": "Vide la Corbeille.",
+            "attention": "Les fichiers de la Corbeille seront supprimés définitivement."
+          }
+        ]
+      },
+      "duration": "5 minutes",
+      "requires_admin": false
+    },
+    "location_linux": "~/.cache, corbeille, /var/cache/apt",
+    "remediation_linux": {
+      "steps": [
+        "Videz la corbeille.",
+        "Supprimez le contenu de ~/.cache (les applications le recréent).",
+        "Nettoyez le cache des paquets."
+      ],
+      "commands": {
+        "linux": [
+          {
+            "type": "verifier",
+            "cmd": "du -sh ~/.cache ~/.local/share/Trash 2>/dev/null",
+            "ou": "terminal",
+            "effet": "Affiche la taille du cache et de la corbeille."
+          },
+          {
+            "type": "corriger",
+            "cmd": "rm -rf ~/.cache/*",
+            "ou": "terminal",
+            "effet": "Vide le cache des applications (il se reconstitue tout seul).",
+            "attention": "Fermez vos applications avant."
+          },
+          {
+            "type": "corriger",
+            "cmd": "gio trash --empty",
+            "ou": "terminal",
+            "effet": "Vide la corbeille.",
+            "attention": "Les fichiers de la corbeille seront supprimés définitivement."
+          },
+          {
+            "type": "corriger",
+            "cmd": "sudo apt clean",
+            "ou": "terminal",
+            "effet": "Supprime les paquets déjà installés gardés en cache."
+          }
+        ]
+      },
+      "duration": "5 minutes",
+      "requires_admin": false
+    },
+    "location_macos": "~/Library/Caches, Corbeille",
+    "remediation_macos": {
+      "steps": [
+        "Videz la corbeille.",
+        "Quittez vos applications puis videz ~/Library/Caches.",
+        "Réglages > Général > Stockage : suivez les recommandations."
+      ],
+      "commands": {
+        "macos": [
+          {
+            "type": "verifier",
+            "cmd": "du -sh ~/Library/Caches ~/.Trash",
+            "ou": "terminal",
+            "effet": "Affiche la taille des caches et de la corbeille."
+          },
+          {
+            "type": "corriger",
+            "cmd": "rm -rf ~/Library/Caches/*",
+            "ou": "terminal",
+            "effet": "Vide les caches des applications (ils se reconstituent).",
+            "attention": "Quittez vos applications avant."
+          },
+          {
+            "type": "corriger",
+            "cmd": "osascript -e 'tell application \"Finder\" to empty trash'",
+            "ou": "terminal",
+            "effet": "Vide la corbeille.",
+            "attention": "Suppression définitive."
+          }
+        ]
+      },
+      "duration": "5 minutes",
+      "requires_admin": false
+    },
+    "references": []
+  }
+}

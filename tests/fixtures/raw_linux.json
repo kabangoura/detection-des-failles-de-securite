@@ -1,0 +1,66 @@
+{
+  "scan_id": "20260301-100000-linux1",
+  "started_at": "2026-03-01T10:00:00-05:00",
+  "finished_at": "2026-03-01T10:01:10-05:00",
+  "kmb_version": "test",
+  "os_family": "linux",
+  "is_admin": false,
+  "collectors": {
+    "system": {"status": "ok", "duration_s": 3, "errors": {}, "data": {
+      "hostname": "portable-alice", "user": "alice", "is_admin": false,
+      "os": {"family": "linux", "caption": "Ubuntu 22.04.4 LTS", "id": "ubuntu", "version": "22.04", "kernel": "6.5.0-41-generic", "architecture": "x86_64"},
+      "firmware": "UEFI", "secure_boot": true, "package_manager": "apt",
+      "pending_updates": [{"title": "openssl 3.0.2-0ubuntu1.15", "security": true, "severity": "Important"},
+                          {"title": "vim 2:8.2.3995-1ubuntu2.17", "security": false, "severity": null}],
+      "last_update_date": "2026-02-27",
+      "mac_framework": {"selinux": null, "apparmor": true},
+      "hardware": {"manufacturer": "LENOVO", "model": "ThinkPad T14", "cpu": "AMD Ryzen 5 PRO 4650U"},
+      "_errors": {}}},
+    "accounts": {"status": "partiel", "duration_s": 0.1, "errors": {"shadow": "Accès refusé à /etc/shadow (droits root requis)"}, "data": {
+      "current_user": "alice",
+      "local_users": [{"name": "root", "uid": 0, "enabled": true, "password_required": null},
+                      {"name": "toor", "uid": 0, "enabled": true, "password_required": null},
+                      {"name": "alice", "uid": 1000, "enabled": true, "password_required": null}],
+      "uid0_accounts": ["toor"], "root_password_locked": null, "shadow_readable": false,
+      "administrators": [{"name": "alice", "is_current_user": true}],
+      "_errors": {"shadow": "Accès refusé à /etc/shadow (droits root requis)"}}},
+    "network": {"status": "ok", "duration_s": 0.5, "errors": {}, "data": {
+      "listening": [{"ip": "0.0.0.0", "port": 22, "pid": 812, "process": "sshd", "exposed": true},
+                    {"ip": "127.0.0.1", "port": 631, "pid": 700, "process": "cupsd", "exposed": false}],
+      "interfaces": [], "dns_servers": [{"interface": "resolv.conf", "servers": ["127.0.0.53"]}],
+      "ssh": {"installed": true, "running": true, "permit_root_login": "yes", "password_authentication": true, "port": 22},
+      "smb_shares": [{"name": "public", "path": "/srv/public", "type": "smb", "administrative": false, "guest_ok": true}],
+      "_errors": {}}},
+    "firewall": {"status": "ok", "duration_s": 0.2, "errors": {}, "data": {
+      "profiles": [{"name": "ufw", "enabled": false, "default_inbound": "Block"}], "sensitive_inbound_rules": null, "_errors": {}}},
+    "antivirus": {"status": "ok", "duration_s": 0.1, "errors": {}, "data": {"products": [], "defender": null, "_errors": {}}},
+    "encryption": {"status": "ok", "duration_s": 0.1, "errors": {}, "data": {
+      "volumes": [{"drive": "/", "state": "off", "label": "Non chiffré", "method": "lsblk"}], "system_drive": "/", "_errors": {}}},
+    "software": {"status": "ok", "duration_s": 1.2, "errors": {}, "data": {
+      "installed": [
+        {"name": "python3.10", "version": "3.10.12-1~22.04.3", "size_mb": 20.5, "source": "dpkg", "publisher": null},
+        {"name": "python3.12", "version": "3.12.3-1", "size_mb": 0.5, "source": "dpkg", "publisher": null},
+        {"name": "firefox", "version": "131.0", "size_mb": null, "source": "snap", "publisher": null}],
+      "cleaning": {"raw_entries": 1843, "kept": 1843, "duplicates": 0, "package_manager": "dpkg"}, "_errors": {}}},
+    "performance": {"status": "ok", "duration_s": 3.1, "errors": {}, "data": {
+      "cpu": {"usage_percent": 12.5, "logical_cores": 12, "physical_cores": 6, "temperature_c": 61},
+      "memory": {"total_gb": 15.3, "used_gb": 6.1, "percent": 40.0},
+      "top_memory": [], "top_cpu": [], "startup": [{"name": "Slack", "enabled": true, "command": "slack", "source": "autostart (utilisateur)"}],
+      "services_enabled": 41, "uptime_days": 2.3, "boot_time": "2026-02-27T08:00:00-05:00", "_errors": {}}},
+    "storage": {"status": "ok", "duration_s": 5, "errors": {}, "data": {
+      "partitions": [{"mount": "/", "fstype": "ext4", "total_gb": 468.0, "used_gb": 234.0, "free_gb": 234.0, "percent_used": 50.0}],
+      "physical_disks": [{"name": "Samsung SSD 980", "media_type": "SSD", "health": null}],
+      "folders": [{"name": "Téléchargements", "path": "/home/alice/Téléchargements", "local_gb": 2.1, "files": 120}],
+      "large_files": [], "_errors": {}}},
+    "wifi": {"status": "ok", "duration_s": 1, "errors": {}, "data": {
+      "available": true, "current": {"ssid": "Gare", "auth": "open", "cipher": null, "security": "ouvert"},
+      "profiles": [{"name": "Gare", "auth": "open", "security": "ouvert", "autoconnect": true},
+                   {"name": "Maison", "auth": "WPA2-PSK", "security": "wpa2", "autoconnect": true}], "_errors": {}}},
+    "hardware": {"status": "ok", "duration_s": 0.1, "errors": {}, "data": {
+      "battery_present": true,
+      "battery": {"design_capacity": 57000000, "full_capacity": 30000000, "unit": "µWh", "cycles": 800, "health_percent": 52.6},
+      "temperatures": [{"sensor": "k10temp Tctl", "current": 61, "high": null, "critical": null}], "max_temperature_c": 61, "_errors": {}}},
+    "duplicates": {"status": "ok", "duration_s": 1, "errors": {}, "data": {
+      "files_scanned": 520, "group_count": 0, "duplicate_files": 0, "wasted_bytes": 0, "groups": []}}
+  }
+}
