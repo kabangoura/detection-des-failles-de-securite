@@ -1,0 +1,17 @@
+# Relais IA de KMB Library (Cloudflare Workers, plan gratuit).
+# La clé Groq est un « secret » Cloudflare (GROQ_API_KEY) : elle n'est ni dans ce fichier ni dans le site.
+# Déploiement : npx wrangler deploy   (depuis ce dossier)
+name = "kmb-ia"
+main = "src/index.js"
+compatibility_date = "2026-09-01"
+workers_dev = true
+
+# Compteurs anti-abus (demandes par visiteur et par jour) ; aucune donnée du rapport n'y est stockée
+[[kv_namespaces]]
+binding = "KMB_QUOTAS"
+id = "556bcaca645045f8a914faed51b995cf"
+
+[vars]
+ORIGINES = "https://kabangoura.github.io,http://127.0.0.1:8000,http://localhost:8000"
+LIMITE_HEURE_VISITEUR = "10"
+LIMITE_JOUR_TOTAL = "300"

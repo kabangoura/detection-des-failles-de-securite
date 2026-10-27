@@ -18,9 +18,9 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-AUTORISE = ["kmb_library", "api", "tests", "web", "scripts", ".github", "pyproject.toml", "README-pypi.md",
+AUTORISE = ["kmb_library", "api", "tests", "web", "scripts", ".github", "relais-ia", "pyproject.toml", "README-pypi.md",
             "requirements.txt", ".env.example", ".gitignore"]
-EXCLU = ("__pycache__", ".pyc", ".egg-info", ".pytest_cache", ".exe")
+EXCLU = ("__pycache__", ".pyc", ".egg-info", ".pytest_cache", ".exe", ".wrangler", "node_modules")
 # Données personnelles à rechercher (nom du poste, compte, courriel, IP…) : une expression par ligne dans
 # .donnees-personnelles, fichier qui reste sur le poste (il n'est pas dans AUTORISE, donc jamais publié).
 LISTE_PERSO = ROOT / ".donnees-personnelles"

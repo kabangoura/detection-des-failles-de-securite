@@ -320,9 +320,27 @@ mark { background: #ffe58a; color: #000; border-radius: 3px; padding: 0 2px; }
   *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
 }
 
+/* ===================================================== assistant IA */
+.ai-panel { border-color: color-mix(in srgb, var(--accent) 35%, var(--line)); }
+.ai-box { margin-top: 12px; padding: 12px 14px; border-radius: 12px; background: color-mix(in srgb, var(--accent-soft) 60%, var(--panel));
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, var(--line)); animation: fade-up .25s ease both; }
+.ai-box p { margin: 6px 0; }
+.ai-label { font-weight: 700; margin-top: 0 !important; }
+.ai-cmd.unknown .cmd { outline: 2px dashed var(--eleve); outline-offset: 2px; }
+.ai-explain { margin: 10px 0 4px; }
+.ai-ask { display: flex; gap: 8px; flex-wrap: wrap; }
+.ai-ask input { flex: 1 1 260px; }
+.ai-consent { max-width: 560px; width: calc(100% - 32px); border: 1px solid var(--line); border-radius: 18px; padding: 22px 24px;
+  background: var(--panel); color: var(--fg); box-shadow: var(--shadow-hover); }
+.ai-consent::backdrop { background: rgba(10, 17, 32, .55); backdrop-filter: blur(2px); }
+.ai-consent h2 { margin: 0 0 10px; font-size: 20px; }
+.ai-consent ul { padding-left: 20px; }
+.ai-consent li { margin: 6px 0; }
+.row-end { display: flex; justify-content: flex-end; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
+
 /* ===================================================== impression / PDF */
 @media print {
-  .topbar, .tabs, .toolbar, .filters, .dropzone, .site-footer, #ai-panel, .cmd button, .theme-btn { display: none !important; }
+  .topbar, .tabs, .toolbar, .filters, .dropzone, .site-footer, #ai-panel, .ai-panel, .ai-explain, .cmd button, .theme-btn { display: none !important; }
   body { background: #fff; color: #000; }
   .tab-panel[hidden] { display: block !important; }
   .panel, .score, .finding { break-inside: avoid; box-shadow: none; }

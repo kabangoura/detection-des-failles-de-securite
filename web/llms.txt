@@ -24,6 +24,8 @@ Linux / macOS : `python3 -m venv ~/.kmb` puis `~/.kmb/bin/python -m pip install 
 Score global et par domaine sur 100, liste des problèmes par gravité, plan de correction.
 Chaque problème a un guide en trois temps : Vérifier, Ouvrir le réglage, Corriger, avec l'endroit où taper la commande, son effet, le résultat attendu et les précautions. KMB ne corrige rien lui-même : l'utilisateur applique les commandes.
 
+Assistant IA (facultatif, avec accord de l'utilisateur) : explication d'un problème en mots simples, résumé du rapport, plan de correction, questions libres et commentaire avant/après. Le site envoie seulement un résumé anonyme des problèmes à un relais KMB (Cloudflare), qui interroge le service d'IA Groq ; chaque réponse est vérifiée (étapes liées aux vrais problèmes, commandes comparées à la base KMB).
+
 ## Pages
 - [Accueil](https://kabangoura.github.io/detection-des-failles-de-securite/)
 - [Guide d'installation](https://kabangoura.github.io/detection-des-failles-de-securite/#guide)

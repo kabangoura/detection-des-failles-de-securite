@@ -1,7 +1,7 @@
 """Stockage des rapports en fichiers JSON (pas de base de données) pour l'API locale.
 
 <dossier de données>/KMB-rapport_<PC>_<date>.json : rapports (produits par `kmb scan --sortie data` ou reçus par POST /scans)
-<dossier de données>/plans-ia/plan-ia_<id>.json     : plans de correction générés par Grok
+<dossier de données>/plans-ia/plan-ia_<id>.json     : plans de correction générés par l'IA (Groq ou xAI Grok)
 Les rapports aux anciens emplacements et noms (processed/rapport-traite_*, processed/scan_*) sont toujours lus.
 Les fichiers sont relus seulement s'ils ont changé (cache par date de modification).
 """

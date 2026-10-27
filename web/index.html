@@ -66,7 +66,8 @@
     "Services réseau exposés et Wi-Fi",
     "Performance : mémoire, processeur, démarrage, batterie",
     "Stockage : gros fichiers, doublons, applications, espace récupérable",
-    "Guide de correction : vérifier, ouvrir le réglage, corriger"
+    "Guide de correction : vérifier, ouvrir le réglage, corriger",
+    "Assistant IA (avec accord) : explication des problèmes, résumé, plan de correction, questions, commentaire avant/après"
    ],
    "sameAs": [
     "https://pypi.org/project/kmb-library/",
@@ -81,7 +82,15 @@
      "name": "Mes données sont-elles envoyées sur Internet ?",
      "acceptedAnswer": {
       "@type": "Answer",
-      "text": "Non. Le rapport est lu par votre navigateur, sur votre ordinateur. Il n'est ni envoyé ni conservé par ce site. Le scanner contacte seulement le site public endoflife.date pour connaître les dates de fin de support des logiciels (sans rien envoyer de personnel)."
+      "text": "Non. Le rapport est lu par votre navigateur, sur votre ordinateur. Il n'est ni envoyé ni conservé par ce site. Le scanner contacte seulement le site public endoflife.date pour connaître les dates de fin de support des logiciels (sans rien envoyer de personnel). Seule exception, si vous l'acceptez : l'assistant IA, qui reçoit un résumé anonyme des problèmes détectés."
+     }
+    },
+    {
+     "@type": "Question",
+     "name": "Comment fonctionne l'assistant IA ?",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "Avec votre accord, le site envoie un résumé anonyme des problèmes détectés (jamais le nom de l'ordinateur, les comptes, les adresses IP ni vos fichiers) au relais de KMB Library, qui interroge le service d'IA Groq. KMB vérifie chaque réponse et signale toute commande absente de sa base vérifiée."
      }
     },
     {
@@ -328,6 +337,11 @@
     <section id="tab-overview" class="tab-panel">
       <div class="meta" id="meta"></div>
       <div class="scores" id="scores"></div>
+      <div class="panel ai-panel" data-ai>
+        <div class="row-between"><h3>🤖 Résumé par l'IA</h3><button type="button" class="btn" id="ai-summary-btn">Résumer mon rapport</button></div>
+        <p class="muted small">Un résumé en quelques lignes de l'état de votre ordinateur, en mots simples.</p>
+        <div id="ai-summary"></div>
+      </div>
       <div class="grid2">
         <div class="panel"><h3>Problèmes par gravité</h3><div class="chart-box"><canvas id="chart-sev"></canvas></div><div id="sev-legend" class="legend"></div></div>
         <div class="panel"><h3>Évolution des scores</h3><div class="chart-box"><canvas id="chart-evo"></canvas></div><p class="muted small" id="evo-note"></p></div>
@@ -356,9 +370,19 @@
         <div class="table-wrap"><table id="plan-table"></table></div>
       </div>
       <div class="panel" id="ai-panel">
-        <div class="row-between"><h3>Assistant IA (Grok)</h3><button class="btn" id="ai-btn">Générer le plan IA</button></div>
-        <p class="muted small" id="ai-note">Seuls les problèmes détectés, les scores et la version du système sont envoyés, sans le nom de la machine ni les noms de comptes. Chaque étape proposée par l'IA est vérifiée par rapport au scan.</p>
+        <div class="row-between"><h3>🤖 Assistant IA</h3><button class="btn" id="ai-btn">Générer le plan IA</button></div>
+        <p class="muted small" id="ai-note">Un plan de correction personnalisé. Seul un résumé anonyme des problèmes est envoyé à l'IA (sans nom d'ordinateur, comptes, adresses IP ni fichiers).
+          Chaque étape est rattachée à un vrai problème du scan et chaque commande est comparée à la base vérifiée de KMB.</p>
         <div id="ai-out"></div>
+      </div>
+      <div class="panel ai-panel" data-ai>
+        <h3>🤖 Poser une question sur mon rapport</h3>
+        <form id="ai-ask-form" class="ai-ask">
+          <label class="sr" for="ai-question">Votre question</label>
+          <input id="ai-question" type="search" maxlength="400" placeholder="Ex. : Est-ce grave si je ne chiffre pas mon disque ?">
+          <button type="submit" class="btn" id="ai-ask-btn">Demander</button>
+        </form>
+        <div id="ai-answer"></div>
       </div>
     </section>
 
@@ -414,7 +438,15 @@
   <h1>Questions fréquentes</h1>
   <details class="faq" open><summary>Mes données sont-elles envoyées sur Internet&nbsp;?</summary>
     <p>Non. Le rapport est lu par votre navigateur, sur votre ordinateur. Il n'est ni envoyé ni conservé par ce site.
-      Le scanner contacte seulement le site public endoflife.date pour connaître les dates de fin de support des logiciels (sans rien envoyer de personnel).</p></details>
+      Le scanner contacte seulement le site public endoflife.date pour connaître les dates de fin de support des logiciels (sans rien envoyer de personnel).</p>
+    <p><b>Seule exception, si vous l'acceptez :</b> l'assistant IA. Voir la question suivante.</p></details>
+  <details class="faq"><summary>Comment fonctionne l'assistant IA&nbsp;?</summary>
+    <p>Les boutons 🤖 (« Explique-moi ce problème », « Résumer mon rapport », plan de correction, questions, comparaison) font appel à une IA.
+      La première fois, le site vous demande votre accord. Il envoie alors un <b>résumé anonyme</b> des problèmes détectés (titre, gravité, constat,
+      commandes de correction connues) : jamais le nom de l'ordinateur, les comptes, les adresses IP, vos fichiers ni le rapport complet.</p>
+    <p>Ce résumé passe par le relais de KMB Library, qui l'envoie au service d'IA Groq (modèles ouverts) puis vous renvoie la réponse ; rien n'est conservé.
+      L'IA peut se tromper : KMB vérifie que chaque étape correspond à un vrai problème du scan et signale toute commande absente de sa base vérifiée.
+      Le nombre de demandes est limité (10 par heure) pour que le service reste gratuit pour tous.</p></details>
   <details class="faq"><summary>Le scanner peut-il abîmer mon ordinateur&nbsp;?</summary>
     <p>Non. Il lit des informations, il ne modifie rien. Les corrections sont proposées : c'est vous qui décidez de les appliquer.</p></details>
   <details class="faq"><summary>Pourquoi faut-il installer Python&nbsp;?</summary>
@@ -436,6 +468,21 @@
     <p>Le fichier qui commence par <code>KMB-rapport_</code> et finit par <code>.json</code> : c'est votre rapport, et ce site sert à l'afficher.
       Le dossier <code>donnees-brutes</code> (données de départ) et le dossier <code>.cache</code> servent uniquement au fonctionnement et à la vérification.</p></details>
 </main>
+
+<dialog id="ai-consent" class="ai-consent">
+  <form method="dialog">
+    <h2>🤖 Utiliser l'assistant IA ?</h2>
+    <p>Pour vous répondre, KMB envoie à l'IA un <b>résumé anonyme</b> des problèmes détectés : leur titre, leur gravité, le constat et les
+      commandes de correction connues.</p>
+    <ul>
+      <li>Jamais envoyés : le nom de l'ordinateur, les comptes, les adresses IP, vos fichiers ni le rapport complet.</li>
+      <li>Le relais KMB transmet ce résumé au service d'IA <b>Groq</b>, puis vous renvoie la réponse. Rien n'est conservé.</li>
+      <li>L'IA peut se tromper : chaque réponse est vérifiée par KMB, et les commandes inconnues sont signalées.</li>
+    </ul>
+    <p class="muted small">Sans votre accord, rien n'est envoyé et le reste du rapport fonctionne normalement.</p>
+    <div class="row-end"><button value="non" class="btn ghost">Non merci</button><button value="oui" class="btn">J'accepte</button></div>
+  </form>
+</dialog>
 
 <footer class="site-footer"><div class="inner">
   <a class="brand" href="#accueil"><svg class="logo" viewBox="0 0 40 40" aria-hidden="true"><path d="M20 2 35 8v11c0 9.5-6.4 16.4-15 19C11.4 35.4 5 28.5 5 19V8Z" fill="url(#kmb-grad)"/><text x="20" y="24.5" text-anchor="middle" font-family="Plus Jakarta Sans,Segoe UI,sans-serif" font-size="10.5" font-weight="800" fill="#fff">KMB</text></svg><div><strong>KMB Library</strong> <span>v2.1.0</span></div></a>

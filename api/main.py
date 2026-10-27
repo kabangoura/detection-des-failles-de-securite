@@ -39,7 +39,7 @@ API de consultation des audits produits par **KMB Library** (`kmb scan`).
 TAGS = [
     {"name": "Scans", "description": "Téléverser, lister et consulter les rapports d'audit"},
     {"name": "Analyse", "description": "Filtrer les problèmes, les logiciels, comparer et obtenir des statistiques"},
-    {"name": "IA", "description": "Plan de correction généré par Grok (xAI), vérifié par rapport au scan"},
+    {"name": "IA", "description": "Plan de correction généré par l'IA (Groq, ou xAI Grok), vérifié par rapport au scan"},
     {"name": "Référence", "description": "Base de connaissances des contrôles"},
 ]
 
@@ -212,6 +212,11 @@ def create_app(data_dir: Path | None = None) -> FastAPI:
 
     # ------------------------------------------------------------------ IA
 
+    def ia_configuree() -> bool:
+        from kmb_library.ai.assistant import api_key
+
+        return api_key() is not None
+
     @app.get("/scans/{scan_id}/plan-ia", tags=["IA"], summary="Lire le plan IA déjà généré")
     def get_ai_plan(scan_id: str):
         report = get_or_404(scan_id)
@@ -220,18 +225,18 @@ def create_app(data_dir: Path | None = None) -> FastAPI:
             raise HTTPException(status_code=404, detail="Aucun plan IA pour ce scan : utiliser POST pour le générer")
         return plan
 
-    @app.post("/scans/{scan_id}/plan-ia", tags=["IA"], summary="Générer un plan de correction avec Grok")
+    @app.post("/scans/{scan_id}/plan-ia", tags=["IA"], summary="Générer un plan de correction avec l'IA")
     def create_ai_plan(scan_id: str, regenerer: bool = Query(False, description="Ignorer le plan déjà enregistré")):
-        from kmb_library.ai.grok import GrokError, api_key, generate_plan
+        from kmb_library.ai.assistant import AIError, api_key, generate_plan
 
         report = get_or_404(scan_id)
         if not regenerer and (plan := store.get_ai_plan(report.scan_id)):
             return plan
         if not api_key():
-            raise HTTPException(status_code=503, detail="Assistant IA non configuré : définir XAI_API_KEY dans le fichier .env")
+            raise HTTPException(status_code=503, detail="Assistant IA non configuré : mettre GROQ_API_KEY (ou XAI_API_KEY) dans le fichier .env")
         try:
             plan = generate_plan(report)
-        except GrokError as exc:
+        except AIError as exc:
             raise HTTPException(status_code=502, detail=str(exc)) from exc
         store.save_ai_plan(report.scan_id, plan)
         return plan
@@ -258,7 +263,7 @@ def create_app(data_dir: Path | None = None) -> FastAPI:
 
     @app.get("/sante", tags=["Référence"], summary="État du service")
     def health():
-        return {"statut": "ok", "version": __version__, "scans": len(store.all()), "ia_configuree": bool(os.getenv("XAI_API_KEY") or os.getenv("GROK_API_KEY"))}
+        return {"statut": "ok", "version": __version__, "scans": len(store.all()), "ia_configuree": ia_configuree()}
 
     # ------------------------------------------------------------------ site web
     # Le dossier web/ est un site statique autonome (publiable tel quel sur GitHub Pages ou Hostinger).

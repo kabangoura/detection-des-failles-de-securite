@@ -146,12 +146,12 @@ def cmd_compare(args: argparse.Namespace) -> int:
 
 
 def cmd_ai(args: argparse.Namespace) -> int:
-    from kmb_library.ai.grok import GrokError, generate_plan
+    from kmb_library.ai.assistant import AIError, generate_plan
     from kmb_library.reports.json_report import load_report
 
     try:
         plan = generate_plan(load_report(Path(args.rapport)), model=args.modele)
-    except GrokError as exc:
+    except AIError as exc:
         print(f"Erreur : {exc}")
         return 1
     print(json.dumps(plan, ensure_ascii=False, indent=2))
@@ -188,9 +188,9 @@ def build_parser() -> argparse.ArgumentParser:
     e.add_argument("--api", default="http://127.0.0.1:8000")
     e.set_defaults(func=cmd_send)
 
-    a = sub.add_parser("plan-ia", help="Générer un plan de correction avec l'API Grok")
+    a = sub.add_parser("plan-ia", help="Générer un plan de correction avec l'IA (Groq, ou xAI Grok)")
     a.add_argument("rapport")
-    a.add_argument("--modele", help="Modèle Grok (défaut : XAI_MODEL ou grok-4.7)")
+    a.add_argument("--modele", help="Modèle à utiliser (défaut : KMB_IA_MODELE, sinon les modèles du fournisseur dans l'ordre)")
     a.set_defaults(func=cmd_ai)
 
     v = sub.add_parser("version", help="Afficher la version")

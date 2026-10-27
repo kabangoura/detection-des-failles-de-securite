@@ -3,7 +3,7 @@
 Organisation par défaut (Documents\\KMB Library) :
     KMB-rapport_<PC>_<AAAA-MM-JJ>_<HHhMM>.json    LE rapport : seul fichier à téléverser, affiché par le site
     donnees-brutes/donnees-brutes_<PC>_<...>.json données collectées sans traitement (pour vérification)
-    plans-ia/plan-ia_<id>.json                    plans de correction générés par Grok
+    plans-ia/plan-ia_<id>.json                    plans de correction générés par l'IA (Groq ou xAI Grok)
     .cache/                                       réponses d'endoflife.date gardées 7 jours
 Le scan ne produit volontairement aucun autre rapport (pas de HTML) : c'est le site qui présente le résultat.
 Les anciens noms (rapport-traite_*, scan_*, raw_*) restent lisibles.

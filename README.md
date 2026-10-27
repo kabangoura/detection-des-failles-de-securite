@@ -16,6 +16,7 @@
 |---|---|
 | `kmb_library/` | la librairie : collecte (Windows, Linux, macOS), règles, scores, rapport JSON |
 | `api/` | API FastAPI (mode serveur du site) |
+| `relais-ia/` | relais Cloudflare de l'assistant IA (Groq) : la clé reste secrète, demandes limitées |
 | `web/` | le site public, publié sur GitHub Pages |
 | `tests/` | tests automatiques (`pytest`) |
 | `scripts/` | outils du projet : catalogue des commandes de correction, ZIP du site, simulations |

@@ -19,8 +19,8 @@ from pathlib import Path
 
 _REMINDER = re.compile(r"<system-reminder>.*?</system-reminder>", re.S)
 _PASTED = re.compile(r"</?pasted_content[^>]*>")
-# Clés secrètes (PyPI, xAI/Grok, GitHub, Cloudflare) : jamais dans le document remis
-_SECRET = re.compile(r"\b(pypi-[A-Za-z0-9_\-]{16,}|xai-[A-Za-z0-9_\-]{16,}|gh[pousr]_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,})")
+# Clés secrètes (PyPI, Groq, xAI/Grok, GitHub) : jamais dans le document remis
+_SECRET = re.compile(r"\b(pypi-[A-Za-z0-9_\-]{16,}|gsk_[A-Za-z0-9]{16,}|xai-[A-Za-z0-9_\-]{16,}|gh[pousr]_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,})")
 _SUMMARY = "This session is being continued from a previous conversation"
 
 

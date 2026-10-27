@@ -25,7 +25,8 @@ def reports(raw):
 
 @pytest.fixture
 def client(tmp_path, reports, monkeypatch):
-    monkeypatch.delenv("XAI_API_KEY", raising=False)
+    for var in ("GROQ_API_KEY", "XAI_API_KEY", "GROK_API_KEY"):
+        monkeypatch.delenv(var, raising=False)
     monkeypatch.delenv("GROK_API_KEY", raising=False)
     c = TestClient(create_app(tmp_path))
     for r in reports:

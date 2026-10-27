@@ -113,9 +113,7 @@ function localApi(path, opts) {
     res.total = items.length;
     return res;
   }
-  if (parts[0] === "scans" && parts[2] === "plan-ia") {
-    throw apiError(501, "Le plan IA (Grok) n'est disponible qu'avec l'outil installé (commande « kmb plan-ia »).");
-  }
+  if (parts[0] === "scans" && parts[2] === "plan-ia") throw apiError(404, "Plan IA généré à la demande (bouton « Générer le plan IA »).");
   if (parts[0] === "statistiques") {
     const m = p.get("machine");
     const reports = sortedLocal().filter((r) => !m || r.machine_name === m);
@@ -214,6 +212,7 @@ async function loadScans(selectId) {
 
 async function loadReport(id) {
   state.report = await api(`/scans/${encodeURIComponent(id)}`);
+  for (const sel of ["#ai-summary", "#ai-answer"]) $(sel).innerHTML = "";
   renderOverview();
   loadFindings();
   renderPlan();
@@ -347,6 +346,7 @@ function findingHtml(f) {
         ${f.impact ? `<dt>Conséquences possibles</dt><dd>${esc(f.impact)}</dd>` : ""}
         ${f.location ? `<dt>Où se trouve-t-il ?</dt><dd>${esc(f.location)}</dd>` : ""}
       </dl>
+      ${isProblem && (CONFIG.relaisIA || MODE === "serveur") ? `<div class="ai-explain"><button type="button" class="btn ghost" data-explain="${esc(f.key)}">🤖 Explique-moi ce problème</button><div></div></div>` : ""}
       ${isProblem ? `<h3 class="guide-title">Guide de correction</h3><p class="small muted">KMB ne modifie rien sur votre ordinateur : c'est vous qui lancez chaque commande, dans l'ordre.</p>${guide}` : ""}
       ${f.references?.length ? `<p class="small">Références : ${f.references.map((u) => `<a href="${esc(u)}" target="_blank" rel="noopener">${esc(u)}</a>`).join(" · ")}</p>` : ""}
       <p class="small muted">Score de risque indicatif : ${f.risk_score}/10 · pénalité : ${f.penalty} points (${DOMAIN_LABEL[f.domain]})</p>
@@ -375,6 +375,14 @@ async function renderPlan() {
   try { renderAi(await api(`/scans/${encodeURIComponent(r.scan_id)}/plan-ia`)); } catch (e) { if (e.status !== 404) toast(e.message); }
 }
 
+function aiCommands(s) {
+  const list = s.commandes_verifiees || (s.commandes || []).map((c) => ({ commande: c, connue: null }));
+  return list.map(({ commande, connue }) => `<div class="ai-cmd ${connue === false ? "unknown" : ""}">
+    ${connue === false ? `<p class="small st-detecte">⚠️ Commande non vérifiée (absente de la base KMB) : à ne pas exécuter sans la comprendre.</p>`
+      : connue ? `<p class="small st-conforme">✓ Commande vérifiée (base KMB)</p>` : ""}
+    <div class="cmd"><pre>${esc(commande)}</pre><button type="button" data-copy="${esc(commande)}">Copier</button></div></div>`).join("");
+}
+
 function renderAi(plan) {
   const v = plan.verification || {};
   const steps = (plan.priorites || []).map((s) => `<div class="ai-step ${s.verifie ? "" : "unverified"}">
@@ -382,23 +390,180 @@ function renderAi(plan) {
       <span class="small ${s.verifie ? "st-conforme" : "st-detecte"}">${s.verifie ? "✓ lié au constat " + esc(s.key) : "⚠ non vérifiée (clé inconnue : " + esc(s.key) + ")"}</span></div>
     <p>${esc(s.pourquoi || "")}</p>
     <ol>${(s.etapes || []).map((x) => `<li>${esc(x)}</li>`).join("")}</ol>
-    ${(s.commandes || []).map((c) => `<div class="cmd"><pre>${esc(c)}</pre><button type="button" data-copy="${esc(c)}">Copier</button></div>`).join("")}
+    ${aiCommands(s)}
     <p class="small muted">Gain estimé : ${esc(s.gain_estime || "—")} · durée : ${esc(s.duree || "—")}</p></div>`).join("");
   const missing = (v.problemes_graves_oublies || []).length ? `<p class="st-detecte small">Problèmes graves non traités par l'IA : ${v.problemes_graves_oublies.map(esc).join(", ")}</p>` : "";
+  const cmdNote = v.commandes != null ? ` · ${v.commandes} commande(s), dont ${v.commandes_non_verifiees} non vérifiée(s)` : "";
   $("#ai-out").innerHTML = `<p>${esc(plan.resume || "")}</p>
-    <p class="small ${v.fiable ? "st-conforme" : "st-detecte"}">Vérification : ${v.etapes || 0} étape(s), ${v.etapes_non_verifiees || 0} non vérifiée(s) — ${v.fiable ? "plan cohérent avec le scan" : "à relire avec prudence"}</p>
+    <p class="small ${v.fiable ? "st-conforme" : "st-detecte"}">Vérification : ${v.etapes || 0} étape(s), ${v.etapes_non_verifiees || 0} non vérifiée(s)${cmdNote} — ${v.fiable ? "plan cohérent avec le scan" : "à relire avec prudence"}</p>
     ${missing}${steps}
     ${(plan.conseils_generaux || []).length ? `<h4>Conseils généraux</h4><ul>${plan.conseils_generaux.map((c) => `<li>${esc(c)}</li>`).join("")}</ul>` : ""}
-    <p class="small muted">${esc(plan.meta?.fournisseur || "")} · modèle ${esc(plan.meta?.modele || "")} · ${fmtDate(plan.meta?.genere_le)}</p>`;
+    <p class="small muted">${esc(plan.meta?.fournisseur || "")} · modèle ${esc(plan.meta?.modele || "")}${plan.meta?.genere_le ? " · " + fmtDate(plan.meta.genere_le) : ""}</p>`;
   $("#ai-btn").textContent = "Régénérer le plan IA";
 }
 
 async function generateAi() {
   const btn = $("#ai-btn"); btn.disabled = true; const old = btn.textContent; btn.textContent = "Génération en cours…";
   try {
-    const regen = old.startsWith("Régénérer") ? "?regenerer=true" : "";
-    renderAi(await api(`/scans/${encodeURIComponent(state.report.scan_id)}/plan-ia${regen}`, { method: "POST" }));
+    if (MODE === "serveur") {
+      const regen = old.startsWith("Régénérer") ? "?regenerer=true" : "";
+      renderAi(await api(`/scans/${encodeURIComponent(state.report.scan_id)}/plan-ia${regen}`, { method: "POST" }));
+    } else {
+      const r = await askAI("plan", aiBase());
+      if (r) renderAi(verifyPlan({ ...r.resultat, meta: { fournisseur: "Groq (relais KMB)", modele: r.modele } }));
+    }
   } catch (e) { toast(e.message); btn.textContent = old; } finally { btn.disabled = false; }
+}
+
+// ------------------------------------------------------------------ assistant IA (relais Groq)
+// Le site envoie au relais un résumé ANONYME des problèmes (jamais le rapport) ; le relais garde la clé de l'IA secrète.
+// Chaque réponse est vérifiée ici : étapes rattachées à de vrais problèmes, commandes comparées à la base KMB.
+const AI_FIELDS = new Set(["ordre", "key", "titre", "pourquoi", "etapes", "commandes", "gain_estime", "duree", "resume", "priorites"]);
+
+function aiConsent() {
+  try { if (sessionStorage.getItem("kmb-ia-ok") === "1") return Promise.resolve(true); } catch { /* stockage indisponible */ }
+  const dlg = $("#ai-consent");
+  return new Promise((resolve) => {
+    dlg.returnValue = "";
+    dlg.addEventListener("close", () => {
+      const ok = dlg.returnValue === "oui";
+      if (ok) { try { sessionStorage.setItem("kmb-ia-ok", "1"); } catch { /* idem */ } }
+      resolve(ok);
+    }, { once: true });
+    dlg.showModal();
+  });
+}
+
+function anonymize(text) {
+  const r = state.report;
+  let t = String(text ?? "");
+  for (const name of [r.machine_name, r.display_name].filter((x) => x && x.length > 2)) t = t.split(name).join("[ordinateur]");
+  return t.replace(/[A-Za-z]:\\Users\\[^\\\s"]+/gi, "~").replace(/\/(home|Users)\/[^/\s"]+/g, "~")
+    .replace(/\b\d{1,3}(\.\d{1,3}){3}\b/g, "[IP]").replace(/[\w.+-]+@[\w-]+\.[\w.]+/g, "[courriel]").slice(0, 400);
+}
+
+function knownCommands(f) {
+  const all = f.remediation?.commands || {};
+  const cmds = all[state.report.os_family || "windows"] || Object.values(all).flat();
+  const order = { corriger: 0, ouvrir: 1, verifier: 2 };
+  return [...cmds].sort((a, b) => (order[a.type] ?? 3) - (order[b.type] ?? 3)).slice(0, 3).map((c) => (typeof c === "string" ? c : c.cmd));
+}
+
+function aiProblem(f) {
+  return { key: f.key, titre: f.title, gravite: f.severity, domaine: f.domain, constat: anonymize(f.evidence),
+    correction_connue: (f.remediation?.steps || []).slice(0, 3).map(anonymize), commandes_connues: knownCommands(f) };
+}
+
+function detectedFindings() {
+  return state.report.findings.filter((f) => f.status === "detecte").sort((a, b) => SEV_RANK[a.severity] - SEV_RANK[b.severity]);
+}
+
+function aiBase() {
+  const r = state.report;
+  return { os: r.os, scores: r.scores, resume_gravite: r.summary, problemes: detectedFindings().slice(0, 15).map(aiProblem) };
+}
+
+async function askAI(tache, data) {
+  if (!CONFIG.relaisIA) throw new Error("Assistant IA non configuré sur ce site.");
+  if (!(await aiConsent())) return null;
+  let res;
+  try {
+    res = await fetch(CONFIG.relaisIA, { method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ tache, langue: document.documentElement.lang === "en" ? "en" : "fr", ...data }) });
+  } catch { throw new Error("IA indisponible pour l'instant (pas de connexion au relais). Le reste du rapport fonctionne normalement."); }
+  const body = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(body.erreur || `IA indisponible pour l'instant (erreur ${res.status}).`);
+  return body;
+}
+
+// Même logique que kmb_library/ai/assistant.py (verify)
+const reEscape = (t) => t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+function normCmd(c) { return String(c).replace(/\\"/g, '"').trim().replace(/^`+|`+$/g, "").toLowerCase().split(/\s+/).join(" "); }
+function cmdPattern(c) {
+  const cmd = typeof c === "string" ? c : c.cmd;
+  const words = (typeof c === "string" ? null : c.remplacer) || {};
+  let t = reEscape(normCmd(cmd));
+  for (const w of Object.keys(words)) t = t.split(reEscape(normCmd(w))).join(".+?");
+  t = t.replace(/<[^>]+>/g, ".+?").replace(/ /g, "\\s+");
+  return new RegExp(`^${t}\\s*$`);
+}
+function cleanCommands(raw) {
+  return (Array.isArray(raw) ? raw : []).map((c) => {
+    c = String(c).replace(/\\"/g, '"').trim().replace(/\\+$/, "").trim();
+    return (c.split('"').length - 1) % 2 ? c.replace(/^"+|"+$/g, "").trim() : c;  // guillemet orphelin
+  }).filter((c) => {
+    const words = c.split(/\s+/).length;
+    const prose = (/[.…]$/.test(c) && words >= 3) || (words >= 3 && /[à-ÿ]/.test(c) && !/[-/\\:=|$<>]/.test(c));
+    const duration = /^\d+\s*[-–‑à]?\s*\d*\s*(min|minutes?|h|heures?|s|secondes?)\.?$/i.test(c);
+    return !duration && c.length >= 3 && !AI_FIELDS.has(c.replace(/[:,[\]{}" ]/g, "").toLowerCase()) && /[A-Za-z]{2}/.test(c) && !prose;
+  });
+}
+function checkCommands(cmds, key) {
+  const byKey = {};
+  for (const f of state.report.findings) byKey[f.key] = Object.values(f.remediation?.commands || {}).flat().map(cmdPattern);
+  const every = Object.values(byKey).flat();
+  return cleanCommands(cmds).map((c) => {
+    const n = normCmd(c);
+    return { commande: c, connue: (byKey[key] || []).some((pt) => pt.test(n)) || every.some((pt) => pt.test(n)) };
+  });
+}
+function verifyPlan(plan) {
+  const known = new Map(detectedFindings().map((f) => [f.key, f]));
+  let unknown = 0, nCmds = 0, unknownCmds = 0;
+  plan.priorites = (plan.priorites || []).map((s) => {
+    s.verifie = known.has(s.key); unknown += !s.verifie;
+    s.commandes_verifiees = checkCommands(s.commandes, s.key);
+    nCmds += s.commandes_verifiees.length; unknownCmds += s.commandes_verifiees.filter((c) => !c.connue).length;
+    return s;
+  });
+  const covered = new Set(plan.priorites.map((s) => s.key));
+  const missing = [...known.values()].filter((f) => ["critique", "eleve"].includes(f.severity) && !covered.has(f.key)).map((f) => f.key);
+  plan.verification = { etapes: plan.priorites.length, etapes_non_verifiees: unknown, problemes_graves_oublies: missing,
+    commandes: nCmds, commandes_non_verifiees: unknownCmds, fiable: unknown === 0 && !missing.length };
+  return plan;
+}
+
+function aiBox(html) { return `<div class="ai-box"><p class="ai-label">🤖 Réponse de l'IA <span class="muted small">(à relire : l'IA peut se tromper)</span></p>${html}</div>`; }
+
+async function runAI(button, out, tache, data, render) {
+  const old = button.textContent; button.disabled = true; button.textContent = "L'IA réfléchit…";
+  try {
+    const r = await askAI(tache, data);
+    if (r) out.innerHTML = aiBox(render(r.resultat) + `<p class="small muted">Groq · ${esc(r.modele)}</p>`);
+  } catch (e) { out.innerHTML = `<p class="small st-detecte">${esc(e.message)}</p>`; } finally { button.disabled = false; button.textContent = old; }
+}
+
+const AI_RENDER = {
+  explique: (x, key) => `<p>${esc(x.explication || "")}</p>
+    ${x.risque ? `<p><b>Le risque :</b> ${esc(x.risque)}</p>` : ""}${x.exemple ? `<p><b>Exemple :</b> ${esc(x.exemple)}</p>` : ""}
+    ${(x.que_faire || []).length ? `<p><b>Que faire :</b></p><ol>${x.que_faire.map((e) => `<li>${esc(e)}</li>`).join("")}</ol>` : ""}
+    ${aiCommands({ commandes_verifiees: checkCommands(x.commandes, key) })}`,
+  resume: (x) => `<p>${esc(x.resume || "").replace(/\n/g, "<br>")}</p>`,
+  comparaison: (x) => `<p>${esc(x.commentaire || "")}</p>`,
+  question: (x) => `<p>${esc(x.reponse || "").replace(/\n/g, "<br>")}</p>${aiCommands({ commandes_verifiees: checkCommands(x.commandes, "") })}`,
+};
+
+function explainFinding(button) {
+  const f = state.report.findings.find((x) => x.key === button.dataset.explain);
+  if (f) runAI(button, button.nextElementSibling, "explique", { os: state.report.os, probleme: aiProblem(f) }, (x) => AI_RENDER.explique(x, f.key));
+}
+
+function summarizeReport() { runAI($("#ai-summary-btn"), $("#ai-summary"), "resume", aiBase(), AI_RENDER.resume); }
+
+function askQuestion(ev) {
+  ev.preventDefault();
+  const q = $("#ai-question").value.trim();
+  if (q.length < 3) return;
+  runAI($("#ai-ask-btn"), $("#ai-answer"), "question", { ...aiBase(), question: q }, AI_RENDER.question);
+}
+
+function commentComparison() {
+  const c = state.lastComparison;
+  if (!c) return;
+  const titles = (items) => items.map((f) => `${f.title} (${f.severity})`);
+  runAI($("#ai-compare-btn"), $("#ai-compare"), "comparaison",
+    { os: state.report.os, comparaison: { evolution_scores: c.evolution_scores, corriges: titles(c.corriges), restants: titles(c.restants), nouveaux: titles(c.nouveaux) } },
+    AI_RENDER.comparaison);
 }
 
 // ------------------------------------------------------------------ logiciels
@@ -528,6 +693,7 @@ async function compare(ev) {
   ev?.preventDefault();
   try {
     const c = await api(`/comparaison?${qs($("#c-form"))}`);
+    state.lastComparison = c;
     const delta = Object.entries(c.evolution_scores).map(([k, v]) => `<div class="score"><div class="label">${DOMAIN_LABEL[k]}</div>
       <div class="value">${c.nouveau.scores[k]}<small>/100</small></div><div class="${v > 0 ? "delta-pos" : v < 0 ? "delta-neg" : "muted"}">${v > 0 ? "+" : ""}${v} pts</div></div>`).join("");
     const list = (items, empty) => items.length ? `<ul>${items.map((f) => `<li>${badge(f.severity)} ${esc(f.title)}</li>`).join("")}</ul>` : `<p class="muted">${empty}</p>`;
@@ -538,7 +704,8 @@ async function compare(ev) {
         <div class="panel"><h3>Toujours présents (${c.resume.restants})</h3>${list(c.restants, "Aucun.")}</div>
         <div class="panel"><h3>Nouveaux (${c.resume.nouveaux})</h3>${list(c.nouveaux, "Aucun nouveau problème.")}</div>
       </div>
-      ${c.non_verifiables.length ? `<div class="panel"><h3>Devenus non vérifiables (${c.non_verifiables.length})</h3>${list(c.non_verifiables, "")}</div>` : ""}`;
+      ${c.non_verifiables.length ? `<div class="panel"><h3>Devenus non vérifiables (${c.non_verifiables.length})</h3>${list(c.non_verifiables, "")}</div>` : ""}
+      ${CONFIG.relaisIA ? `<div class="panel"><div class="row-between"><h3>Commentaire de l'IA</h3><button type="button" class="btn" id="ai-compare-btn">🤖 Commenter mon évolution</button></div><div id="ai-compare"></div></div>` : ""}`;
   } catch (e) { $("#c-out").innerHTML = `<p class="muted">${esc(e.message)}</p>`; }
 }
 
@@ -589,8 +756,13 @@ document.addEventListener("DOMContentLoaded", () => {
   $("#mode-note").textContent = MODE === "serveur"
     ? "Mode serveur : rapports du dossier de données de l'API locale."
     : "Vos rapports sont lus dans votre navigateur et ne sont jamais envoyés.";
-  if (MODE === "serveur") { $("#ai-note").hidden = false; $("#clear-btn").hidden = true; }
-  else { $("#ai-btn").hidden = true; $("#ai-note").textContent = "Le plan de correction par IA (Grok) est disponible avec l'outil installé : commande « kmb plan-ia ». Le plan ci-dessus, lui, est toujours disponible."; }
+  if (MODE === "serveur") $("#clear-btn").hidden = true;
+  if (!CONFIG.relaisIA && MODE !== "serveur") {
+    document.querySelectorAll("[data-ai]").forEach((el) => (el.hidden = true));
+    $("#ai-btn").hidden = true; $("#ai-note").textContent = "Assistant IA non configuré sur ce site : commande « python -m kmb_library plan-ia » avec l'outil installé.";
+  }
+  $("#ai-summary-btn").addEventListener("click", summarizeReport);
+  $("#ai-ask-form").addEventListener("submit", askQuestion);
   document.querySelectorAll("[data-dl-zip]").forEach((a) => (a.href = CONFIG.downloadZip || "#"));
   // Adresse complète du ZIP (dépend de l'adresse du site) pour « pip install <adresse> »
   const zipUrl = new URL(CONFIG.downloadZip || "telechargements/kmb-library.zip", location.href).href;
@@ -625,6 +797,9 @@ document.addEventListener("DOMContentLoaded", () => {
   zone.addEventListener("dragleave", () => zone.classList.remove("over"));
   zone.addEventListener("drop", (e) => { e.preventDefault(); zone.classList.remove("over"); addFiles([...e.dataTransfer.files]); });
   document.addEventListener("click", (e) => {
+    const ex = e.target.closest("[data-explain]");
+    if (ex) { explainFinding(ex); return; }
+    if (e.target.closest("#ai-compare-btn")) { commentComparison(); return; }
     const b = e.target.closest("[data-copy]");
     if (!b) return;
     const done = () => {
