@@ -135,6 +135,16 @@ main { max-width: 1200px; margin: 0 auto; padding: 16px; }
 .cta-band h2 { margin: 0 0 6px; font-size: 22px; }
 .cta-band p { margin: 0 0 16px; color: var(--muted); }
 
+/* section « Assistant IA » de l'accueil */
+.ai-features { grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); }
+.ai-features .feature { border-top: 3px solid var(--accent); }
+.ai-trust { display: flex; gap: 14px 22px; align-items: center; justify-content: space-between; flex-wrap: wrap; margin: 16px 0 0;
+  padding: 16px 20px; border-radius: var(--radius); background: var(--panel); border: 1px dashed color-mix(in srgb, var(--accent) 45%, var(--line)); }
+.ai-trust p { margin: 0; flex: 1 1 420px; color: var(--muted); }
+.ai-trust b { color: var(--fg); }
+.preview .pv-ai { margin-top: 8px; display: inline-block; font-size: 12px; font-weight: 700; color: #0a7c87; background: #e0f4f5;
+  border: 1px solid #b5e3e6; border-radius: 99px; padding: 3px 10px; }
+
 /* ===================================================== guide : frise et terminal */
 .ostabs { display: inline-flex; flex-wrap: wrap; gap: 4px; margin: 16px 0; padding: 4px; background: var(--bg2); border-radius: 12px; }
 .ostabs button { border: 0; background: transparent; color: var(--muted); border-radius: 9px; padding: 8px 16px; font: inherit; font-weight: 700; cursor: pointer; }
