@@ -32,3 +32,17 @@ Assistant IA (facultatif, avec accord de l'utilisateur) : explication d'un probl
 - [Analyser un rapport](https://kabangoura.github.io/detection-des-failles-de-securite/#analyser)
 - [Questions fréquentes](https://kabangoura.github.io/detection-des-failles-de-securite/#questions)
 - [Exemple de rapport](https://kabangoura.github.io/detection-des-failles-de-securite/?exemple=1#analyser)
+
+## In English
+
+KMB Library is a free tool that audits a computer (Windows, Linux, macOS): security, software, performance and storage.
+English site: https://kabangoura.github.io/detection-des-failles-de-securite/en/
+
+1. Install Python 3.10+ (python.org; on Windows, check “Add python.exe to PATH”).
+2. Install KMB Library from PyPI: `python -m pip install kmb-library`
+3. Scan (3 to 5 minutes, changes nothing): `python -m kmb_library scan`
+4. Open the `KMB-rapport_<computer>_<date>.json` report (Documents/KMB Library) on the site with “Analyse my report”: it is read in the browser and never sent.
+
+Each problem comes with a fix guide (Check, Open the setting, Fix) and commands the user runs themselves.
+Optional AI assistant (with consent): explanations, summary, fix plan, questions, before/after comment; only an anonymous summary
+of the problems is sent, through a KMB relay, to the Groq AI service, and every answer is checked against the KMB database.

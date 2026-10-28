@@ -10,6 +10,9 @@
   <meta name="application-name" content="KMB Library">
   <meta name="theme-color" content="#0f2a4a">
   <link rel="canonical" href="https://kabangoura.github.io/detection-des-failles-de-securite/">
+  <link rel="alternate" hreflang="fr" href="https://kabangoura.github.io/detection-des-failles-de-securite/">
+  <link rel="alternate" hreflang="en" href="https://kabangoura.github.io/detection-des-failles-de-securite/en/">
+  <link rel="alternate" hreflang="x-default" href="https://kabangoura.github.io/detection-des-failles-de-securite/">
   <link rel="alternate" type="text/plain" href="llms.txt" title="Résumé pour les assistants IA">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="KMB Library">
@@ -82,7 +85,7 @@
      "name": "Mes données sont-elles envoyées sur Internet ?",
      "acceptedAnswer": {
       "@type": "Answer",
-      "text": "Non. Le rapport est lu par votre navigateur, sur votre ordinateur. Il n'est ni envoyé ni conservé par ce site. Le scanner contacte seulement le site public endoflife.date pour connaître les dates de fin de support des logiciels (sans rien envoyer de personnel). Seule exception, si vous l'acceptez : l'assistant IA, qui reçoit un résumé anonyme des problèmes détectés."
+      "text": "Non. Le rapport est lu par votre navigateur, sur votre ordinateur. Il n'est ni envoyé ni conservé par ce site. Le scanner contacte seulement le site public endoflife.date pour connaître les dates de fin de support des logiciels (sans rien envoyer de personnel). Seule exception, si vous l'acceptez : l'assistant IA. Voir la question suivante."
      }
     },
     {
@@ -90,7 +93,7 @@
      "name": "Comment fonctionne l'assistant IA ?",
      "acceptedAnswer": {
       "@type": "Answer",
-      "text": "Avec votre accord, le site envoie un résumé anonyme des problèmes détectés (jamais le nom de l'ordinateur, les comptes, les adresses IP ni vos fichiers) au relais de KMB Library, qui interroge le service d'IA Groq. KMB vérifie chaque réponse et signale toute commande absente de sa base vérifiée."
+      "text": "Les boutons 🤖 (« Explique-moi ce problème », « Résumer mon rapport », plan de correction, questions, comparaison) font appel à une IA. La première fois, le site vous demande votre accord. Il envoie alors un résumé anonyme des problèmes détectés (titre, gravité, constat, commandes de correction connues) : jamais le nom de l'ordinateur, les comptes, les adresses IP, vos fichiers ni le rapport complet. Ce résumé passe par le relais de KMB Library, qui l'envoie au service d'IA Groq (modèles ouverts) puis vous renvoie la réponse ; rien n'est conservé. L'IA peut se tromper : KMB vérifie que chaque étape correspond à un vrai problème du scan et signale toute commande absente de sa base vérifiée. Le nombre de demandes est limité (10 par heure) pour que le service reste gratuit pour tous."
      }
     },
     {
@@ -106,7 +109,7 @@
      "name": "Pourquoi faut-il installer Python ?",
      "acceptedAnswer": {
       "@type": "Answer",
-      "text": "KMB Library est une librairie Python, comme beaucoup d'outils informatiques. Python s'installe depuis son site officiel, puis une seule commande installe KMB directement depuis ce site : pas de programme inconnu à ouvrir, et le code de KMB reste consultable."
+      "text": "KMB Library est une librairie Python, comme beaucoup d'outils informatiques. Python s'installe depuis son site officiel, puis une seule commande installe KMB depuis PyPI, la bibliothèque officielle des logiciels Python : pas de programme inconnu à ouvrir, et le code de KMB reste consultable."
      }
     },
     {
@@ -122,7 +125,7 @@
      "name": "Comment mettre KMB à jour ou le désinstaller ?",
      "acceptedAnswer": {
       "@type": "Answer",
-      "text": "Mise à jour : reprenez la commande de l'étape 3 en ajoutant --upgrade après install. Désinstallation : python -m pip uninstall kmb-library. Pour consulter le code : télécharger KMB Library (ZIP)."
+      "text": "Mise à jour : python -m pip install --upgrade kmb-library. Désinstallation : python -m pip uninstall kmb-library. Pour consulter le code : télécharger KMB Library (ZIP)."
      }
     },
     {
@@ -162,6 +165,7 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
   <link rel="stylesheet" href="style.css">
   <script>try { const t = localStorage.getItem("kmb-theme"); if (t) document.documentElement.dataset.theme = t; } catch (e) {}</script>
+  <script>try { if (localStorage.getItem("kmb-lang") === "en") location.replace("en/" + location.search + location.hash); } catch (e) {}</script>
   <script src="config.js" defer></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js" defer></script>
   <script src="app.js" defer></script>
@@ -174,6 +178,7 @@
     <a href="#guide" data-page="guide">Guide d'installation</a>
     <a href="#analyser" data-page="analyser" class="cta">Analyser mon rapport</a>
     <a href="#questions" data-page="questions">Questions</a>
+    <a class="lang-btn" id="lang-btn" href="en/" hreflang="en" lang="en" title="English version">EN</a>
     <button type="button" class="theme-btn" id="theme-btn" title="Mode sombre" aria-label="Changer le thème clair / sombre">🌙</button>
   </nav>
 </header>

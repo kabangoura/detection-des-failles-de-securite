@@ -46,7 +46,7 @@ kmb = "kmb_library.cli:main"
 include = ["kmb_library*"]
 
 [tool.setuptools.package-data]
-kmb_library = ["rules/knowledge_base.json"]
+kmb_library = ["rules/knowledge_base.json", "rules/knowledge_base_en.json"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

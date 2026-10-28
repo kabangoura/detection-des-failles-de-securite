@@ -62,6 +62,9 @@ a { color: var(--accent); text-underline-offset: 2px; }
 .mainnav a.cta:hover { filter: brightness(1.08); }
 .theme-btn { border: 1px solid var(--line); background: var(--panel); color: var(--fg); width: 38px; height: 38px; border-radius: 10px; cursor: pointer; font-size: 17px; line-height: 1; }
 .theme-btn:hover { background: var(--bg2); }
+.lang-btn { display: inline-grid; place-items: center; min-width: 38px; height: 38px; padding: 0 8px; border: 1px solid var(--line); border-radius: 10px;
+  background: var(--panel); color: var(--fg) !important; font-weight: 800; font-size: 13px; letter-spacing: .04em; text-decoration: none; }
+.lang-btn:hover { background: var(--bg2); }
 
 /* ===================================================== boutons, champs */
 .toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
@@ -314,6 +317,7 @@ mark { background: #ffe58a; color: #000; border-radius: 3px; padding: 0 2px; }
   .brand small { display: none; }
   .mainnav { width: 100%; }
   .theme-btn { position: absolute; top: 8px; right: 12px; }
+  .lang-btn { position: absolute; top: 8px; right: 58px; }
   .mainnav a { padding: 6px 9px; font-size: 13px; }
   .hero h1 { font-size: 28px; }
   .page h1 { font-size: 24px; }

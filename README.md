@@ -5,7 +5,7 @@
 **KMB Library** vérifie gratuitement la sécurité, les logiciels, la performance et le stockage d'un ordinateur
 (Windows 10/11, Linux, macOS), puis explique quoi corriger, étape par étape.
 
-- **Site et guide :** https://kabangoura.github.io/detection-des-failles-de-securite/
+- **Site et guide :** https://kabangoura.github.io/detection-des-failles-de-securite/ (English: https://kabangoura.github.io/detection-des-failles-de-securite/en/)
 - **Installation :** `python -m pip install kmb-library` ([PyPI](https://pypi.org/project/kmb-library/))
 - **Scan :** `python -m kmb_library scan` ; le rapport `KMB-rapport_….json` s'ouvre sur le site avec « Analyser mon rapport »,
   qui le lit dans le navigateur sans l'envoyer.

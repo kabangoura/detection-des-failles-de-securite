@@ -5,14 +5,29 @@
 
 const MODE = new URLSearchParams(location.search).get("mode") === "serveur" ? "serveur" : "local";
 const CONFIG = window.KMB_CONFIG || {};
+// Langue de la page (<html lang="en"> pour la version anglaise, dossier en/). tr(texte, variables) renvoie
+// la traduction de web/i18n-en.js sur la version anglaise, et le texte français tel quel sinon.
+const LANG = document.documentElement.lang === "en" ? "en" : "fr";
+const EN = LANG === "en" ? window.KMB_EN || { ui: {}, phrases: [] } : null;
+function tr(fr, vars = {}) {
+  let t = (EN && EN.ui[fr]) || fr;
+  for (const [k, v] of Object.entries(vars)) t = t.split(`{${k}}`).join(v);
+  return t;
+}
+const NUM_LOCALE = LANG === "en" ? "en-CA" : "fr-CA";
+const COLON = LANG === "en" ? ":" : " :";
+const GB = tr("Go"); const MB = tr("Mo");
+// Fichiers du site (exemple, ZIP, traductions) : chemins relatifs au dossier de config.js, valables aussi depuis en/
+const SITE_ROOT = new URL(".", document.querySelector('script[src$="config.js"]')?.src || location.href).href;
+const assetUrl = (path) => new URL(path, SITE_ROOT).href;
 const SEV = ["critique", "eleve", "moyen", "faible", "info"];
-const SEV_LABEL = { critique: "Critique", eleve: "Élevé", moyen: "Moyen", faible: "Faible", info: "Information" };
+const SEV_LABEL = { critique: tr("Critique"), eleve: tr("Élevé"), moyen: tr("Moyen"), faible: tr("Faible"), info: tr("Information") };
 const SEV_RANK = { critique: 0, eleve: 1, moyen: 2, faible: 3, info: 4 };
-const DOMAIN_LABEL = { securite: "Sécurité", performance: "Performance", stockage: "Stockage", logiciels: "Logiciels", global: "Global" };
-const LIFE_LABEL = { fin_de_support: "Fin de support", maj_disponible: "Mise à jour disponible", supporte: "Supporté", inconnu: "Inconnu", non_suivi: "Non suivi" };
-const STATUS_LABEL = { detecte: "Détecté", conforme: "Conforme", non_verifiable: "Non vérifiable" };
+const DOMAIN_LABEL = { securite: tr("Sécurité"), performance: tr("Performance"), stockage: tr("Stockage"), logiciels: tr("Logiciels"), global: tr("Global") };
+const LIFE_LABEL = { fin_de_support: tr("Fin de support"), maj_disponible: tr("Mise à jour disponible"), supporte: tr("Supporté"), inconnu: tr("Inconnu"), non_suivi: tr("Non suivi") };
+const STATUS_LABEL = { detecte: tr("Détecté"), conforme: tr("Conforme"), non_verifiable: tr("Non vérifiable") };
 const OS_LABEL = { windows: "Windows", linux: "Linux", macos: "macOS" };
-const WIFI_LABEL = { ouvert: "ouvert (non chiffré)", wep: "WEP (obsolète)", wpa: "WPA (obsolète)", wpa2: "WPA2", wpa3: "WPA3", entreprise: "Entreprise (802.1X)", inconnu: "inconnu" };
+const WIFI_LABEL = { ouvert: tr("ouvert (non chiffré)"), wep: tr("WEP (obsolète)"), wpa: tr("WPA (obsolète)"), wpa2: "WPA2", wpa3: "WPA3", entreprise: tr("Entreprise (802.1X)"), inconnu: tr("inconnu") };
 
 const state = { scans: [], report: null, charts: {}, local: new Map() };
 const $ = (sel) => document.querySelector(sel);
@@ -26,7 +41,7 @@ function badge(sev) { return `<span class="badge b-${sev}">${SEV_LABEL[sev] || s
 function fmtDate(iso) { return iso ? iso.slice(0, 16).replace("T", " ") : "—"; }
 function size(bytes) {
   if (bytes == null) return "—";
-  const u = ["o", "Ko", "Mo", "Go", "To"]; let i = 0; let n = bytes;
+  const u = LANG === "en" ? ["B", "KB", "MB", "GB", "TB"] : ["o", "Ko", "Mo", "Go", "To"]; let i = 0; let n = bytes;
   while (n >= 1024 && i < u.length - 1) { n /= 1024; i++; }
   return `${n.toFixed(i ? 1 : 0)} ${u[i]}`;
 }
@@ -35,7 +50,7 @@ function machineLabel(r) { return r.display_name || r.machine_name; }
 // Jauge circulaire (score sur 100), animée par animateRings()
 function ring(v, sz = 120, stroke = 11) {
   const c = sz / 2, r = (sz - stroke) / 2, len = 2 * Math.PI * r;
-  return `<svg class="ring" viewBox="0 0 ${sz} ${sz}" width="${sz}" height="${sz}" role="img" aria-label="${v} sur 100">
+  return `<svg class="ring" viewBox="0 0 ${sz} ${sz}" width="${sz}" height="${sz}" role="img" aria-label="${tr("{v} sur 100", { v })}">
     <circle cx="${c}" cy="${c}" r="${r}" fill="none" stroke="var(--line)" stroke-width="${stroke}"/>
     <circle cx="${c}" cy="${c}" r="${r}" fill="none" stroke="${scoreColor(v)}" stroke-width="${stroke}" stroke-linecap="round"
       stroke-dasharray="${len}" stroke-dashoffset="${len}" data-off="${len * (1 - v / 100)}" transform="rotate(-90 ${c} ${c})"/>
@@ -62,12 +77,62 @@ function chart(id, config) {
 function debounce(fn, ms = 250) { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; }
 function apiError(status, message) { const e = new Error(message); e.status = status; return e; }
 
+// ------------------------------------------------------------------ traduction des rapports (version anglaise)
+// Les rapports sont écrits en français par le scanner. En anglais, chaque fiche est traduite à partir de
+// web/kb_en.json (base de connaissances traduite, commandes indexées par leur texte exact) et les phrases
+// générées pendant le scan (constats, titres avec un nom, durées…) par les motifs de web/i18n-en.js.
+let KB_EN = null;
+async function loadKbEn() {
+  if (LANG !== "en" || KB_EN) return;
+  try { KB_EN = await (await fetch(assetUrl("kb_en.json"))).json(); } catch { KB_EN = {}; }
+}
+const PHRASES = (EN?.phrases || []).map(([re, rep]) => [new RegExp(re, "g"), rep]);
+const TITRES = (EN?.titres || []).map(([re, rep]) => [new RegExp(re), rep]);
+// Titre contenant un nom ou un numéro (« Version dépassée : Chrome ») ; null si c'est un titre fixe de la base
+function trTitle(text) {
+  for (const [re, rep] of TITRES) if (re.test(text || "")) return text.replace(re, rep);
+  return null;
+}
+function trPhrase(text) {
+  if (!EN || !text) return text;
+  let t = String(text);
+  for (const [re, rep] of PHRASES) t = t.replace(re, rep);
+  return t;
+}
+function locCommand(k, c) {
+  const t = typeof c === "string" ? null : k?.commandes?.[c.cmd];
+  return t ? { ...c, ...t, remplacer: c.remplacer && { ...c.remplacer, ...t.remplacer } } : c;
+}
+function loc(f) {
+  if (LANG !== "en" || !f) return f;
+  const k = KB_EN?.[f.id];
+  const os = state.report?.os_family;
+  const pick = (field) => k && ((os && os !== "windows" && k[`${field}_${os}`]) || k[field]);
+  const out = { ...f, title: trTitle(f.title) || pick("title") || f.title, evidence: trPhrase(f.evidence),
+                category: pick("category") || f.category };
+  for (const field of ["description", "danger", "impact", "location"]) out[field] = pick(field) || f[field];
+  if (f.remediation) {
+    const steps = pick("steps");
+    const cmds = {};
+    for (const [o, list] of Object.entries(f.remediation.commands || {})) cmds[o] = list.map((c) => locCommand(k, c));
+    out.remediation = { ...f.remediation, commands: cmds, duration: pick("duration") || trPhrase(f.remediation.duration),
+                        steps: steps && steps.length === (f.remediation.steps || []).length ? steps : f.remediation.steps };
+  }
+  return out;
+}
+// Titre d'un problème à partir de sa clé (plan, comparaison) : celui de la fiche traduite
+function locTitle(item) {
+  if (LANG !== "en") return item.title;
+  const f = state.report?.findings.find((x) => x.key === item.key);
+  return f ? loc(f).title : trTitle(item.title) || trPhrase(item.title);
+}
+
 // ------------------------------------------------------------------ accès aux données
 async function api(path, opts = {}) {
   if (MODE === "local") return localApi(path, opts);
   const res = await fetch(path, { headers: { "Content-Type": "application/json" }, ...opts });
   const body = await res.json().catch(() => ({}));
-  if (!res.ok) throw apiError(res.status, body.detail || `Erreur HTTP ${res.status}`);
+  if (!res.ok) throw apiError(res.status, body.detail || tr("Erreur HTTP {n}", { n: res.status }));
   return body;
 }
 
@@ -78,7 +143,7 @@ function summaryOf(r) {
 function sortedLocal() { return [...state.local.values()].sort((a, b) => (a.scan_date < b.scan_date ? 1 : -1)); }
 function getLocal(id) {
   const r = id === "dernier" ? sortedLocal()[0] : state.local.get(id);
-  if (!r) throw apiError(404, `Rapport introuvable : ${id}`);
+  if (!r) throw apiError(404, tr("Rapport introuvable : {id}", { id }));
   return r;
 }
 function listResult(items, empty) { const out = { total: items.length, resultats: items }; if (!items.length) out.message = empty; return out; }
@@ -88,7 +153,7 @@ function localApi(path, opts) {
   const url = new URL(path, location.href);
   const p = url.searchParams;
   const parts = url.pathname.split("/").filter(Boolean);
-  if (parts[0] === "scans" && parts.length === 1) return listResult(sortedLocal().map(summaryOf), "Aucun rapport chargé.");
+  if (parts[0] === "scans" && parts.length === 1) return listResult(sortedLocal().map(summaryOf), tr("Aucun rapport chargé."));
   if (parts[0] === "scans" && parts.length === 2) return getLocal(decodeURIComponent(parts[1]));
   if (parts[0] === "scans" && parts[2] === "findings") {
     const r = getLocal(decodeURIComponent(parts[1]));
@@ -99,9 +164,9 @@ function localApi(path, opts) {
     if (sev.length) items = items.filter((f) => sev.includes(f.severity));
     if (p.get("domaine")) items = items.filter((f) => f.domain === p.get("domaine"));
     const q = (p.get("recherche") || "").toLowerCase();
-    if (q) items = items.filter((f) => f.title.toLowerCase().includes(q) || (f.evidence || "").toLowerCase().includes(q) || f.key.toLowerCase().includes(q));
+    if (q) items = items.filter((f) => [f.title, f.evidence, f.key, loc(f).title, loc(f).evidence].some((x) => String(x || "").toLowerCase().includes(q)));
     items = [...items].sort((a, b) => SEV_RANK[a.severity] - SEV_RANK[b.severity]);
-    return listResult(items, "Aucun problème ne correspond à ces critères.");
+    return listResult(items, tr("Aucun problème ne correspond à ces critères."));
   }
   if (parts[0] === "scans" && parts[2] === "logiciels") {
     const r = getLocal(decodeURIComponent(parts[1]));
@@ -109,11 +174,11 @@ function localApi(path, opts) {
     const q = (p.get("recherche") || "").toLowerCase();
     if (q) items = items.filter((s) => s.name.toLowerCase().includes(q) || String(s.publisher || "").toLowerCase().includes(q));
     if (p.get("cycle_de_vie")) items = items.filter((s) => s.lifecycle === p.get("cycle_de_vie"));
-    const res = listResult(items.slice(0, 200), "Aucun logiciel ne correspond à ces critères.");
+    const res = listResult(items.slice(0, 200), tr("Aucun logiciel ne correspond à ces critères."));
     res.total = items.length;
     return res;
   }
-  if (parts[0] === "scans" && parts[2] === "plan-ia") throw apiError(404, "Plan IA généré à la demande (bouton « Générer le plan IA »).");
+  if (parts[0] === "scans" && parts[2] === "plan-ia") throw apiError(404, tr("Plan IA généré à la demande (bouton « Générer le plan IA »)."));
   if (parts[0] === "statistiques") {
     const m = p.get("machine");
     const reports = sortedLocal().filter((r) => !m || r.machine_name === m);
@@ -121,10 +186,10 @@ function localApi(path, opts) {
   }
   if (parts[0] === "comparaison") {
     const old = getLocal(p.get("ancien")); const nw = getLocal(p.get("nouveau") || "dernier");
-    if (old.scan_id === nw.scan_id) throw apiError(422, "Choisissez deux rapports différents.");
+    if (old.scan_id === nw.scan_id) throw apiError(422, tr("Choisissez deux rapports différents."));
     return compareReports(old, nw);
   }
-  throw apiError(404, "Page introuvable");
+  throw apiError(404, tr("Page introuvable"));
 }
 
 // Même logique que kmb_library/core/compare.py
@@ -144,9 +209,9 @@ function compareReports(old, nw) {
   const added = [...newDet].filter(([k]) => !oldDet.has(k)).map(([, f]) => brief(f));
   const delta = {}; for (const k of Object.keys(nw.scores)) delta[k] = nw.scores[k] - (old.scores[k] || 0);
   const warnings = [];
-  if (old.machine_name !== nw.machine_name) warnings.push(`Les rapports proviennent de deux ordinateurs différents (${machineLabel(old)} / ${machineLabel(nw)}).`);
-  if (old.scan_date > nw.scan_date) warnings.push("Le rapport « avant » est plus récent que le rapport « après ».");
-  if (old.is_admin !== nw.is_admin) warnings.push("Les deux scans n'ont pas été lancés avec les mêmes droits : certains contrôles diffèrent.");
+  if (old.machine_name !== nw.machine_name) warnings.push(tr("Les rapports proviennent de deux ordinateurs différents ({a} / {b}).", { a: machineLabel(old), b: machineLabel(nw) }));
+  if (old.scan_date > nw.scan_date) warnings.push(tr("Le rapport « avant » est plus récent que le rapport « après »."));
+  if (old.is_admin !== nw.is_admin) warnings.push(tr("Les deux scans n'ont pas été lancés avec les mêmes droits : certains contrôles diffèrent."));
   return { ancien: { scan_id: old.scan_id, date: old.scan_date, scores: old.scores }, nouveau: { scan_id: nw.scan_id, date: nw.scan_date, scores: nw.scores },
            evolution_scores: delta, resume: { corriges: fixed.length, restants: remaining.length, nouveaux: added.length, non_verifiables: unverified.length },
            corriges: fixed, restants: remaining, nouveaux: added, non_verifiables: unverified, avertissements: warnings };
@@ -155,10 +220,10 @@ function compareReports(old, nw) {
 // ------------------------------------------------------------------ chargement des fichiers (mode local)
 function validateReport(doc, fileName) {
   if (doc && doc.collectors && doc.started_at && !doc.findings) {
-    throw new Error(`« ${fileName} » contient les données brutes. Choisissez plutôt le fichier qui commence par KMB-rapport_ (dans le dossier Documents\\KMB Library).`);
+    throw new Error(tr("« {file} » contient les données brutes. Choisissez plutôt le fichier qui commence par KMB-rapport_ (dans le dossier Documents\\KMB Library).", { file: fileName }));
   }
   if (!doc || !doc.scan_id || !Array.isArray(doc.findings) || !doc.scores) {
-    throw new Error(`« ${fileName} » n'est pas un rapport KMB. Choisissez le fichier KMB-rapport_….json créé par le scanner.`);
+    throw new Error(tr("« {file} » n'est pas un rapport KMB. Choisissez le fichier KMB-rapport_….json créé par le scanner.", { file: fileName }));
   }
   return doc;
 }
@@ -176,7 +241,7 @@ async function addFiles(files) {
         last = doc.scan_id;
       }
     } catch (err) {
-      toast(err instanceof SyntaxError ? `« ${file.name} » n'est pas un fichier JSON valide.` : err.message);
+      toast(err instanceof SyntaxError ? tr("« {file} » n'est pas un fichier JSON valide.", { file: file.name }) : err.message);
     }
   }
   if (last) { await loadScans(last); showPage("analyser"); }
@@ -184,12 +249,12 @@ async function addFiles(files) {
 
 async function loadExample() {
   try {
-    const res = await fetch(CONFIG.exampleReport || "exemple/KMB-rapport_exemple.json");
+    const res = await fetch(assetUrl(CONFIG.exampleReport || "exemple/KMB-rapport_exemple.json"));
     if (!res.ok) throw new Error();
     const doc = validateReport(await res.json(), "exemple");
     state.local.set(doc.scan_id, doc);
     await loadScans(doc.scan_id);
-  } catch { toast("L'exemple n'est pas disponible."); }
+  } catch { toast(tr("L'exemple n'est pas disponible.")); }
 }
 
 // ------------------------------------------------------------------ rapports
@@ -199,7 +264,7 @@ async function loadScans(selectId) {
   const has = state.scans.length > 0;
   $("#dashboard").hidden = !has;
   $("#upload-zone").hidden = has || MODE === "serveur";
-  if (!has) { if (MODE === "serveur") toast("Aucun rapport dans le dossier de données du serveur."); return; }
+  if (!has) { if (MODE === "serveur") toast(tr("Aucun rapport dans le dossier de données du serveur.")); return; }
   const opts = state.scans.map((s) => `<option value="${esc(s.scan_id)}">${fmtDate(s.scan_date)} · ${esc(machineLabel(s))} · ${OS_LABEL[s.os_family] || ""} · ${s.scores.global}/100</option>`).join("");
   $("#scan-select").innerHTML = opts;
   $("#c-old").innerHTML = opts; $("#c-new").innerHTML = opts;
@@ -211,6 +276,7 @@ async function loadScans(selectId) {
 }
 
 async function loadReport(id) {
+  await loadKbEn();
   state.report = await api(`/scans/${encodeURIComponent(id)}`);
   for (const sel of ["#ai-summary", "#ai-answer"]) $(sel).innerHTML = "";
   renderOverview();
@@ -232,23 +298,23 @@ async function renderOverview() {
   const life = r.inventory.system?.os_lifecycle || {};
   const name = r.display_name ? `<b>${esc(r.display_name)}</b> <span class="muted">(${esc(r.machine_name)})</span>` : `<b>${esc(r.machine_name)}</b>`;
   $("#meta").innerHTML = `${name}${r.device_model ? " · " + esc(r.device_model) : ""} · <span class="badge b-info">${OS_LABEL[r.os_family] || esc(r.os_family || "Windows")}</span> ${esc(r.os)} (${esc(r.os_version || "")})
-    · scan du ${fmtDate(r.scan_date)} · ${r.duration_s} s · ${r.is_admin ? "administrateur" : "sans droits administrateur"}
-    ${r.anonymized ? " · anonymisé" : ""}${life.eol ? ` · fin de support du système : ${esc(life.eol)}` : ""}`;
+    · ${tr("scan du {date}", { date: fmtDate(r.scan_date) })} · ${r.duration_s} s · ${r.is_admin ? tr("administrateur") : tr("sans droits administrateur")}
+    ${r.anonymized ? " · " + tr("anonymisé") : ""}${life.eol ? " · " + tr("fin de support du système : {date}", { date: esc(life.eol) }) : ""}`;
   const order = ["global", "securite", "performance", "stockage", "logiciels"];
   $("#scores").innerHTML = order.map((k) => {
     const v = r.scores[k];
     if (k !== "global") return `<div class="score gauge">${ring(v, 84, 9)}<div class="label">${DOMAIN_LABEL[k]}</div></div>`;
-    const verdict = v >= 80 ? "Bon état" : v >= 60 ? "À améliorer" : "À corriger en priorité";
-    return `<div class="score gauge global">${ring(v, 136, 13)}<div><div class="label">Score global sur 100</div>
+    const verdict = v >= 80 ? tr("Bon état") : v >= 60 ? tr("À améliorer") : tr("À corriger en priorité");
+    return `<div class="score gauge global">${ring(v, 136, 13)}<div><div class="label">${tr("Score global sur 100")}</div>
       <div class="verdict" style="color:${scoreColor(v)}">${verdict}</div>
-      <div class="hint">Commencez par les problèmes les plus graves : onglet « Plan de correction ».</div></div></div>`;
+      <div class="hint">${tr("Commencez par les problèmes les plus graves : onglet « Plan de correction ».")}</div></div></div>`;
   }).join("");
   animateRings($("#scores"));
 
   const counts = SEV.map((s) => r.summary[s] || 0);
   const colors = SEV.map((s) => cssVar(`--${s}`));
-  $("#sev-legend").innerHTML = SEV.map((s, i) => `<span><i style="background:${colors[i]}"></i>${SEV_LABEL[s]} : <b>${counts[i]}</b></span>`).join("")
-    + `<span class="muted">· ${r.summary.conformes} conformes · ${r.summary.non_verifiables} non vérifiables</span>`;
+  $("#sev-legend").innerHTML = SEV.map((s, i) => `<span><i style="background:${colors[i]}"></i>${SEV_LABEL[s]}${COLON} <b>${counts[i]}</b></span>`).join("")
+    + `<span class="muted">${tr("· {ok} conformes · {nv} non vérifiables", { ok: r.summary.conformes, nv: r.summary.non_verifiables })}</span>`;
   chart("chart-sev", {
     type: "bar",
     data: { labels: SEV.map((s) => SEV_LABEL[s]), datasets: [{ data: counts, backgroundColor: colors, borderRadius: 4 }] },
@@ -260,8 +326,8 @@ async function renderOverview() {
   const stats = await api(`/statistiques?machine=${encodeURIComponent(r.machine_name)}`);
   const evo = stats.evolution || [];
   $("#evo-note").textContent = evo.length < 2
-    ? (MODE === "local" ? "Ajoutez un deuxième rapport de cet ordinateur (après vos corrections) pour voir l'évolution." : "Un seul scan pour cette machine.")
-    : `${evo.length} rapports pour cet ordinateur.`;
+    ? (MODE === "local" ? tr("Ajoutez un deuxième rapport de cet ordinateur (après vos corrections) pour voir l'évolution.") : tr("Un seul scan pour cette machine."))
+    : tr("{n} rapports pour cet ordinateur.", { n: evo.length });
   const lineColors = { global: cssVar("--accent"), securite: cssVar("--critique"), performance: cssVar("--faible"), stockage: cssVar("--moyen"), logiciels: cssVar("--info") };
   chart("chart-evo", {
     type: "line",
@@ -272,12 +338,12 @@ async function renderOverview() {
       scales: { y: { min: 0, max: 100, ticks: { color: cssVar("--muted") }, grid: { color: cssVar("--line") } }, x: { ticks: { color: cssVar("--muted") }, grid: { display: false } } } },
   });
 
-  $("#top-plan").innerHTML = r.plan.slice(0, 6).map((p) => `<li>${badge(p.severity)} ${esc(p.title)} <span class="muted small">(${esc(p.gain)})</span></li>`).join("")
-    || "<li>Aucune action nécessaire.</li>";
-  const LBL = { system: "Système", accounts: "Comptes", network: "Réseau", firewall: "Pare-feu", antivirus: "Antivirus", encryption: "Chiffrement",
-                software: "Logiciels", performance: "Performance", storage: "Stockage", duplicates: "Doublons", wifi: "Wi-Fi", hardware: "Matériel" };
-  const ST = { ok: "terminé", partiel: "partiel", erreur: "erreur", ignore: "ignoré" };
-  $("#collectors").innerHTML = "<tr><th>Partie examinée</th><th>État</th><th class='num'>Durée</th><th>Remarque</th></tr>" +
+  $("#top-plan").innerHTML = r.plan.slice(0, 6).map((p) => `<li>${badge(p.severity)} ${esc(locTitle(p))} <span class="muted small">(${esc(trPhrase(p.gain))})</span></li>`).join("")
+    || `<li>${tr("Aucune action nécessaire.")}</li>`;
+  const LBL = { system: tr("Système"), accounts: tr("Comptes"), network: tr("Réseau"), firewall: tr("Pare-feu"), antivirus: tr("Antivirus"), encryption: tr("Chiffrement"),
+                software: tr("Logiciels"), performance: tr("Performance"), storage: tr("Stockage"), duplicates: tr("Doublons"), wifi: tr("Wi-Fi"), hardware: tr("Matériel") };
+  const ST = { ok: tr("terminé"), partiel: tr("partiel"), erreur: tr("erreur"), ignore: tr("ignoré") };
+  $("#collectors").innerHTML = `<tr><th>${tr("Partie examinée")}</th><th>${tr("État")}</th><th class='num'>${tr("Durée")}</th><th>${tr("Remarque")}</th></tr>` +
     Object.entries(r.collectors).map(([k, c]) => `<tr><td>${LBL[k] || k}</td><td>${ST[c.status] || esc(c.status)}</td><td class="num">${c.duration_s} s</td>
       <td class="small muted">${esc(Object.values(c.errors || {})[0] || "")}</td></tr>`).join("");
 }
@@ -285,19 +351,19 @@ async function renderOverview() {
 // ------------------------------------------------------------------ problèmes
 // Où taper une commande, et comment ouvrir cet endroit
 const WHERE = {
-  cmd: { label: "Invite de commandes", how: "Démarrer → tapez cmd → Entrée" },
-  cmd_admin: { label: "Invite de commandes (administrateur)", how: "Démarrer → tapez cmd → clic droit sur « Invite de commandes » → Exécuter en tant qu'administrateur" },
-  ps: { label: "PowerShell", how: "Démarrer → tapez powershell → Entrée" },
-  ps_admin: { label: "PowerShell (administrateur)", how: "Démarrer → tapez powershell → clic droit → Exécuter en tant qu'administrateur" },
+  cmd: { label: tr("Invite de commandes"), how: tr("Démarrer → tapez cmd → Entrée") },
+  cmd_admin: { label: tr("Invite de commandes (administrateur)"), how: tr("Démarrer → tapez cmd → clic droit sur « Invite de commandes » → Exécuter en tant qu'administrateur") },
+  ps: { label: "PowerShell", how: tr("Démarrer → tapez powershell → Entrée") },
+  ps_admin: { label: tr("PowerShell (administrateur)"), how: tr("Démarrer → tapez powershell → clic droit → Exécuter en tant qu'administrateur") },
   terminal: { label: "Terminal", how: "" },
 };
 const CMD_TYPE = {
-  verifier: { icon: "🔍", label: "Vérifier" },
-  ouvrir: { icon: "⚙️", label: "Ouvrir le réglage" },
-  corriger: { icon: "🛠️", label: "Corriger" },
+  verifier: { icon: "🔍", label: tr("Vérifier") },
+  ouvrir: { icon: "⚙️", label: tr("Ouvrir le réglage") },
+  corriger: { icon: "🛠️", label: tr("Corriger") },
 };
 function terminalHow() {
-  return state.report?.os_family === "macos" ? "Applications → Utilitaires → Terminal" : "Ctrl + Alt + T, ou menu des applications → Terminal";
+  return state.report?.os_family === "macos" ? tr("Applications → Utilitaires → Terminal") : tr("Ctrl + Alt + T, ou menu des applications → Terminal");
 }
 function highlight(cmd, words) {
   let html = esc(cmd);
@@ -305,22 +371,23 @@ function highlight(cmd, words) {
   return html;
 }
 function commandCard(c) {
-  if (typeof c === "string") return `<div class="cmd"><pre>${esc(c)}</pre><button type="button" data-copy="${esc(c)}">Copier</button></div>`;
+  if (typeof c === "string") return `<div class="cmd"><pre>${esc(c)}</pre><button type="button" data-copy="${esc(c)}">${tr("Copier")}</button></div>`;
   const t = CMD_TYPE[c.type] || CMD_TYPE.corriger;
   const w = WHERE[c.ou] || WHERE.cmd;
   const how = c.ou === "terminal" ? terminalHow() : w.how;
-  const sudo = c.ou === "terminal" && c.cmd.includes("sudo ") ? " · votre mot de passe sera demandé (rien ne s'affiche pendant la frappe)" : "";
-  const repl = c.remplacer ? `<div class="repl"><b>À remplacer avant de lancer :</b><ul>${Object.entries(c.remplacer).map(([k, v]) => `<li><mark>${esc(k)}</mark> : ${esc(v)}</li>`).join("")}</ul></div>` : "";
+  const sudo = c.ou === "terminal" && c.cmd.includes("sudo ") ? " · " + tr("votre mot de passe sera demandé (rien ne s'affiche pendant la frappe)") : "";
+  const repl = c.remplacer ? `<div class="repl"><b>${tr("À remplacer avant de lancer :")}</b><ul>${Object.entries(c.remplacer).map(([k, v]) => `<li><mark>${esc(k)}</mark>${COLON} ${esc(v)}</li>`).join("")}</ul></div>` : "";
   return `<div class="cmdcard cmd-${c.type}">
-    <div class="cmdhead"><span class="cmdtype">${t.icon} ${t.label}</span><span class="where" title="${esc(how)}">Où : <b>${esc(w.label)}</b>${how ? ` <span class="muted">(${esc(how)})</span>` : ""}${sudo}</span></div>
-    <div class="cmd"><pre>${highlight(c.cmd, c.remplacer)}</pre><button type="button" data-copy="${esc(c.cmd)}">Copier</button></div>
+    <div class="cmdhead"><span class="cmdtype">${t.icon} ${t.label}</span><span class="where" title="${esc(how)}">${tr("Où :")} <b>${esc(w.label)}</b>${how ? ` <span class="muted">(${esc(how)})</span>` : ""}${sudo}</span></div>
+    <div class="cmd"><pre>${highlight(c.cmd, c.remplacer)}</pre><button type="button" data-copy="${esc(c.cmd)}">${tr("Copier")}</button></div>
     <p class="effet">${esc(c.effet)}</p>
-    ${c.attendu ? `<p class="attendu">✔ Résultat attendu si tout va bien : <b>${esc(c.attendu)}</b></p>` : ""}
+    ${c.attendu ? `<p class="attendu">${tr("✔ Résultat attendu si tout va bien :")} <b>${esc(c.attendu)}</b></p>` : ""}
     ${repl}
     ${c.attention ? `<p class="attention">⚠️ ${esc(c.attention)}</p>` : ""}
   </div>`;
 }
 function findingHtml(f) {
+  f = loc(f);
   const all = f.remediation.commands || {};
   const cmds = all[state.report?.os_family || "windows"] || Object.values(all).flat();
   const verifier = cmds.filter((c) => typeof c !== "string" && c.type === "verifier");
@@ -328,28 +395,27 @@ function findingHtml(f) {
   const steps = (f.remediation.steps || []).map((s) => `<li>${esc(s)}</li>`).join("");
   const isProblem = f.status === "detecte";
   const guide = `
-    <div class="phase"><h4>1. 🔍 Vérifier</h4>
-      ${verifier.length ? verifier.map(commandCard).join("") : `<p class="muted small">Le constat ci-dessus suffit : rien à vérifier de plus.</p>`}</div>
-    <div class="phase"><h4>2. 🛠️ Corriger${f.remediation.duration ? ` <span class="muted small">(${esc(f.remediation.duration)}${f.remediation.requires_admin ? " · droits administrateur requis" : ""})</span>` : ""}</h4>
-      ${steps ? `<p class="small"><b>À la souris :</b></p><ol>${steps}</ol>` : ""}
-      ${corriger.length ? `<p class="small"><b>Ou avec des commandes</b> (à lancer vous-même, une à une) :</p>${corriger.map(commandCard).join("")}` : ""}</div>
-    <div class="phase"><h4>3. ✅ Contrôler</h4>
-      <p>Relancez le scan (<code>python -m kmb_library scan</code>), puis ajoutez le nouveau rapport ici avec « + Ajouter un rapport » :
-        l'onglet <b>Comparaison</b> doit afficher ce problème dans « Corrigés ».</p></div>`;
+    <div class="phase"><h4>1. 🔍 ${tr("Vérifier")}</h4>
+      ${verifier.length ? verifier.map(commandCard).join("") : `<p class="muted small">${tr("Le constat ci-dessus suffit : rien à vérifier de plus.")}</p>`}</div>
+    <div class="phase"><h4>2. 🛠️ ${tr("Corriger")}${f.remediation.duration ? ` <span class="muted small">(${esc(f.remediation.duration)}${f.remediation.requires_admin ? " · " + tr("droits administrateur requis") : ""})</span>` : ""}</h4>
+      ${steps ? `<p class="small"><b>${tr("À la souris :")}</b></p><ol>${steps}</ol>` : ""}
+      ${corriger.length ? `<p class="small">${tr("<b>Ou avec des commandes</b> (à lancer vous-même, une à une) :")}</p>${corriger.map(commandCard).join("")}` : ""}</div>
+    <div class="phase"><h4>3. ✅ ${tr("Contrôler")}</h4>
+      <p>${tr("Relancez le scan (<code>python -m kmb_library scan</code>), puis ajoutez le nouveau rapport ici avec « + Ajouter un rapport » : l'onglet <b>Comparaison</b> doit afficher ce problème dans « Corrigés ».")}</p></div>`;
   return `<details class="finding sev-${isProblem ? f.severity : "info"}">
     <summary>${badge(f.severity)} <span>${esc(f.title)}</span> <span class="st st-${f.status}">${STATUS_LABEL[f.status]}</span><span class="key">${esc(f.key)}</span></summary>
     <div class="body">
-      <p><b>Constat :</b> ${esc(f.evidence || "—")}</p>
+      <p><b>${tr("Constat :")}</b> ${esc(f.evidence || "—")}</p>
       <dl>
-        <dt>De quoi s'agit-il ?</dt><dd>${esc(f.description)}</dd>
-        ${f.danger ? `<dt>Pourquoi est-ce dangereux ?</dt><dd>${esc(f.danger)}</dd>` : ""}
-        ${f.impact ? `<dt>Conséquences possibles</dt><dd>${esc(f.impact)}</dd>` : ""}
-        ${f.location ? `<dt>Où se trouve-t-il ?</dt><dd>${esc(f.location)}</dd>` : ""}
+        <dt>${tr("De quoi s'agit-il ?")}</dt><dd>${esc(f.description)}</dd>
+        ${f.danger ? `<dt>${tr("Pourquoi est-ce dangereux ?")}</dt><dd>${esc(f.danger)}</dd>` : ""}
+        ${f.impact ? `<dt>${tr("Conséquences possibles")}</dt><dd>${esc(f.impact)}</dd>` : ""}
+        ${f.location ? `<dt>${tr("Où se trouve-t-il ?")}</dt><dd>${esc(f.location)}</dd>` : ""}
       </dl>
-      ${isProblem && (CONFIG.relaisIA || MODE === "serveur") ? `<div class="ai-explain"><button type="button" class="btn ghost" data-explain="${esc(f.key)}">🤖 Explique-moi ce problème</button><div></div></div>` : ""}
-      ${isProblem ? `<h3 class="guide-title">Guide de correction</h3><p class="small muted">KMB ne modifie rien sur votre ordinateur : c'est vous qui lancez chaque commande, dans l'ordre.</p>${guide}` : ""}
-      ${f.references?.length ? `<p class="small">Références : ${f.references.map((u) => `<a href="${esc(u)}" target="_blank" rel="noopener">${esc(u)}</a>`).join(" · ")}</p>` : ""}
-      <p class="small muted">Score de risque indicatif : ${f.risk_score}/10 · pénalité : ${f.penalty} points (${DOMAIN_LABEL[f.domain]})</p>
+      ${isProblem && (CONFIG.relaisIA || MODE === "serveur") ? `<div class="ai-explain"><button type="button" class="btn ghost" data-explain="${esc(f.key)}">🤖 ${tr("Explique-moi ce problème")}</button><div></div></div>` : ""}
+      ${isProblem ? `<h3 class="guide-title">${tr("Guide de correction")}</h3><p class="small muted">${tr("KMB ne modifie rien sur votre ordinateur : c'est vous qui lancez chaque commande, dans l'ordre.")}</p>${guide}` : ""}
+      ${f.references?.length ? `<p class="small">${tr("Références :")} ${f.references.map((u) => `<a href="${esc(u)}" target="_blank" rel="noopener">${esc(u)}</a>`).join(" · ")}</p>` : ""}
+      <p class="small muted">${tr("Score de risque indicatif : {r}/10 · pénalité : {p} points ({d})", { r: f.risk_score, p: f.penalty, d: DOMAIN_LABEL[f.domain] })}</p>
     </div></details>`;
 }
 
@@ -359,7 +425,7 @@ async function loadFindings() {
   if (form.recherche.value && form.recherche.value.length < 2) return;
   try {
     const data = await api(`/scans/${encodeURIComponent(state.report.scan_id)}/findings?${qs(form)}`);
-    $("#f-count").textContent = data.message || `${data.total} résultat(s)`;
+    $("#f-count").textContent = data.message || tr("{n} résultat(s)", { n: data.total });
     $("#f-list").innerHTML = data.resultats.map(findingHtml).join("");
   } catch (e) { toast(e.message); }
 }
@@ -367,9 +433,9 @@ async function loadFindings() {
 // ------------------------------------------------------------------ plan
 async function renderPlan() {
   const r = state.report;
-  $("#plan-table").innerHTML = "<tr><th>#</th><th>Gravité</th><th>Action</th><th>Gain</th><th>Durée</th></tr>" +
-    (r.plan.map((p) => `<tr><td>${p.priority}</td><td>${badge(p.severity)}</td><td>${esc(p.title)}<div class="small muted">${esc(p.key)}</div></td>
-      <td>${esc(p.gain)}</td><td>${esc(p.duration || "")}</td></tr>`).join("") || "<tr><td colspan='5'>Aucune action nécessaire.</td></tr>");
+  $("#plan-table").innerHTML = `<tr><th>#</th><th>${tr("Gravité")}</th><th>${tr("Action")}</th><th>${tr("Gain")}</th><th>${tr("Durée")}</th></tr>` +
+    (r.plan.map((p) => `<tr><td>${p.priority}</td><td>${badge(p.severity)}</td><td>${esc(locTitle(p))}<div class="small muted">${esc(p.key)}</div></td>
+      <td>${esc(trPhrase(p.gain))}</td><td>${esc(trPhrase(p.duration || ""))}</td></tr>`).join("") || `<tr><td colspan='5'>${tr("Aucune action nécessaire.")}</td></tr>`);
   $("#ai-out").innerHTML = "";
   if (MODE === "local") return;
   try { renderAi(await api(`/scans/${encodeURIComponent(r.scan_id)}/plan-ia`)); } catch (e) { if (e.status !== 404) toast(e.message); }
@@ -378,39 +444,39 @@ async function renderPlan() {
 function aiCommands(s) {
   const list = s.commandes_verifiees || (s.commandes || []).map((c) => ({ commande: c, connue: null }));
   return list.map(({ commande, connue }) => `<div class="ai-cmd ${connue === false ? "unknown" : ""}">
-    ${connue === false ? `<p class="small st-detecte">⚠️ Commande non vérifiée (absente de la base KMB) : à ne pas exécuter sans la comprendre.</p>`
-      : connue ? `<p class="small st-conforme">✓ Commande vérifiée (base KMB)</p>` : ""}
-    <div class="cmd"><pre>${esc(commande)}</pre><button type="button" data-copy="${esc(commande)}">Copier</button></div></div>`).join("");
+    ${connue === false ? `<p class="small st-detecte">${tr("⚠️ Commande non vérifiée (absente de la base KMB) : à ne pas exécuter sans la comprendre.")}</p>`
+      : connue ? `<p class="small st-conforme">${tr("✓ Commande vérifiée (base KMB)")}</p>` : ""}
+    <div class="cmd"><pre>${esc(commande)}</pre><button type="button" data-copy="${esc(commande)}">${tr("Copier")}</button></div></div>`).join("");
 }
 
 function renderAi(plan) {
   const v = plan.verification || {};
   const steps = (plan.priorites || []).map((s) => `<div class="ai-step ${s.verifie ? "" : "unverified"}">
     <div class="row-between"><b>${esc(s.ordre)}. ${esc(s.titre)}</b>
-      <span class="small ${s.verifie ? "st-conforme" : "st-detecte"}">${s.verifie ? "✓ lié au constat " + esc(s.key) : "⚠ non vérifiée (clé inconnue : " + esc(s.key) + ")"}</span></div>
+      <span class="small ${s.verifie ? "st-conforme" : "st-detecte"}">${s.verifie ? tr("✓ lié au constat {key}", { key: esc(s.key) }) : tr("⚠ non vérifiée (clé inconnue : {key})", { key: esc(s.key) })}</span></div>
     <p>${esc(s.pourquoi || "")}</p>
     <ol>${(s.etapes || []).map((x) => `<li>${esc(x)}</li>`).join("")}</ol>
     ${aiCommands(s)}
-    <p class="small muted">Gain estimé : ${esc(s.gain_estime || "—")} · durée : ${esc(s.duree || "—")}</p></div>`).join("");
-  const missing = (v.problemes_graves_oublies || []).length ? `<p class="st-detecte small">Problèmes graves non traités par l'IA : ${v.problemes_graves_oublies.map(esc).join(", ")}</p>` : "";
-  const cmdNote = v.commandes != null ? ` · ${v.commandes} commande(s), dont ${v.commandes_non_verifiees} non vérifiée(s)` : "";
+    <p class="small muted">${tr("Gain estimé : {g} · durée : {d}", { g: esc(s.gain_estime || "—"), d: esc(s.duree || "—") })}</p></div>`).join("");
+  const missing = (v.problemes_graves_oublies || []).length ? `<p class="st-detecte small">${tr("Problèmes graves non traités par l'IA :")} ${v.problemes_graves_oublies.map(esc).join(", ")}</p>` : "";
+  const cmdNote = v.commandes != null ? tr(" · {n} commande(s), dont {u} non vérifiée(s)", { n: v.commandes, u: v.commandes_non_verifiees }) : "";
   $("#ai-out").innerHTML = `<p>${esc(plan.resume || "")}</p>
-    <p class="small ${v.fiable ? "st-conforme" : "st-detecte"}">Vérification : ${v.etapes || 0} étape(s), ${v.etapes_non_verifiees || 0} non vérifiée(s)${cmdNote} — ${v.fiable ? "plan cohérent avec le scan" : "à relire avec prudence"}</p>
+    <p class="small ${v.fiable ? "st-conforme" : "st-detecte"}">${tr("Vérification : {e} étape(s), {u} non vérifiée(s)", { e: v.etapes || 0, u: v.etapes_non_verifiees || 0 })}${cmdNote} — ${v.fiable ? tr("plan cohérent avec le scan") : tr("à relire avec prudence")}</p>
     ${missing}${steps}
-    ${(plan.conseils_generaux || []).length ? `<h4>Conseils généraux</h4><ul>${plan.conseils_generaux.map((c) => `<li>${esc(c)}</li>`).join("")}</ul>` : ""}
-    <p class="small muted">${esc(plan.meta?.fournisseur || "")} · modèle ${esc(plan.meta?.modele || "")}${plan.meta?.genere_le ? " · " + fmtDate(plan.meta.genere_le) : ""}</p>`;
-  $("#ai-btn").textContent = "Régénérer le plan IA";
+    ${(plan.conseils_generaux || []).length ? `<h4>${tr("Conseils généraux")}</h4><ul>${plan.conseils_generaux.map((c) => `<li>${esc(c)}</li>`).join("")}</ul>` : ""}
+    <p class="small muted">${esc(plan.meta?.fournisseur || "")} · ${tr("modèle")} ${esc(plan.meta?.modele || "")}${plan.meta?.genere_le ? " · " + fmtDate(plan.meta.genere_le) : ""}</p>`;
+  $("#ai-btn").textContent = tr("Régénérer le plan IA");
 }
 
 async function generateAi() {
-  const btn = $("#ai-btn"); btn.disabled = true; const old = btn.textContent; btn.textContent = "Génération en cours…";
+  const btn = $("#ai-btn"); btn.disabled = true; const old = btn.textContent; btn.textContent = tr("Génération en cours…");
   try {
     if (MODE === "serveur") {
-      const regen = old.startsWith("Régénérer") ? "?regenerer=true" : "";
+      const regen = old === tr("Régénérer le plan IA") ? "?regenerer=true" : "";
       renderAi(await api(`/scans/${encodeURIComponent(state.report.scan_id)}/plan-ia${regen}`, { method: "POST" }));
     } else {
       const r = await askAI("plan", aiBase());
-      if (r) renderAi(verifyPlan({ ...r.resultat, meta: { fournisseur: "Groq (relais KMB)", modele: r.modele } }));
+      if (r) renderAi(verifyPlan({ ...r.resultat, meta: { fournisseur: tr("Groq (relais KMB)"), modele: r.modele } }));
     }
   } catch (e) { toast(e.message); btn.textContent = old; } finally { btn.disabled = false; }
 }
@@ -464,15 +530,15 @@ function aiBase() {
 }
 
 async function askAI(tache, data) {
-  if (!CONFIG.relaisIA) throw new Error("Assistant IA non configuré sur ce site.");
+  if (!CONFIG.relaisIA) throw new Error(tr("Assistant IA non configuré sur ce site."));
   if (!(await aiConsent())) return null;
   let res;
   try {
     res = await fetch(CONFIG.relaisIA, { method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ tache, langue: document.documentElement.lang === "en" ? "en" : "fr", ...data }) });
-  } catch { throw new Error("IA indisponible pour l'instant (pas de connexion au relais). Le reste du rapport fonctionne normalement."); }
+      body: JSON.stringify({ tache, langue: LANG, ...data }) });
+  } catch { throw new Error(tr("IA indisponible pour l'instant (pas de connexion au relais). Le reste du rapport fonctionne normalement.")); }
   const body = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(body.erreur || `IA indisponible pour l'instant (erreur ${res.status}).`);
+  if (!res.ok) throw new Error((LANG === "fr" && body.erreur) || tr("IA indisponible pour l'instant (erreur {n}).", { n: res.status }));
   return body;
 }
 
@@ -494,7 +560,7 @@ function cleanCommands(raw) {
   }).filter((c) => {
     const words = c.split(/\s+/).length;
     const prose = (/[.…]$/.test(c) && words >= 3) || (words >= 3 && /[à-ÿ]/.test(c) && !/[-/\\:=|$<>]/.test(c));
-    const duration = /^\d+\s*[-–‑à]?\s*\d*\s*(min|minutes?|h|heures?|s|secondes?)\.?$/i.test(c);
+    const duration = /^\d+\s*[-–‑à]?\s*\d*\s*(min|minutes?|h|heures?|hours?|s|secondes?|seconds?)\.?$/i.test(c);
     return !duration && c.length >= 3 && !AI_FIELDS.has(c.replace(/[:,[\]{}" ]/g, "").toLowerCase()) && /[A-Za-z]{2}/.test(c) && !prose;
   });
 }
@@ -523,10 +589,10 @@ function verifyPlan(plan) {
   return plan;
 }
 
-function aiBox(html) { return `<div class="ai-box"><p class="ai-label">🤖 Réponse de l'IA <span class="muted small">(à relire : l'IA peut se tromper)</span></p>${html}</div>`; }
+function aiBox(html) { return `<div class="ai-box"><p class="ai-label">🤖 ${tr("Réponse de l'IA")} <span class="muted small">${tr("(à relire : l'IA peut se tromper)")}</span></p>${html}</div>`; }
 
 async function runAI(button, out, tache, data, render) {
-  const old = button.textContent; button.disabled = true; button.textContent = "L'IA réfléchit…";
+  const old = button.textContent; button.disabled = true; button.textContent = tr("L'IA réfléchit…");
   try {
     const r = await askAI(tache, data);
     if (r) out.innerHTML = aiBox(render(r.resultat) + `<p class="small muted">Groq · ${esc(r.modele)}</p>`);
@@ -535,8 +601,8 @@ async function runAI(button, out, tache, data, render) {
 
 const AI_RENDER = {
   explique: (x, key) => `<p>${esc(x.explication || "")}</p>
-    ${x.risque ? `<p><b>Le risque :</b> ${esc(x.risque)}</p>` : ""}${x.exemple ? `<p><b>Exemple :</b> ${esc(x.exemple)}</p>` : ""}
-    ${(x.que_faire || []).length ? `<p><b>Que faire :</b></p><ol>${x.que_faire.map((e) => `<li>${esc(e)}</li>`).join("")}</ol>` : ""}
+    ${x.risque ? `<p><b>${tr("Le risque :")}</b> ${esc(x.risque)}</p>` : ""}${x.exemple ? `<p><b>${tr("Exemple :")}</b> ${esc(x.exemple)}</p>` : ""}
+    ${(x.que_faire || []).length ? `<p><b>${tr("Que faire :")}</b></p><ol>${x.que_faire.map((e) => `<li>${esc(e)}</li>`).join("")}</ol>` : ""}
     ${aiCommands({ commandes_verifiees: checkCommands(x.commandes, key) })}`,
   resume: (x) => `<p>${esc(x.resume || "").replace(/\n/g, "<br>")}</p>`,
   comparaison: (x) => `<p>${esc(x.commentaire || "")}</p>`,
@@ -573,24 +639,24 @@ async function loadSoftware() {
   if (form.recherche.value && form.recherche.value.length < 2) return;
   try {
     const data = await api(`/scans/${encodeURIComponent(state.report.scan_id)}/logiciels?${qs(form)}`);
-    $("#s-count").textContent = data.message || `${data.total} logiciel(s)${data.total > data.resultats.length ? ` — ${data.resultats.length} premiers affichés, affinez la recherche` : ""}`;
+    $("#s-count").textContent = data.message || tr("{n} logiciel(s)", { n: data.total }) + (data.total > data.resultats.length ? tr(" — {n} premiers affichés, affinez la recherche", { n: data.resultats.length }) : "");
     const lifeBadge = (l) => ({ fin_de_support: `<span class="badge b-eleve">${LIFE_LABEL[l]}</span>`, maj_disponible: `<span class="badge b-faible">${LIFE_LABEL[l]}</span>` }[l]
       || `<span class="muted small">${LIFE_LABEL[l] || esc(l)}</span>`);
-    $("#s-table").innerHTML = "<tr><th>Logiciel</th><th>Version</th><th>Éditeur</th><th>Cycle de vie</th><th class='num'>Taille</th></tr>" +
+    $("#s-table").innerHTML = `<tr><th>${tr("Logiciel")}</th><th>${tr("Version")}</th><th>${tr("Éditeur")}</th><th>${tr("Cycle de vie")}</th><th class='num'>${tr("Taille")}</th></tr>` +
       data.resultats.map((s) => `<tr><td>${esc(s.name)}</td><td>${esc(s.version || "")}</td><td>${esc(s.publisher || "")}</td>
-        <td>${lifeBadge(s.lifecycle)}${s.eol ? `<div class="small muted">fin : ${esc(String(s.eol))}${s.latest ? " · dernière : " + esc(s.latest) : ""}</div>` : ""}</td>
-        <td class="num">${s.size_mb ? s.size_mb + " Mo" : "—"}</td></tr>`).join("");
+        <td>${lifeBadge(s.lifecycle)}${s.eol ? `<div class="small muted">${tr("fin :")} ${esc(String(s.eol))}${s.latest ? " · " + tr("dernière :") + " " + esc(s.latest) : ""}</div>` : ""}</td>
+        <td class="num">${s.size_mb ? s.size_mb + " " + MB : "—"}</td></tr>`).join("");
     const c = state.report.inventory.software_cleaning;
-    if (c) $("#s-clean").textContent = `Nettoyage : ${c.raw_entries} entrées brutes → ${c.kept} logiciels retenus. Dates de fin de support : endoflife.date.`;
+    if (c) $("#s-clean").textContent = tr("Nettoyage : {a} entrées brutes → {b} logiciels retenus. Dates de fin de support : endoflife.date.", { a: c.raw_entries, b: c.kept });
   } catch (e) { toast(e.message); }
 }
 
 // ------------------------------------------------------------------ stockage
 const CAT = {
-  personnel: { icon: "🟢", label: "Personnel", tip: "vos fichiers : vous pouvez décider (supprimer, déplacer)" },
-  application: { icon: "🟡", label: "Application", tip: "passer par l'application ou la désinstaller ; ne pas supprimer à la main" },
-  systeme: { icon: "🔴", label: "Système", tip: "ne pas toucher" },
-  mixte: { icon: "⚪", label: "Mixte", tip: "contient des fichiers personnels et d'applications" },
+  personnel: { icon: "🟢", label: tr("Personnel"), tip: tr("vos fichiers : vous pouvez décider (supprimer, déplacer)") },
+  application: { icon: "🟡", label: tr("Application"), tip: tr("passer par l'application ou la désinstaller ; ne pas supprimer à la main") },
+  systeme: { icon: "🔴", label: tr("Système"), tip: tr("ne pas toucher") },
+  mixte: { icon: "⚪", label: tr("Mixte"), tip: tr("contient des fichiers personnels et d'applications") },
 };
 function catBadge(c) { const x = CAT[c] || CAT.personnel; return `<span class="cat cat-${c || "personnel"}" title="${esc(x.tip)}">${x.icon} ${x.label}</span>`; }
 function shortPath(p) { return String(p || "").replace(/^[A-Z]:\\Users\\[^\\]+/i, "~").replace(/^\/(home|Users)\/[^/]+/, "~"); }
@@ -600,50 +666,50 @@ function renderStorage() {
   const deep = Array.isArray(st.space_by_folder);
   $("#partitions").innerHTML = (st.partitions || []).map((p) => {
     const free = (100 - p.percent_used).toFixed(1);
-    return `<p><b>${esc(p.mount)}</b> (${esc(p.fstype)}) — ${p.free_gb} Go libres sur ${p.total_gb} Go (${free} %)</p>
+    return `<p><b>${esc(p.mount)}</b> (${esc(p.fstype)}) — ${tr("{f} Go libres sur {t} Go ({p} %)", { f: p.free_gb, t: p.total_gb, p: free })}</p>
       <div class="bar"><span style="width:${p.percent_used}%;background:${scoreColor(100 - p.percent_used * 0.9)}"></span></div>`;
-  }).join("") + (st.physical_disks || []).map((d) => `<p class="small muted">Disque : ${esc(d.name)} · ${esc(d.media_type)}${d.bus ? " · " + esc(d.bus) : ""} · état ${esc(d.health || "inconnu")}</p>`).join("")
-    + (st.system_estimate_gb != null ? `<p class="small">${catBadge("systeme")} ${OS_LABEL[state.report.os_family] || "Système"} et programmes installés : environ <b>${st.system_estimate_gb} Go</b> (non analysés : ne pas toucher).</p>` : "")
-    + (deep ? `<p class="small muted">${(st.files_scanned || 0).toLocaleString("fr-CA")} fichiers analysés (${st.measured_gb} Go)${st.truncated ? " — analyse interrompue (temps limité)" : ""}.</p>` : "");
-  $("#legend-cat").innerHTML = Object.entries(CAT).filter(([k]) => k !== "mixte").map(([k, x]) => `<span>${x.icon} <b>${x.label}</b> : ${x.tip}</span>`).join("");
+  }).join("") + (st.physical_disks || []).map((d) => `<p class="small muted">${tr("Disque :")} ${esc(d.name)} · ${esc(d.media_type)}${d.bus ? " · " + esc(d.bus) : ""} · ${tr("état")} ${esc(d.health || tr("inconnu"))}</p>`).join("")
+    + (st.system_estimate_gb != null ? `<p class="small">${catBadge("systeme")} ${tr("{os} et programmes installés : environ <b>{n} Go</b> (non analysés : ne pas toucher).", { os: OS_LABEL[state.report.os_family] || tr("Système"), n: st.system_estimate_gb })}</p>` : "")
+    + (deep ? `<p class="small muted">${tr("{n} fichiers analysés ({g} Go)", { n: (st.files_scanned || 0).toLocaleString(NUM_LOCALE), g: st.measured_gb })}${st.truncated ? tr(" — analyse interrompue (temps limité)") : ""}.</p>` : "");
+  $("#legend-cat").innerHTML = Object.entries(CAT).filter(([k]) => k !== "mixte").map(([k, x]) => `<span>${x.icon} <b>${x.label}</b>${COLON} ${x.tip}</span>`).join("");
 
   const folders = deep ? st.space_by_folder.filter((f) => f.depth === 1).slice(0, 10) : (st.folders || []).map((f) => ({ name: f.name, size_gb: f.local_gb }));
   chart("chart-folders", {
     type: "bar",
-    data: { labels: folders.map((f) => f.name), datasets: [{ label: "Go", data: folders.map((f) => f.size_gb), backgroundColor: cssVar("--accent"), borderRadius: 4 }] },
+    data: { labels: folders.map((f) => f.name), datasets: [{ label: GB, data: folders.map((f) => f.size_gb), backgroundColor: cssVar("--accent"), borderRadius: 4 }] },
     options: { indexAxis: "y", maintainAspectRatio: false, plugins: { legend: { display: false } },
       scales: { x: { ticks: { color: cssVar("--muted") }, grid: { color: cssVar("--line") } }, y: { ticks: { color: cssVar("--muted") }, grid: { display: false } } } },
   });
 
   $("#space").innerHTML = deep
-    ? "<tr><th>Dossier</th><th>Catégorie</th><th class='num'>Taille</th></tr>" + st.space_by_folder.map((f) =>
-        `<tr><td class="path" style="padding-left:${(f.depth - 1) * 18 + 8}px">${f.depth > 1 ? "└ " : ""}${esc(shortPath(f.path))}</td><td>${catBadge(f.category)}</td><td class="num">${f.size_gb} Go</td></tr>`).join("")
-    : "<tr><td>Non disponible pour ce rapport (version précédente de KMB).</td></tr>";
+    ? `<tr><th>${tr("Dossier")}</th><th>${tr("Catégorie")}</th><th class='num'>${tr("Taille")}</th></tr>` + st.space_by_folder.map((f) =>
+        `<tr><td class="path" style="padding-left:${(f.depth - 1) * 18 + 8}px">${f.depth > 1 ? "└ " : ""}${esc(shortPath(f.path))}</td><td>${catBadge(f.category)}</td><td class="num">${f.size_gb} ${GB}</td></tr>`).join("")
+    : `<tr><td>${tr("Non disponible pour ce rapport (version précédente de KMB).")}</td></tr>`;
 
   const rec = st.recoverable || [];
   const recTotal = rec.reduce((s, r) => s + r.size_gb, 0);
   $("#recoverable").innerHTML = rec.length
-    ? `<p><b>${recTotal.toFixed(1)} Go</b> peuvent être libérés sans aucun risque (voir aussi le problème « Espace récupérable sans risque »).</p>
-       <div class="table-wrap"><table><tr><th>Élément</th><th class='num'>Taille</th><th>Comment le libérer</th></tr>${rec.map((r) =>
-         `<tr><td>${esc(r.name)}</td><td class="num">${r.size_gb} Go</td><td class="small">${esc(r.how)}</td></tr>`).join("")}</table></div>`
-    : `<p class="muted">${deep ? "Rien d'important à récupérer." : "Non disponible pour ce rapport."}</p>`;
+    ? `<p>${tr("<b>{n} Go</b> peuvent être libérés sans aucun risque (voir aussi le problème « Espace récupérable sans risque »).", { n: recTotal.toFixed(1) })}</p>
+       <div class="table-wrap"><table><tr><th>${tr("Élément")}</th><th class='num'>${tr("Taille")}</th><th>${tr("Comment le libérer")}</th></tr>${rec.map((r) =>
+         `<tr><td>${esc(trPhrase(r.name))}</td><td class="num">${r.size_gb} ${GB}</td><td class="small">${esc(trPhrase(r.how))}</td></tr>`).join("")}</table></div>`
+    : `<p class="muted">${deep ? tr("Rien d'important à récupérer.") : tr("Non disponible pour ce rapport.")}</p>`;
 
   $("#apps").innerHTML = (st.apps || []).length
-    ? "<tr><th>Application</th><th class='num'>Taille</th><th>Mesure</th></tr>" + st.apps.map((a) =>
-        `<tr><td>${esc(a.name)}${a.version ? ` <span class="muted small">${esc(a.version)}</span>` : ""}</td><td class="num">${a.size_gb} Go</td><td class="small">${a.measured ? "taille réelle sur le disque" : "taille déclarée par l'application"}</td></tr>`).join("")
-    : "<tr><td class='muted'>Non disponible pour ce rapport.</td></tr>";
+    ? `<tr><th>${tr("Application")}</th><th class='num'>${tr("Taille")}</th><th>${tr("Mesure")}</th></tr>` + st.apps.map((a) =>
+        `<tr><td>${esc(a.name)}${a.version ? ` <span class="muted small">${esc(a.version)}</span>` : ""}</td><td class="num">${a.size_gb} ${GB}</td><td class="small">${a.measured ? tr("taille réelle sur le disque") : tr("taille déclarée par l'application")}</td></tr>`).join("")
+    : `<tr><td class='muted'>${tr("Non disponible pour ce rapport.")}</td></tr>`;
 
-  if (dup.skipped) { $("#dup-sum").textContent = "Recherche de doublons désactivée pour ce scan."; $("#dup-list").innerHTML = ""; }
+  if (dup.skipped) { $("#dup-sum").textContent = tr("Recherche de doublons désactivée pour ce scan."); $("#dup-list").innerHTML = ""; }
   else {
-    $("#dup-sum").innerHTML = `${catBadge("personnel")} <b>${dup.duplicate_files || 0}</b> fichier(s) en double dans <b>${dup.group_count || 0}</b> groupe(s) — <b>${size(dup.wasted_bytes)}</b> récupérables.
-      <span class="small muted">${(dup.files_scanned || 0).toLocaleString("fr-CA")} fichiers parcourus, ${dup.files_hashed || 0} contenus comparés${dup.truncated ? ", analyse partielle (temps limité)" : ""}. Seuls vos fichiers personnels sont proposés : jamais ceux des applications ou du système.</span>`;
-    $("#dup-list").innerHTML = (dup.groups || []).slice(0, 40).map((g) => `<details class="finding"><summary><b>${g.count} copies</b> · ${size(g.size_bytes)} chacune · ${esc(g.category)}
-      <span class="key">${size(g.wasted_bytes)} récupérables</span></summary><div class="body">${g.files.map((p, i) => `<div class="path">${i === 0 ? "✓ " : "✗ "}${esc(shortPath(p))}</div>`).join("")}
-      <p class="small muted">✓ = le plus ancien (original présumé) · ✗ = copies identiques (comparaison du ${esc(g.method || "contenu complet")})</p></div></details>`).join("");
+    $("#dup-sum").innerHTML = `${catBadge("personnel")} ${tr("<b>{n}</b> fichier(s) en double dans <b>{g}</b> groupe(s) — <b>{s}</b> récupérables.", { n: dup.duplicate_files || 0, g: dup.group_count || 0, s: size(dup.wasted_bytes) })}
+      <span class="small muted">${tr("{n} fichiers parcourus, {h} contenus comparés", { n: (dup.files_scanned || 0).toLocaleString(NUM_LOCALE), h: dup.files_hashed || 0 })}${dup.truncated ? tr(", analyse partielle (temps limité)") : ""}. ${tr("Seuls vos fichiers personnels sont proposés : jamais ceux des applications ou du système.")}</span>`;
+    $("#dup-list").innerHTML = (dup.groups || []).slice(0, 40).map((g) => `<details class="finding"><summary>${tr("<b>{n} copies</b> · {s} chacune", { n: g.count, s: size(g.size_bytes) })} · ${esc(trPhrase(g.category))}
+      <span class="key">${tr("{s} récupérables", { s: size(g.wasted_bytes) })}</span></summary><div class="body">${g.files.map((p, i) => `<div class="path">${i === 0 ? "✓ " : "✗ "}${esc(shortPath(p))}</div>`).join("")}
+      <p class="small muted">${tr("✓ = le plus ancien (original présumé) · ✗ = copies identiques (comparaison du {m})", { m: esc(trPhrase(g.method || "contenu complet")) })}</p></div></details>`).join("");
   }
-  $("#large").innerHTML = "<tr><th>Fichier</th><th>Type</th><th>Catégorie</th><th class='num'>Taille</th></tr>" +
-    ((st.large_files || []).map((f) => `<tr><td class="path">${esc(shortPath(f.path))}</td><td class="small">${esc(f.kind || "")}</td><td>${f.category ? catBadge(f.category) : ""}</td><td class="num">${f.size_gb} Go</td></tr>`).join("")
-      || "<tr><td colspan='4'>Aucun.</td></tr>");
+  $("#large").innerHTML = `<tr><th>${tr("Fichier")}</th><th>${tr("Type")}</th><th>${tr("Catégorie")}</th><th class='num'>${tr("Taille")}</th></tr>` +
+    ((st.large_files || []).map((f) => `<tr><td class="path">${esc(shortPath(f.path))}</td><td class="small">${esc(trPhrase(f.kind || ""))}</td><td>${f.category ? catBadge(f.category) : ""}</td><td class="num">${f.size_gb} ${GB}</td></tr>`).join("")
+      || `<tr><td colspan='4'>${tr("Aucun.")}</td></tr>`);
 }
 
 // ------------------------------------------------------------------ performance et matériel
@@ -651,18 +717,18 @@ function renderPerformance() {
   const p = state.report.inventory.performance || {}; const cpu = p.cpu || {}; const m = p.memory || {};
   const hw = state.report.inventory.system?.hardware || {};
   const card = (label, value, sub) => `<div class="score"><div class="label">${label}</div><div class="value">${value}</div><div class="small muted">${sub || ""}</div></div>`;
-  $("#perf-cards").innerHTML = card("Processeur", `${cpu.usage_percent ?? "—"}<small> %</small>`, `${esc(hw.cpu || "")}${cpu.logical_cores ? ` · ${cpu.physical_cores}c/${cpu.logical_cores}t` : ""}`)
-    + card("Mémoire", `${m.percent ?? "—"}<small> %</small>`, `${m.used_gb ?? "?"} / ${m.total_gb ?? "?"} Go`)
-    + card("Programmes ouverts", p.process_count ?? "—", "processus en cours")
-    + card("Allumé depuis", `${p.uptime_days ?? "—"}<small> j</small>`, `depuis ${fmtDate(p.boot_time)}`)
-    + (p.battery ? card("Batterie", `${p.battery.percent}<small> %</small>`, p.battery.plugged ? "sur secteur" : "sur batterie") : "");
-  $("#top-mem").innerHTML = "<tr><th>Application</th><th class='num'>Processus</th><th class='num'>Mémoire</th><th class='num'>Processeur</th></tr>" +
-    (p.top_memory || []).map((g) => `<tr><td>${esc(g.name)}</td><td class="num">${g.count}</td><td class="num">${g.memory_mb} Mo</td><td class="num">${g.cpu_percent} %</td></tr>`).join("");
+  $("#perf-cards").innerHTML = card(tr("Processeur"), `${cpu.usage_percent ?? "—"}<small> %</small>`, `${esc(hw.cpu || "")}${cpu.logical_cores ? ` · ${cpu.physical_cores}c/${cpu.logical_cores}t` : ""}`)
+    + card(tr("Mémoire"), `${m.percent ?? "—"}<small> %</small>`, `${m.used_gb ?? "?"} / ${m.total_gb ?? "?"} ${GB}`)
+    + card(tr("Programmes ouverts"), p.process_count ?? "—", tr("processus en cours"))
+    + card(tr("Allumé depuis"), `${p.uptime_days ?? "—"}<small> ${tr("j")}</small>`, tr("depuis {date}", { date: fmtDate(p.boot_time) }))
+    + (p.battery ? card(tr("Batterie"), `${p.battery.percent}<small> %</small>`, p.battery.plugged ? tr("sur secteur") : tr("sur batterie")) : "");
+  $("#top-mem").innerHTML = `<tr><th>${tr("Application")}</th><th class='num'>${tr("Processus")}</th><th class='num'>${tr("Mémoire")}</th><th class='num'>${tr("Processeur")}</th></tr>` +
+    (p.top_memory || []).map((g) => `<tr><td>${esc(g.name)}</td><td class="num">${g.count}</td><td class="num">${g.memory_mb} ${MB}</td><td class="num">${g.cpu_percent} %</td></tr>`).join("");
   renderHardware();
-  $("#services").textContent = p.services_enabled != null ? `${p.services_enabled} services système activés (systemd), non comptés comme programmes de démarrage.` : "";
-  $("#startup").innerHTML = "<tr><th>Programme</th><th>Source</th><th>État</th></tr>" +
-    (p.startup || []).map((s) => `<tr><td>${esc(s.name)}<div class="small muted path">${esc(s.command)}</div></td><td class="small">${esc(s.source)}</td>
-      <td>${s.enabled ? "actif" : "<span class='muted'>désactivé</span>"}</td></tr>`).join("");
+  $("#services").textContent = p.services_enabled != null ? tr("{n} services système activés (systemd), non comptés comme programmes de démarrage.", { n: p.services_enabled }) : "";
+  $("#startup").innerHTML = `<tr><th>${tr("Programme")}</th><th>${tr("Source")}</th><th>${tr("État")}</th></tr>` +
+    (p.startup || []).map((s) => `<tr><td>${esc(s.name)}<div class="small muted path">${esc(s.command)}</div></td><td class="small">${esc(trPhrase(s.source))}</td>
+      <td>${s.enabled ? tr("actif") : `<span class='muted'>${tr("désactivé")}</span>`}</td></tr>`).join("");
 }
 
 function renderHardware() {
@@ -672,20 +738,20 @@ function renderHardware() {
   if (!hasHw) return;
   const hw = inv.hardware || {}; const w = inv.wifi || {}; const b = hw.battery;
   let html = "";
-  if (!hw.battery_present && !b) html += "<p class='muted'>Aucune batterie (ordinateur fixe) ou information indisponible.</p>";
-  else if (!b || b.health_percent == null) html += "<p class='muted'>Batterie présente, mais le système ne publie pas sa capacité.</p>";
-  else html += `<p><b>Batterie :</b> ${b.health_percent} % de la capacité d'origine${b.cycles ? ` · ${b.cycles} cycles` : ""}</p>
+  if (!hw.battery_present && !b) html += `<p class='muted'>${tr("Aucune batterie (ordinateur fixe) ou information indisponible.")}</p>`;
+  else if (!b || b.health_percent == null) html += `<p class='muted'>${tr("Batterie présente, mais le système ne publie pas sa capacité.")}</p>`;
+  else html += `<p>${tr("<b>Batterie :</b> {p} % de la capacité d'origine", { p: b.health_percent })}${b.cycles ? " · " + tr("{n} cycles", { n: b.cycles }) : ""}</p>
       <div class="bar"><span style="width:${b.health_percent}%;background:${scoreColor(b.health_percent)}"></span></div>`;
   html += (hw.temperatures || []).length
-    ? `<p><b>Température max. :</b> ${Math.round(hw.max_temperature_c)} °C</p>`
-    : "<p class='small muted'>Températures : capteurs non accessibles sur ce système.</p>";
+    ? `<p><b>${tr("Température max. :")}</b> ${Math.round(hw.max_temperature_c)} °C</p>`
+    : `<p class='small muted'>${tr("Températures : capteurs non accessibles sur ce système.")}</p>`;
   $("#hw").innerHTML = html;
-  if (w.available === false) { $("#wifi").innerHTML = "<p class='muted'>Pas de Wi-Fi sur cet ordinateur.</p>"; return; }
-  if (!w.available) { $("#wifi").innerHTML = "<p class='muted'>Information Wi-Fi indisponible.</p>"; return; }
+  if (w.available === false) { $("#wifi").innerHTML = `<p class='muted'>${tr("Pas de Wi-Fi sur cet ordinateur.")}</p>`; return; }
+  if (!w.available) { $("#wifi").innerHTML = `<p class='muted'>${tr("Information Wi-Fi indisponible.")}</p>`; return; }
   const cur = w.current;
-  $("#wifi").innerHTML = (cur ? `<p><b>Connecté :</b> ${esc(cur.ssid)} — ${WIFI_LABEL[cur.security] || esc(cur.security)}${cur.cipher ? " · " + esc(cur.cipher) : ""}</p>` : "<p class='muted'>Non connecté.</p>")
-    + `<div class="table-wrap"><table><tr><th>Réseau mémorisé</th><th>Sécurité</th><th>Connexion auto.</th></tr>${(w.profiles || []).map((p) =>
-      `<tr><td>${esc(p.name)}</td><td>${WIFI_LABEL[p.security] || esc(p.security)}</td><td>${p.autoconnect ? "oui" : "non"}</td></tr>`).join("")}</table></div>`;
+  $("#wifi").innerHTML = (cur ? `<p><b>${tr("Connecté :")}</b> ${esc(cur.ssid)} — ${WIFI_LABEL[cur.security] || esc(cur.security)}${cur.cipher ? " · " + esc(cur.cipher) : ""}</p>` : `<p class='muted'>${tr("Non connecté.")}</p>`)
+    + `<div class="table-wrap"><table><tr><th>${tr("Réseau mémorisé")}</th><th>${tr("Sécurité")}</th><th>${tr("Connexion auto.")}</th></tr>${(w.profiles || []).map((p) =>
+      `<tr><td>${esc(p.name)}</td><td>${WIFI_LABEL[p.security] || esc(p.security)}</td><td>${p.autoconnect ? tr("oui") : tr("non")}</td></tr>`).join("")}</table></div>`;
 }
 
 // ------------------------------------------------------------------ comparaison
@@ -695,17 +761,17 @@ async function compare(ev) {
     const c = await api(`/comparaison?${qs($("#c-form"))}`);
     state.lastComparison = c;
     const delta = Object.entries(c.evolution_scores).map(([k, v]) => `<div class="score"><div class="label">${DOMAIN_LABEL[k]}</div>
-      <div class="value">${c.nouveau.scores[k]}<small>/100</small></div><div class="${v > 0 ? "delta-pos" : v < 0 ? "delta-neg" : "muted"}">${v > 0 ? "+" : ""}${v} pts</div></div>`).join("");
-    const list = (items, empty) => items.length ? `<ul>${items.map((f) => `<li>${badge(f.severity)} ${esc(f.title)}</li>`).join("")}</ul>` : `<p class="muted">${empty}</p>`;
+      <div class="value">${c.nouveau.scores[k]}<small>/100</small></div><div class="${v > 0 ? "delta-pos" : v < 0 ? "delta-neg" : "muted"}">${v > 0 ? "+" : ""}${v} ${tr("pts")}</div></div>`).join("");
+    const list = (items, empty) => items.length ? `<ul>${items.map((f) => `<li>${badge(f.severity)} ${esc(locTitle(f))}</li>`).join("")}</ul>` : `<p class="muted">${empty}</p>`;
     $("#c-out").innerHTML = `${c.avertissements.map((w) => `<p class="st-detecte small">⚠ ${esc(w)}</p>`).join("")}
       <div class="scores">${delta}</div>
       <div class="cols3">
-        <div class="panel"><h3>Corrigés (${c.resume.corriges})</h3>${list(c.corriges, "Aucun problème corrigé.")}</div>
-        <div class="panel"><h3>Toujours présents (${c.resume.restants})</h3>${list(c.restants, "Aucun.")}</div>
-        <div class="panel"><h3>Nouveaux (${c.resume.nouveaux})</h3>${list(c.nouveaux, "Aucun nouveau problème.")}</div>
+        <div class="panel"><h3>${tr("Corrigés")} (${c.resume.corriges})</h3>${list(c.corriges, tr("Aucun problème corrigé."))}</div>
+        <div class="panel"><h3>${tr("Toujours présents")} (${c.resume.restants})</h3>${list(c.restants, tr("Aucun."))}</div>
+        <div class="panel"><h3>${tr("Nouveaux")} (${c.resume.nouveaux})</h3>${list(c.nouveaux, tr("Aucun nouveau problème."))}</div>
       </div>
-      ${c.non_verifiables.length ? `<div class="panel"><h3>Devenus non vérifiables (${c.non_verifiables.length})</h3>${list(c.non_verifiables, "")}</div>` : ""}
-      ${CONFIG.relaisIA ? `<div class="panel"><div class="row-between"><h3>Commentaire de l'IA</h3><button type="button" class="btn" id="ai-compare-btn">🤖 Commenter mon évolution</button></div><div id="ai-compare"></div></div>` : ""}`;
+      ${c.non_verifiables.length ? `<div class="panel"><h3>${tr("Devenus non vérifiables")} (${c.non_verifiables.length})</h3>${list(c.non_verifiables, "")}</div>` : ""}
+      ${CONFIG.relaisIA ? `<div class="panel"><div class="row-between"><h3>${tr("Commentaire de l'IA")}</h3><button type="button" class="btn" id="ai-compare-btn">🤖 ${tr("Commenter mon évolution")}</button></div><div id="ai-compare"></div></div>` : ""}`;
   } catch (e) { $("#c-out").innerHTML = `<p class="muted">${esc(e.message)}</p>`; }
 }
 
@@ -723,7 +789,7 @@ function showTab(name) {
   document.querySelectorAll(".tab-panel").forEach((p) => (p.hidden = p.id !== `tab-${name}` || !state.report));
   if (name === "storage" && state.report) renderStorage();  // un graphique dessiné caché a une taille nulle
   if (name === "compare") {
-    if (state.scans.length < 2) $("#c-out").innerHTML = `<p class="muted">Il faut deux rapports : refaites un scan après vos corrections, puis utilisez « + Ajouter un rapport ».</p>`;
+    if (state.scans.length < 2) $("#c-out").innerHTML = `<p class="muted">${tr("Il faut deux rapports : refaites un scan après vos corrections, puis utilisez « + Ajouter un rapport ».")}</p>`;
     else if (!$("#c-out").innerHTML) compare();
   }
 }
@@ -742,7 +808,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Thème clair / sombre : suit l'ordinateur, sauf si le visiteur a choisi avec le bouton
   const themeBtn = $("#theme-btn");
   const dark = () => (document.documentElement.dataset.theme || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")) === "dark";
-  const syncThemeBtn = () => { themeBtn.textContent = dark() ? "☀️" : "🌙"; themeBtn.title = dark() ? "Passer en mode clair" : "Passer en mode sombre"; };
+  const syncThemeBtn = () => { themeBtn.textContent = dark() ? "☀️" : "🌙"; themeBtn.title = dark() ? tr("Passer en mode clair") : tr("Passer en mode sombre"); };
   syncThemeBtn();
   themeBtn.addEventListener("click", () => {
     const t = dark() ? "light" : "dark";
@@ -751,27 +817,33 @@ document.addEventListener("DOMContentLoaded", () => {
     syncThemeBtn();
     if (state.report) loadReport(state.report.scan_id).catch(() => {});  // graphiques redessinés avec les nouvelles couleurs
   });
+  // Bouton FR | EN : même page et même onglet dans l'autre langue ; le choix est mémorisé pour les visites suivantes
+  const langBtn = $("#lang-btn");
+  langBtn?.addEventListener("click", () => {
+    try { localStorage.setItem("kmb-lang", langBtn.hreflang); } catch { /* stockage indisponible */ }
+    langBtn.href = langBtn.getAttribute("href").split(/[?#]/)[0] + location.search + location.hash;
+  });
   // Aperçu du rapport sur l'accueil
   document.querySelectorAll("[data-ring]").forEach((el) => { el.innerHTML = ring(+el.dataset.ring, 104, 11); animateRings(el); });
   $("#mode-note").textContent = MODE === "serveur"
-    ? "Mode serveur : rapports du dossier de données de l'API locale."
-    : "Vos rapports sont lus dans votre navigateur et ne sont jamais envoyés.";
+    ? tr("Mode serveur : rapports du dossier de données de l'API locale.")
+    : tr("Vos rapports sont lus dans votre navigateur et ne sont jamais envoyés.");
   if (MODE === "serveur") $("#clear-btn").hidden = true;
   if (!CONFIG.relaisIA && MODE !== "serveur") {
     document.querySelectorAll("[data-ai]").forEach((el) => (el.hidden = true));
-    $("#ai-btn").hidden = true; $("#ai-note").textContent = "Assistant IA non configuré sur ce site : commande « python -m kmb_library plan-ia » avec l'outil installé.";
+    $("#ai-btn").hidden = true; $("#ai-note").textContent = tr("Assistant IA non configuré sur ce site : commande « python -m kmb_library plan-ia » avec l'outil installé.");
   }
   $("#ai-summary-btn").addEventListener("click", summarizeReport);
   $("#ai-ask-form").addEventListener("submit", askQuestion);
-  document.querySelectorAll("[data-dl-zip]").forEach((a) => (a.href = CONFIG.downloadZip || "#"));
+  document.querySelectorAll("[data-dl-zip]").forEach((a) => (a.href = CONFIG.downloadZip ? assetUrl(CONFIG.downloadZip) : "#"));
   // Adresse complète du ZIP (dépend de l'adresse du site) pour « pip install <adresse> »
-  const zipUrl = new URL(CONFIG.downloadZip || "telechargements/kmb-library.zip", location.href).href;
+  const zipUrl = assetUrl(CONFIG.downloadZip || "telechargements/kmb-library.zip");
   document.querySelectorAll("pre[data-install]").forEach((pre) => (pre.textContent = pre.textContent.replace("{URL_ZIP}", zipUrl)));
   // Bouton « Copier » sur chaque commande du guide
   document.querySelectorAll(".guide pre").forEach((pre) => {
     const box = document.createElement("div"); box.className = "cmd";
     pre.replaceWith(box); box.append(pre);
-    const btn = document.createElement("button"); btn.type = "button"; btn.textContent = "Copier"; btn.dataset.copy = pre.textContent;
+    const btn = document.createElement("button"); btn.type = "button"; btn.textContent = tr("Copier"); btn.dataset.copy = pre.textContent;
     box.append(btn);
   });
 
@@ -803,16 +875,16 @@ document.addEventListener("DOMContentLoaded", () => {
     const b = e.target.closest("[data-copy]");
     if (!b) return;
     const done = () => {
-      b.textContent = "Copié ✓"; b.classList.add("done");
-      clearTimeout(b._t); b._t = setTimeout(() => { b.textContent = "Copier"; b.classList.remove("done"); }, 1800);
+      b.textContent = tr("Copié ✓"); b.classList.add("done");
+      clearTimeout(b._t); b._t = setTimeout(() => { b.textContent = tr("Copier"); b.classList.remove("done"); }, 1800);
     };
-    if (navigator.clipboard) navigator.clipboard.writeText(b.dataset.copy).then(done, () => toast("Copie impossible : sélectionnez la commande à la main."));
-    else toast("Copie impossible : sélectionnez la commande à la main.");
+    if (navigator.clipboard) navigator.clipboard.writeText(b.dataset.copy).then(done, () => toast(tr("Copie impossible : sélectionnez la commande à la main.")));
+    else toast(tr("Copie impossible : sélectionnez la commande à la main."));
   });
   // Impression : toutes les sections et toutes les fiches dépliées
   window.addEventListener("beforeprint", () => document.querySelectorAll("#dashboard details").forEach((d) => { d.dataset.wasOpen = d.open; d.open = true; }));
   window.addEventListener("afterprint", () => document.querySelectorAll("#dashboard details").forEach((d) => { d.open = d.dataset.wasOpen === "true"; }));
 
-  if (MODE === "serveur") loadScans().catch((e) => toast("API injoignable : " + e.message));
+  if (MODE === "serveur") loadScans().catch((e) => toast(tr("API injoignable : ") + e.message));
   if (new URLSearchParams(location.search).get("exemple") === "1") { showPage("analyser"); loadExample(); }
 });

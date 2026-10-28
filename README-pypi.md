@@ -65,7 +65,23 @@ KMB ne corrige rien lui-même : c'est vous qui décidez.
 - Le scanner contacte seulement endoflife.date pour connaître les dates de fin de support des logiciels.
 - Option `--anonymiser` : masque le nom de l'ordinateur, les comptes, les adresses IP et les chemins personnels.
 
+
+## In English
+
+**KMB Library checks the security, software, performance and storage of your computer for free** (Windows 10/11, Linux, macOS),
+then explains what to fix, step by step. The scan changes nothing; the report opens on the
+**[English site](https://kabangoura.github.io/detection-des-failles-de-securite/en/)** and is read in your browser, never sent.
+
+```
+python -m pip install kmb-library
+python -m kmb_library scan
+```
+
+Every problem comes with a fix guide (🔍 Check, ⚙️ Open the setting, 🛠️ Fix) and the commands to run yourself.
+An optional AI assistant (with your consent) explains problems in plain words, summarises the report and answers questions;
+every AI answer is checked against KMB's verified database.
+
 ---
 
-Projet scolaire en français · [Site et guide](https://kabangoura.github.io/detection-des-failles-de-securite/) ·
-[Questions fréquentes](https://kabangoura.github.io/detection-des-failles-de-securite/#questions)
+Projet scolaire · School project · [Site et guide](https://kabangoura.github.io/detection-des-failles-de-securite/) ·
+[Questions fréquentes](https://kabangoura.github.io/detection-des-failles-de-securite/#questions) · [English site](https://kabangoura.github.io/detection-des-failles-de-securite/en/)
