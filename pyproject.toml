@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "kmb-library"
-version = "2.1.0"
+version = "2.2.0"
 description = "KMB Library - audit de sécurité, de performance et de stockage d'un poste de travail (Windows, Linux, macOS)"
 readme = "README-pypi.md"
 requires-python = ">=3.10"

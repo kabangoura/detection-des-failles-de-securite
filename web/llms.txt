@@ -3,7 +3,7 @@
 > KMB Library est un outil gratuit qui audite un ordinateur (Windows, Linux, macOS) : sécurité, logiciels, performance et stockage.
 > Il produit un rapport JSON que l'on ouvre sur le site https://kabangoura.github.io/detection-des-failles-de-securite/ ; le rapport est lu par le navigateur et n'est envoyé nulle part.
 
-Projet scolaire en français. Version actuelle : 2.1.0. Code : https://github.com/kabangoura/detection-des-failles-de-securite
+Projet scolaire en français. Version actuelle : 2.2.0. Code : https://github.com/kabangoura/detection-des-failles-de-securite
 
 ## Utilisation
 1. Installer Python 3.10+ (python.org ; sous Windows, cocher « Add python.exe to PATH »).
